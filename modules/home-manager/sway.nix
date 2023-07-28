@@ -10,6 +10,7 @@
         modifier = modifier;
         terminal = "alacritty";
         menu = "wofi --show run";
+
       };
     };
   
