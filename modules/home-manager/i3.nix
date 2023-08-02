@@ -1,10 +1,14 @@
-{pkgs, lib, ...}:{
+{
+  pkgs,
+  lib,
+  ...
+}: {
   xsession = {
     enable = true;
     scriptPath = ".hm-xsession";
-    windowManager.i3 = 
-      let modifier = "Mod4";
-      in {
+    windowManager.i3 = let
+      modifier = "Mod4";
+    in {
       enable = true;
       package = pkgs.i3-gaps;
       config = {
@@ -26,7 +30,10 @@
           ];
         };
         startup = [
-          {command = "tmux new -d -s spt spt"; always = true; }
+          {
+            command = "tmux new -d -s spt spt";
+            always = true;
+          }
         ];
         terminal = "alacritty";
       };
@@ -35,7 +42,6 @@
 
   programs.rofi = {
     enable = true;
-    location="top";
+    location = "top";
   };
-
 }

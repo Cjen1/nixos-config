@@ -1,4 +1,4 @@
-{inputs, lib, config, pkgs, ...}: {
+{...}: {
 
   imports = [
     ../../modules/home-manager/tui.nix

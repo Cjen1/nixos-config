@@ -1,5 +1,4 @@
 {pkgs, ...}: {
-
   imports = [
     ./sway.nix
   ];
@@ -10,11 +9,10 @@
     vlc
     drawio
     signal-desktop
-    
+
     zoom-us
     discord
   ];
-
 
   services.dunst.enable = true;
 }

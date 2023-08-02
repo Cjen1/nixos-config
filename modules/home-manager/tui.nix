@@ -1,7 +1,7 @@
-{pkgs, ...}:{
+{pkgs, ...}: {
   imports = [
     ./git.nix
-    ./neovim.nix
+    ./neovim
   ];
 
   home.packages = with pkgs; [
@@ -14,7 +14,7 @@
   programs.fish = {
     enable = true;
     shellInit = ''
-    direnv hook fish | source
+      direnv hook fish | source
     '';
   };
 

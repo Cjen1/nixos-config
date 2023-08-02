@@ -1,7 +1,6 @@
-{ ... }:{
-
+{...}: {
   imports = [];
-  
+
   programs.git = {
     enable = true;
     delta = {
@@ -17,6 +16,6 @@
     };
     ignores = [
       "*.swp"
-      ];
+    ];
   };
 }
