@@ -3,7 +3,7 @@
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
     ../../modules/nixos/greetd.nix
-    ../../modules/nixos/cam-vpn.nix
+    ../../modules/nixos/cam-vpn
   ];
 
   nixpkgs.config.allowUnfree = true;
