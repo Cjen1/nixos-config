@@ -23,7 +23,14 @@
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         extraSpecialArgs = { inherit inputs;};
         modules = [
-          ./home-manager/home.nix
+          ./home-manager/graphite
+        ];
+      };
+      "cjen1@binky" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = { inherit inputs;};
+        modules = [
+          ./home-manager/binky
         ];
       };
     };
