@@ -1,7 +1,5 @@
-{pkgs, ...}: let
-  username_cam = "cjj39+graphite_vpn@cam.ac.uk";
-  username_cl = "cjj39-graphite";
-in {
+{pkgs, ...}: 
+{
   environment.systemPackages = [pkgs.strongswan];
   services.strongswan = {
     enable = true;
@@ -9,7 +7,7 @@ in {
     secrets = ["/var/lib/ipsec.secrets"];
     connections.CAM = {
       left = "%any";
-      leftid = username_cam;
+      leftid = "cjj39+graphite_vpn@cam.ac.uk"; # TODO replace if necessary
       leftauth = "eap";
       leftsourceip = "%config";
       leftfirewall = "yes";
@@ -26,7 +24,7 @@ in {
     connections.CL = {
       reauth = "no";
       left = "%any";
-      leftid = username_cl;
+      leftid = "cjj39-graphite"; # TODO replace if necessary
       leftauth = "eap";
       leftsourceip = "%config4,%config6";
       leftfirewall = "yes";
