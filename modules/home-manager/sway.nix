@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   imports = [
     ./alacritty.nix
   ];
@@ -9,15 +9,21 @@
     config = {
       modifier = modifier;
       terminal = "alacritty";
-      menu = "wofi --show run";
+      menu = "fuzzel";
       gaps.smartBorders = "on";
     };
   };
 
-  programs.wofi = {
-    enable = true;
-    settings = {
-      location = "top";
-    };
-  };
+  programs.fuzzel.enable= true;
+
+  home.packages = [
+    (
+      pkgs.makeDesktopItem {
+        name = "shutdown-now";
+        desktopName = "shutdown now";
+        exec = "shutdown 0";
+        terminal = true;
+      }
+    )
+  ];
 }
