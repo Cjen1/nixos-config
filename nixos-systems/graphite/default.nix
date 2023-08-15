@@ -5,6 +5,8 @@
     ../../modules/nixos/greetd.nix
     ../../modules/nixos/cam-vpn
     ../../modules/nixos/qmk.nix
+    ../../modules/nixos/audio.nix
+    ../../modules/nixos/bluetooth.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -32,18 +34,6 @@
   networking.networkmanager.enableStrongSwan = true;
 
 
-  hardware = {
-    bluetooth.enable = true;
-    pulseaudio.enable = false;
-  };
-  # Enable sound.
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
   services.davfs2.enable = true;
 
   # vaapi crud 
@@ -88,22 +78,18 @@
     (nerdfonts.override { fonts = [ "Hack" ]; })
   ];
 
-  environment.systemPackages = with pkgs; [
+  environment.systemPackages = 
+    with pkgs; [
     vim 
     networkmanager
-    arandr
-    autorandr
     pavucontrol
     brightnessctl
-    xclip
-
     krb5
   ];
   virtualisation.docker.enable = true;
   services.udisks2.enable = true;
 
   security.sudo.wheelNeedsPassword = false;
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   programs.fish.enable = true;
   users.users.cjen1 = {
     shell = pkgs.fish;
