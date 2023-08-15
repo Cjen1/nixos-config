@@ -4,6 +4,7 @@
     inputs.home-manager.nixosModules.home-manager
     ../../modules/nixos/greetd.nix
     ../../modules/nixos/cam-vpn
+    ../../modules/nixos/qmk.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -73,9 +74,6 @@
     enable = true;
     clientConf = "ServerName cups-serv.cl.cam.ac.uk";
   };
-
-  # enable qmk dev
-  services.udev.packages = [ pkgs.qmk-udev-rules ];
 
   fonts.packages = with pkgs; [
     noto-fonts
