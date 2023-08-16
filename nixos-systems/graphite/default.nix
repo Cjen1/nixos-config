@@ -5,6 +5,7 @@
     inputs.nixos-hardware.nixosModules.lenovo-thinkpad
     ../../modules/nixos/greetd.nix
     ../../modules/nixos/cam-vpn
+    ../../modules/nixos/cam-vpn/desktop_items.nix
     ../../modules/nixos/qmk.nix
     ../../modules/nixos/audio.nix
     ../../modules/nixos/bluetooth.nix
