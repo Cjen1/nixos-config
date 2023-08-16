@@ -93,10 +93,11 @@
 
   security.sudo.wheelNeedsPassword = false;
   programs.fish.enable = true;
+  programs.light.enable = true;
   users.users.cjen1 = {
     shell = pkgs.fish;
     isNormalUser = true;
-    extraGroups = [ "wheel" "audio" "pulse-access" "docker" "adbusers" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "audio" "video" "pulse-access" "docker" "adbusers" ]; # Enable ‘sudo’ for the user.
   };
   home-manager = {
     extraSpecialArgs = {inherit inputs; };
