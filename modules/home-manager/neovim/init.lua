@@ -19,8 +19,6 @@ vim.o.fixendofline = false
 vim.bo.autoindent = true
 vim.bo.smartindent = true
 
-vim.o.incsearch = true
-
 vim.o.mouse = 'a'
 vim.o.showmode = false
 vim.o.number = true
@@ -36,7 +34,7 @@ vim.g.mapleader = ' '
 
 local key_mapper = function(mode, key, result)
   vim.api.nvim_set_keymap(
-    mode, 
+    mode,
     key,
     result,
     {noremap = true, silent = true}

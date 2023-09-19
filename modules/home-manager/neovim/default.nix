@@ -19,7 +19,7 @@
         type = "lua";
         config = ''
             require("gruvbox").setup{}
-          vim.o.background = "dark"
+            vim.o.background = "dark"
             vim.cmd([[colorscheme gruvbox]])
         '';
       }
@@ -122,6 +122,7 @@
           }
         '';
       }
+      
       {
         plugin = nvim-treesitter-context;
         type = "lua";
