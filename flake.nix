@@ -18,6 +18,12 @@
           ./nixos-systems/graphite
         ];
       };
+      mercury = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs;};
+        modules = [
+          ./nixos-systems/mercury
+        ];
+      };
     };
 
     homeConfigurations = {
