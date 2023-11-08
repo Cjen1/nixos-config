@@ -4,7 +4,7 @@
   services.strongswan = {
     enable = true;
     # Passwords set up as per https://help.uis.cam.ac.uk/service/network-services/remote-access/uis-vpn/ubuntu1604#password-file
-    secrets = ["/var/lib/ipsec.secrets"];
+    secrets = ["/persist/ipsec.secrets"];
     connections.CAM = {
       left = "%any";
       leftid = "cjj39+graphite_vpn@cam.ac.uk"; # TODO replace if necessary

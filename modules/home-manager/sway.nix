@@ -1,4 +1,4 @@
-{pkgs, lib, ...}: {
+{pkgs, lib, wayland_display_config, ...}: {
   imports = [
     ./alacritty.nix
   ];
@@ -22,6 +22,7 @@
         "XF86AudioLowerVolume" = "exec 'wpctl set-volume @DEFAULT_SINK@ 0.1-'";
         "XF86AudioMute" = "exec 'wpctl set-mute @DEFAULT_SINK@ toggle'";
       };
+      output = wayland_display_config;
     };
     extraConfig = ''
     input "type:touchpad" {
@@ -33,6 +34,7 @@
   programs.fuzzel.enable= true;
 
   home.packages = [
+    pkgs.wl-clipboard
     (
       pkgs.makeDesktopItem {
         name = "shutdown-now";

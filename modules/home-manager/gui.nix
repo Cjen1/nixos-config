@@ -9,6 +9,7 @@
     vlc
     drawio
     signal-desktop
+    zathura
 
     zoom-us
     discord

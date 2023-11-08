@@ -10,6 +10,7 @@
     ../../modules/nixos/audio.nix
     ../../modules/nixos/bluetooth.nix
     ../../modules/nixos/cambridge.nix
+    ../../modules/nixos/persist.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -78,8 +79,16 @@
     extraGroups = [ "wheel" "audio" "video" "pulse-access" "docker" "adbusers" ]; # Enable ‘sudo’ for the user.
   };
 
-  home-manager = {
-    extraSpecialArgs = {inherit inputs; };
+  home-manager = 
+  let wayland_display_config = {
+    "eDP-1" = {
+      pos = "0 1157";
+      scale = "1.5";
+    };
+  };
+  in
+  {
+    extraSpecialArgs = {inherit inputs wayland_display_config; };
     users = {
       cjen1 = import ../../home-manager/graphite;
     };
@@ -93,6 +102,9 @@
   };
 
   security.polkit.enable = true;
+
+  # framework firmware upgrade
+  services.fwupd.enable = true;
 
   system.stateVersion = "23.10";
 }
