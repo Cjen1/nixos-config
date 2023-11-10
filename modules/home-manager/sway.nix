@@ -3,11 +3,11 @@
     ./alacritty.nix
   ];
   wayland.windowManager.sway = let
-    modifier = "Mod4";
-  in {
+  sway-scripts = import ../../scripts/sway-scripts.nix {inherit pkgs;};
+  in rec {
     enable = true;
     config = {
-      modifier = modifier;
+      modifier = "Mod4";
       terminal = "alacritty";
       menu = "fuzzel";
       gaps.smartBorders = "on";
@@ -21,6 +21,9 @@
         "XF86AudioRaiseVolume" = "exec 'wpctl set-volume @DEFAULT_SINK@ 0.1+'";
         "XF86AudioLowerVolume" = "exec 'wpctl set-volume @DEFAULT_SINK@ 0.1-'";
         "XF86AudioMute" = "exec 'wpctl set-mute @DEFAULT_SINK@ toggle'";
+
+        # Screenshotting
+        "${config.modifier}+Shift+s" = "exec ${sway-scripts.screenshot}/bin/sway-screenshot";
       };
       output = wayland_display_config;
     };
