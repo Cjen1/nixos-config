@@ -24,6 +24,12 @@
           ./nixos-systems/mercury
         ];
       };
+      hematite = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs;};
+        modules = [
+          ./nixos-systems/hematite
+        ];
+      };
     };
 
     homeConfigurations = {
@@ -39,6 +45,13 @@
         extraSpecialArgs = { inherit inputs;};
         modules = [
           ./home-manager/binky
+        ];
+      };
+      "cjen1@hematite" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = { inherit inputs;};
+        modules = [
+          ./home-manager/hematite
         ];
       };
     };
