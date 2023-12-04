@@ -9,6 +9,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+    arion.url = "github:hercules-ci/arion";
   };
 
   outputs = {nixpkgs, home-manager, ... }@inputs: 

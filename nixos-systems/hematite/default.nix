@@ -2,15 +2,13 @@
   imports = [
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
-#    inputs.nixos-hardware.nixosModules.framework-13th-gen-intel
     ../../modules/nixos/greetd.nix
-#    ../../modules/nixos/cam-vpn
-#    ../../modules/nixos/cam-vpn/desktop_items.nix
 #    ../../modules/nixos/qmk.nix
     ../../modules/nixos/audio.nix
-#    ../../modules/nixos/bluetooth.nix
-#    ../../modules/nixos/cambridge.nix
-    ../../modules/nixos/persist.nix
+#    ../../modules/nixos/persist.nix
+
+    # Services
+    ../../modules/nixos/docker-services/factorio.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -69,6 +67,8 @@
     networkmanager
     pavucontrol
     brightnessctl
+    arion
+    docker-client
   ];
 
   virtualisation.docker.enable = true;
@@ -105,13 +105,6 @@
     ];
     config.common.default = "*";
   };
-
-  # set keymap
-  services.xserver = {
-    layout = "gb";
-    xkbVariant = "";
-  };
-  console.keyMap = "uk";
 
   security.polkit.enable = true;
 
