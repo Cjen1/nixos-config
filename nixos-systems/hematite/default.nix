@@ -25,10 +25,12 @@
 
   time.timeZone = "Europe/London";
 
-  # Bootloader.
+  # Bootloader
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/sda";
   boot.loader.grub.useOSProber = true;
+
+  # Usb wifi thingy
   boot.kernelModules = [ "88x2bu" ];
   boot.extraModulePackages = [
     config.boot.kernelPackages.rtl88x2bu
@@ -107,6 +109,14 @@
   };
 
   security.polkit.enable = true;
+
+  services.openssh = {
+    enable= true;
+    settings.PasswordAuthentication = false;
+  };
+  users.users."cjen1".openssh.authorizedKeys.keys = [
+  "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEPav2s9tR5yIY6eeaGlag9YAC0HFoj/Lc0iNq2MvcIhvEC81fPHXg1Ie/s2ZykHofGo0EeN92kn3Rl3cflO9n9G5mLxZMX4ABFARO6rk2JZbLjPI1BFZ4CiayFMUaPkT6Ogx2ByWUQkY5WaTJsJHYV/d97ZTzQ0JDSKhcpgLqbiiioJ4I6N1gIMy4cIx84e3FSy/eW78FoBlEMoLVCyNcTaN7HGRT00AuENUTepTnzNcGXFJs34kKm9d3IqAT9zM+k8oK92Ec7nQ7PzkNWt1TY6W4jMXmkyH9yvwvPBQr3QXpnWUTumpksq62pJENTGinesKTYZO7aR+UodBrJ8bqnZXBk/9AG9HG4uYARepggidHzlxcXhjfpTFiHtFSD8OnMUAkcN6jy3YjiZTL5FV/84rPiye5iPpIZviOm/7V2Mt2YeOKThJ/rTcjmI6ZOuzlO9WM9QyZ9c9EL2//cho+4LrFWKleYR/todXyUZbh5LztV7dQYNZZUCIXTkEmA8k= cjen1@shale"
+  ];
 
   system.stateVersion = "23.11";
 }
