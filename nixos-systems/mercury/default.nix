@@ -106,5 +106,14 @@
   # framework firmware upgrade
   services.fwupd.enable = true;
 
+  # use suspend-then-hibernate on lid close
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=3600s
+    SuspendState=mem
+  '';
+  services.logind.lidSwitch="suspend-then-hibernate";
+  services.logind.powerKey="suspend-then-hibernate";
+  services.logind.powerKeyLongPress="poweroff";
+
   system.stateVersion = "23.10";
 }

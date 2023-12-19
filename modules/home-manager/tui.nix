@@ -11,6 +11,8 @@
     magic-wormhole
     usbutils
     pciutils
+    htop
+    reflex
   ];
 
   programs.fish = {
