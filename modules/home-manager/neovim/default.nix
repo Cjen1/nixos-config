@@ -46,7 +46,11 @@
         plugin = fidget-nvim;
         type = "lua";
         config = ''
-          require("fidget").setup{}
+          require("fidget").setup{
+            progress = {
+              suppress_on_insert=true,
+            }
+          }
         '';
       }
 
