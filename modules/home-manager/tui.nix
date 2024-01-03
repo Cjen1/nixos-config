@@ -13,6 +13,7 @@
     pciutils
     htop
     reflex
+    jq
   ];
 
   programs.fish = {
@@ -28,6 +29,10 @@
   };
 
   programs.nix-index = {
+    enable = true;
+    enableFishIntegration = true;
+  };
+  programs.fzf = {
     enable = true;
     enableFishIntegration = true;
   };
