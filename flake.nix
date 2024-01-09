@@ -47,6 +47,13 @@
           ./home-manager/binky
         ];
       };
+      "cjen1@shale" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = { inherit inputs;};
+        modules = [
+          ./home-manager/shale
+        ];
+      };
       "cjen1@hematite" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         extraSpecialArgs = { inherit inputs;};
