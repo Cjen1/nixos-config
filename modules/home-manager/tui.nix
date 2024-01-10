@@ -2,6 +2,7 @@
   imports = [
     ./git.nix
     ./neovim
+    ./scripts.nix
   ];
 
   home.packages = with pkgs; [
