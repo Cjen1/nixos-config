@@ -30,6 +30,7 @@
     extraConfig = ''
     input "type:touchpad" {
       tap enabled
+      dwt disabled
     }
     '';
   };

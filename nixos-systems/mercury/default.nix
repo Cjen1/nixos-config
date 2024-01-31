@@ -85,7 +85,7 @@
   let wayland_display_config = {
     "eDP-1" = {
       pos = "0 1157";
-      scale = "1.5";
+      scale = "1";
     };
   };
   in
