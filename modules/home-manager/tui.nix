@@ -16,6 +16,7 @@
     reflex
     jq
     viddy
+    krb5
   ];
 
   programs.fish = {

@@ -9,8 +9,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-
     arion.url = "github:hercules-ci/arion";
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
   };
 
   outputs = {nixpkgs, home-manager, ... }@inputs: 
@@ -38,12 +38,19 @@
           ./nixos-systems/hematite
         ];
       };
+<<<<<<< HEAD
       jasper = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; 
                         unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
                       };
         modules = [
           ./nixos-systems/jasper
+=======
+      shale = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        modules = [
+          ./nixos-systems/shale
+>>>>>>> 19ac2e3 (Add shale config)
         ];
       };
     };
