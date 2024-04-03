@@ -66,9 +66,9 @@ def get_sll_pkt(buf, hdr, version=1):
 
     pkt = None
     if sll.ethtype == 0x0800:  ## IPv4
-        if sll.type == 3:  ## sent to someone else
+        if sll.type == 4:  ## sent by us
             pkt = sll.ip
-        elif sll.type == 4:  ## sent by us, ie., emitted from switch
+        elif sll.type == 3:  ## sent to someone else by someone else (ie a switch / docker bridge) 
             pass
         else:
             print(

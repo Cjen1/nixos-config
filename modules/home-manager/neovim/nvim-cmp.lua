@@ -30,7 +30,7 @@ capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
 local lspconfig = require('lspconfig')
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'nil_ls', 'gopls', 'texlab', 'marksman', 'ocamllsp' }
+local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'nil_ls', 'gopls', 'marksman', 'ocamllsp' }
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = on_attach,
@@ -88,6 +88,37 @@ lspconfig['ltex'].setup {
       },
     },
   },
+}
+
+lspconfig['texlab'].setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = {
+      texlab = {
+        build = {
+          onSave = true,
+          args = {
+            "-xelatex",
+            "-verbose",
+            "-file-line-error",
+            "-synctex=1",
+            "-interaction=nonstopmode",
+            "%f"
+          },
+          executable = "latexmk",
+          forwardSearchAfter = true
+        },
+        chktex = {onOpenAndSave = true},
+        forwardSearch = {
+          args = {
+            "--synctex-forward",
+            "%l:1:%f",
+            "%p"
+          },
+          executable = "zathura"
+        }
+      }
+    }
 }
 
 -- nvim-cmp setup

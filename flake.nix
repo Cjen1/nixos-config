@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/23.11";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs";
 
     home-manager.url = "github:nix-community/home-manager/release-23.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -10,7 +11,8 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   };
 
-  outputs = {nixpkgs, home-manager, ... }@inputs: {
+  outputs = {nixpkgs, home-manager, ... }@inputs: 
+  {
     nixosConfigurations = {
       graphite = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs;};
@@ -19,7 +21,9 @@
         ];
       };
       mercury = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs;};
+        specialArgs = { inherit inputs; 
+                        unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+                      };
         modules = [
           ./nixos-systems/mercury
         ];

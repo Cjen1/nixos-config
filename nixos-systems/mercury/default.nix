@@ -1,4 +1,4 @@
-{inputs, pkgs, lib, config, ...}:{
+{inputs, pkgs, lib, config, unstable, ...}:{
   imports = [
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
@@ -11,6 +11,7 @@
     ../../modules/nixos/bluetooth.nix
     ../../modules/nixos/cambridge.nix
     ../../modules/nixos/persist.nix
+    ../../modules/nixos/polkit.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -90,7 +91,7 @@
   };
   in
   {
-    extraSpecialArgs = {inherit inputs wayland_display_config; };
+    extraSpecialArgs = {inherit inputs wayland_display_config unstable; };
     users = {
       cjen1 = import ../../home-manager/graphite;
     };
@@ -101,9 +102,8 @@
       xdg-desktop-portal-wlr
       xdg-desktop-portal-gtk
     ];
+    config.common.default = "*";
   };
-
-  security.polkit.enable = true;
 
   # framework firmware upgrade
   services.fwupd.enable = true;

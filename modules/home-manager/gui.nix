@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, unstable, ...}: {
   imports = [
     ./sway.nix
   ];
@@ -8,7 +8,7 @@
     okular
     vlc
     drawio
-    signal-desktop
+    unstable.signal-desktop
     zathura
 
     zoom-us
