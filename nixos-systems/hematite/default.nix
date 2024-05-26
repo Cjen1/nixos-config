@@ -9,6 +9,7 @@
 
     # Services
     ../../modules/nixos/docker-services/factorio.nix
+    ../../modules/nixos/docker-services/jellyfin.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -71,6 +72,7 @@
     brightnessctl
     arion
     docker-client
+    htop
   ];
 
   virtualisation.docker.enable = true;

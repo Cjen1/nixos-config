@@ -1,13 +1,11 @@
-{inputs, ...}:{
+{...}:{
   imports = [
-    inputs.arion.nixosModules.arion
+    ./default.nix
   ];
-
-  virtualisation.arion.backend = "docker";
 
   virtualisation.arion.projects."factorio".settings = {
     services."factorio".service = {
-      image = "factoriotools/factorio:stable";
+      image = "factoriotools/factorio:1.1.100";
       restart = "unless-stopped";
       ports = [
         "34197:34197/udp"
