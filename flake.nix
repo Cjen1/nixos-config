@@ -31,9 +31,19 @@
         ];
       };
       hematite = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs;};
+        specialArgs = { inherit inputs; 
+                        unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+                      };
         modules = [
           ./nixos-systems/hematite
+        ];
+      };
+      jasper = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; 
+                        unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+                      };
+        modules = [
+          ./nixos-systems/jasper
         ];
       };
     };
