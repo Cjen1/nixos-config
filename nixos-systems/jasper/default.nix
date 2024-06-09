@@ -7,8 +7,7 @@
     ../../modules/nixos/polkit.nix
 
     # Services
-    #../../modules/nixos/docker-services/factorio.nix
-    ../../modules/nixos/docker-services/jellyfin.nix
+    ./jellyfin.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -119,7 +118,11 @@
   ];
 
   # ---- Services ----
-  services.caddy.enable = true;
+  services.caddy = {
+    enable = true;
+    dataDir = "/data/caddy/data";
+    logDir = "/data/caddy/log";
+  };
   networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   # Jellyfin - remainder is configured as in jellyfin.nix
@@ -130,5 +133,5 @@
   # Logrotate to minimise log issues
   services.logrotate.enable = true;
 
-  system.stateVersion = "23.11";
+  system.stateVersion = "24.05";
 }
