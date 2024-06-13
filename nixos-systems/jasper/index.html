@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Home</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link href="images/favicon.ico" rel="icon">
+    <link href="./nonAuth/axure_rp_page.css" type="text/css" rel="stylesheet"/>
+	<link href="./nonAuth/BTstyles.css" type="text/css" rel="stylesheet">
+	<link href="./nonAuth/m_BTstyle.css" type="text/css" rel="stylesheet">
+	<link href="./nonAuth/BTfont.css" type="text/css" rel="stylesheet">
+	<link href="./nonAuth/Homestyles.css" type="text/css" rel="stylesheet"/>
+	<link href="./nonAuth/adminLogin.css" type="text/css" rel="stylesheet">
+    <script src="./nonAuth/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="./nonAuth/jquery-ui-1.12.1.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <script src="./nonAuth/HH6menu.js"></script>
+    <script language="JavaScript" type="text/javascript">
+    	var CGIs = ["home","owl"];
+    </script>
+    <script src="./nonAuth/globals.js"></script>
+    <script src="./nonAuth/login_function.js"></script>
+    <script src="./nonAuth/oie.js"></script>
+    <script src="./nonAuth/deviceList.js"></script>
+    <script src="./nonAuth/loginScreen.js"></script>
+    <script src="./nonAuth/base64.js"></script>
+    <script language="javascript" type="text/javascript" src="./nonAuth/ajax.js"></script>
+
+    <script language="javascript" type="text/javascript">
+	
+	var bUsrisLogined=parseInt('0'+'-1');
+	var username = "admin";
+	var device_version = 0;
+	var xmlParser = new XMLParser();
+	var xmlURL = "./nonAuth/wan_conn.xml";
+	var xmlHttp = null;
+	var timerId;
+	var wanConnUpIdx=0;  //Connection status is up, and connection wan idx=?
+	var wanConnStatus = new Array(wan_conn_status_list.length-1);	//If wan interface's Connection status is up, wanConnStatus[idx]=1
+
+		function m_slide(){
+			$("#m_main_first").hide( "slide", { direction: "up" }, 800);
+			$("#m_main_second").show( "slide", { direction: "down" }, 800);
+		}
+
+		function m_slide2home(){
+			$("#m_main_second").hide( "slide", { direction: "down" }, 800);
+			$("#m_main_first").show( "slide", { direction: "up" }, 800);
+		}
+
+		function slide(){
+			//change top bar
+			$("#top_bar_home").hide();
+			$("#top_bar").show();
+			
+			//movement window
+			$("#main_box_first").hide( "slide", { direction: "left" }, 500);
+			$("#main_box_second").show( "slide", { direction: "right" }, 500);
+		}
+
+		function slide_home(){
+			//change top bar
+			$("#top_bar").hide();
+			$("#top_bar_home").show();
+			//movement window
+			$("#main_box_second").hide( "slide", { direction: "right" }, 500);
+			$("#main_box_first").show( "slide", { direction: "left" }, 500);
+		}
+
+		function chkConn()
+		{
+			if(!xmlHttp){
+				xmlHttp = new HTTP_Request(parseAndRun);
+			}
+			clearInterval(timerId);
+			xmlHttp.request(xmlURL, "GET");
+		}
+
+		function parseResponse(strConn)
+		{
+			if(strConn.length > 0) {
+				xmlParser.loadXML(strConn);
+				wan_conn_status_list = xmlParser.get("wan_conn_status_list");
+				wan_conn_volume_list = xmlParser.get("wan_conn_volume_list");
+				wan_link_status_list = xmlParser.get("curlinkstatus");
+				ip4_info_list = xmlParser.get("ip4_info_list");
+				ip6_lla_list = xmlParser.get("ip6_lla_list");
+				ip6_gua_list = xmlParser.get("ip6_gua_list");
+				ip6_rdns_list = xmlParser.get("ip6_rdns_list");
+				wan_active_idx = xmlParser.get("wan_active_idx");
+				locktime = xmlParser.get("locktime");
+			}
+		}
+
+		function parseAndRun(data) {
+			parseResponse(data);
+			initialStatus();
+		}
+
+		function truncateNumber(num)
+		{
+			if (num.indexOf("+44") != -1)
+				return num.replace("+44", "0");
+			if (num.indexOf("+353") != -1)
+				return num.replace("+353", "0");
+			return num;
+		}
+
+		function initialPhone(){
+			var f = document.tF;
+			/* Line enable and number */ 
+			// line 1
+			if(cgi_allSip == "1" && cgi_sipEnable[1] == "1" && cgi_userId[1] != ""){
+				setIdVal("line1_number", truncateNumber(cgi_userId[1]));
+				DisplayObject("phoneLine1");
+				setIdVal("m_line1_number", truncateNumber(cgi_userId[1]));
+				DisplayObject("m_phoneLine1");
+			}
+			else {
+				setIdVal("line1_number", "Not configured");
+				HiddenObject("phoneLine1");
+				setIdVal("m_line1_number", "Not configured");
+				HiddenObject("m_phoneLine1");
+			}
+			// line 2
+			if(cgi_allSip == "1" && cgi_sipEnable[2] == "1" && cgi_userId[2] != ""){
+				setIdVal("line2_number", truncateNumber(cgi_userId[2]));
+				DisplayObject("phoneLine2");
+				setIdVal("m_line2_number", truncateNumber(cgi_userId[2]));
+				DisplayObject("m_phoneLine2");
+			}
+			else {
+				setIdVal("line2_number", "Not configured");
+				HiddenObject("phoneLine2");
+				setIdVal("m_line2_number", "Not configured");
+				HiddenObject("m_phoneLine2");
+			}
+
+			if( cgi_allSip == "0" ||
+				( (cgi_sipEnable[1] == "0" || cgi_userId[1] == "") &&
+				  (cgi_sipEnable[2] == "0" || cgi_userId[2] == "") )
+				){
+				DisplayObject("phoneLine");
+				DisplayObject("m_phoneLine");
+				// remove onclick event when there is not line settings
+				$('#phone_box').removeClass('backgroundClass').addClass('backgroundGray').attr("onclick","");
+				$('#m_phone_box').removeClass('backgroundClass').addClass('backgroundGray').attr("onclick","");
+			}
+			else {
+				HiddenObject("phoneLine");
+				HiddenObject("m_phoneLine");
+			}
+
+			// color
+			if(cgi_regStatus[1] == "0" || cgi_regStatus[2] == "0"){
+				$("#phone_box").css("background","#eb352c");
+				$("#m_phone_box").css("background","#eb352c");
+			}
+
+			// position, adjust when show one row
+			if((cgi_regStatus[1] == "1" || cgi_regStatus[1] == "0") &&
+				cgi_regStatus[2] != "1" && cgi_regStatus[2] != "0") {
+				$("#phoneLine1").css("position", "relative");
+				$("#phoneLine1").css("top", "8.5px");
+				$("#m_phoneLine1").css("top", "15px");
+			}
+			if((cgi_regStatus[2] == "1" || cgi_regStatus[2] == "0") &&
+				cgi_regStatus[1] != "1" && cgi_regStatus[1] != "0") {
+				$("#phoneLine2").css("position", "relative");
+				$("#phoneLine2").css("top", "8.5px");
+				$("#m_phoneLine2").css("top", "15px");
+			}
+
+			if (cgi_regStatus[1] == "1" || cgi_regStatus[2] == "1") {
+				$('#phone_box').removeClass('backgroundGray').addClass('backgroundClass');
+				$('#m_phone_box').removeClass('backgroundGray').addClass('backgroundClass');
+			}
+		}
+
+		function initialStatus()
+		{
+			wanConnUpIdx=0;
+
+			if (wan_active_idx.length !=0)
+				wanConnUpIdx = parseInt(wan_active_idx,10)+1;
+
+			for(var i=0;i<wan_conn_status_list.length-1;i++) //length-1 is because null item
+			{
+				var wan_status = HTML2str(wan_conn_status_list[i]);
+				if (wan_status.indexOf("connected")==0)
+				{
+					wanConnStatus[i]=1;
+				}
+				else
+				{
+					wanConnStatus[i]=0;
+				}
+			}
+
+			if(wanConnUpIdx>0 && wanConnUpIdx<=3)
+			{
+				setIdVal("status_connectionStatus","Connected");
+				setIdVal("m_status_connectionStatus","Connected");
+
+				//change background color
+				$('#status_box').removeClass('backgroundYellow').addClass('backgroundClass');
+				document.getElementById("basicStatus").style.color = "#ffffff";
+				document.getElementById("status_connectionStatus").style.color = "#ffffff";
+				document.getElementById("basicStatusTi").style.color = "#ffffff";
+				DisplayObject("status_icon_img");
+				HiddenObject("status_icon_img2");
+				//mobile
+				$('#m_basicStatus').removeClass('backgroundYellow').addClass('backgroundClass');
+				document.getElementById("moblie_status").style.color = "#ffffff";
+				document.getElementById("moblie_statusTi").style.color = "#ffffff";
+				DisplayObject("moblie_statusImg");
+				HiddenObject("moblie_statusImg2");
+			}
+			else
+			{
+				setIdVal("status_connectionStatus","Disconnected");
+				setIdVal("m_status_connectionStatus","Disconnected");
+
+				//change background color
+				$('#status_box').removeClass('backgroundClass').addClass('backgroundYellow');
+				document.getElementById("basicStatus").style.color = "#333333";
+				document.getElementById("status_connectionStatus").style.color = "#333333";
+				document.getElementById("basicStatusTi").style.color = "#333333";
+				HiddenObject("status_icon_img");
+				DisplayObject("status_icon_img2");
+				//mobile
+				$('#m_basicStatus').removeClass('backgroundClass').addClass('backgroundYellow');
+				document.getElementById("moblie_status").style.color = "#333333";
+				document.getElementById("moblie_statusTi").style.color = "#333333";
+				HiddenObject("moblie_statusImg");
+				DisplayObject("moblie_statusImg2");
+			}
+
+			timerId=setTimeout("chkConn()", 2000);
+		}
+
+		function initialLTE()
+		{
+			var text = "";
+			var num = 0;
+			var signal_info = $.map(ltesignal.split(","), function(val) { return parseInt(val, 10)});
+
+			num = parseInt((ltelist[0] == null ? "0" : unescape(ltelist[0].lte_rsrp)), 10);
+			if(num == 0 || num <= signal_info[0]) {
+				setIdVal("lte_signal", "No signal");
+				setIdVal("m_lte_signal", "No signal");
+				DisplayObject("lte_icon_img0");
+				HiddenObject("lte_icon_img1");
+				HiddenObject("lte_icon_img2");
+				HiddenObject("lte_icon_img3");
+				DisplayObject("m_lte_icon_img0");
+				HiddenObject("m_lte_icon_img1");
+				HiddenObject("m_lte_icon_img2");
+				HiddenObject("m_lte_icon_img3");
+			}
+			else if(num > signal_info[2]) {
+				setIdVal("lte_signal", "Good");
+				setIdVal("m_lte_signal", "Good");
+				HiddenObject("lte_icon_img0");
+				HiddenObject("lte_icon_img1");
+				HiddenObject("lte_icon_img2");
+				DisplayObject("lte_icon_img3");
+				HiddenObject("m_lte_icon_img0");
+				HiddenObject("m_lte_icon_img1");
+				HiddenObject("m_lte_icon_img2");
+				DisplayObject("m_lte_icon_img3");
+			}
+			else if(num > signal_info[1]) {
+				setIdVal("lte_signal", "Good");
+				setIdVal("m_lte_signal", "Good");
+				HiddenObject("lte_icon_img0");
+				HiddenObject("lte_icon_img1");
+				DisplayObject("lte_icon_img2");
+				HiddenObject("lte_icon_img3");
+				HiddenObject("m_lte_icon_img0");
+				HiddenObject("m_lte_icon_img1");
+				DisplayObject("m_lte_icon_img2");
+				HiddenObject("m_lte_icon_img3");
+			}
+			else if(num > signal_info[0]) {
+				setIdVal("lte_signal", "Poor");
+				setIdVal("m_lte_signal", "Poor");
+				HiddenObject("lte_icon_img0");
+				DisplayObject("lte_icon_img1");
+				HiddenObject("lte_icon_img2");
+				HiddenObject("lte_icon_img3");
+				HiddenObject("m_lte_icon_img0");
+				DisplayObject("m_lte_icon_img1");
+				HiddenObject("m_lte_icon_img2");
+				HiddenObject("m_lte_icon_img3");
+			}
+
+			// reset layout
+			DisplayObject("lte_box");
+			$("#devices_box").css("height", "110px");
+			DisplayObject("m_basicLTEModem");
+			$("#m_basicWifi").css("top", "140px");
+			$("#m_basicDevice").css("top", "300px");
+			$("#m_help").css("top", "460px");
+			$("#m_hubLight").css("top", "520px")
+			$("#m_broadbandTest").css("top", "630px");
+			$("#m_restart").css("top", "690px");
+			$("#m_advanceSetting").css("top", "750px");
+
+			switch(ltestatus[0] == null ? "NoModem" : ltestatus[0].service) {
+				case "Ready":
+					DisplayObject("lte_signal_box");
+					$('#lte_box').removeClass('backgroundGray').removeClass('backgroundRed').removeClass('backgroundYellow').addClass('backgroundClass');
+					$('#m_basicLTEModem').removeClass('backgroundGray').removeClass('backgroundRed').removeClass('backgroundYellow').addClass('backgroundClass');
+					text = "Ready";
+					break;
+				case "Connected":
+					DisplayObject("lte_signal_box");
+					$('#lte_box').removeClass('backgroundGray').removeClass('backgroundRed').removeClass('backgroundYellow').addClass('backgroundClass');
+					$('#m_basicLTEModem').removeClass('backgroundGray').removeClass('backgroundRed').removeClass('backgroundYellow').addClass('backgroundClass');
+					text = "Connected";
+					break;
+				case "Connecting":
+					HiddenObject("lte_signal_box");
+					$('#lte_box').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundYellow').addClass('backgroundGray');
+					$('#m_basicLTEModem').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundYellow').addClass('backgroundGray');
+					text = "Detecting";
+					break;
+				case "NoSim":
+					HiddenObject("lte_signal_box");
+					$('#lte_box').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundYellow').addClass('backgroundRed');
+					$('#m_basicLTEModem').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundYellow').addClass('backgroundRed');
+					text = "No SIM";
+					break;
+				case "InvalidSim":
+					HiddenObject("lte_signal_box");
+					$('#lte_box').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundYellow').addClass('backgroundRed');
+					$('#m_basicLTEModem').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundYellow').addClass('backgroundRed');
+					text = "Invalid SIM";
+					break;
+				case "NoSignal":
+					HiddenObject("lte_signal_box");
+					$('#lte_box').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundYellow').addClass('backgroundRed');
+					$('#m_basicLTEModem').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundYellow').addClass('backgroundRed');
+					text = "No signal";
+					break;
+				case "Unknown":
+				default:
+					HiddenObject("lte_signal_box");
+					HiddenObject("lte_box");
+					$("#devices_box").css("height", "190px");
+					HiddenObject("m_basicLTEModem");
+					$("#m_basicWifi").css("top", "140px");
+					$("#m_basicDevice").css("top", "300px");
+					$("#m_help").css("top", "460px");
+					$("#m_hubLight").css("top", "520px");
+					$("#m_broadbandTest").css("top", "630px");
+					$("#m_restart").css("top", "690px");
+					$("#m_advanceSetting").css("top", "750px");
+					// $('#lte_box').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundRed').addClass('backgroundYellow');
+					// $('#m_basicLTEModem').removeClass('backgroundClass').removeClass('backgroundGray').removeClass('backgroundRed').addClass('backgroundYellow');
+					// text = "Modem disconnected";
+					break;
+			}
+			setIdVal("lte_status", text);
+			setIdVal("m_lte_status", text);
+		}
+
+		function UsbDevice(usbListItem)
+		{
+			this.listItem = usbListItem;
+			this.getStatus = function()
+			{
+				if (this.listItem.status == "connected")
+					return "Connected";
+				else
+					return "Not connected";
+			};
+
+			this.isConnected = function()
+			{
+				return (this.listItem.status == "connected") ? true : false;
+			};
+
+			this.isDisconnected = function()
+			{
+				return (this.listItem.status == "disconnected") ? true : false;
+			};
+
+			this.isRemoved = function()
+			{
+				return (this.listItem.status == "removed") ? true : false;
+			};
+		}
+
+		var devicesList_Iface = new Array();
+		var devicesList_Device = new Array();
+
+		function setChannel(){
+			//renew cgi
+			var s,k;
+			CA=[];
+			k="cgi/cgi_home.js";
+			s = document.createElement("script");
+			s.type = "text/javascript";
+			s.src = k;
+			var head = document.getElementsByTagName("head")[0];
+			head.appendChild(s);
+
+			setTimeout( function(){
+				var initial = getCfg("wirelessChannel1");
+				var channel = wlan_channel_list;
+				if(channel == "" || channel == null){
+					setTimeout( function(){setChannel();}, 5000);
+				}
+				else{
+					if(getCfg("wirelessEnable1")=="0"){
+						HiddenObject("AWifi2.4G_channel");
+						HiddenObject("m_AWifi2.4G_channel");
+					}else if(initial=="0"){
+						setIdVal("AWifi2.4G_channel", "Smart (Channel "+ channel[0][0]+")");
+						setIdVal("m_AWifi2.4G_channel", "Smart (Channel "+ channel[0][0]+")");
+					}else{
+						temp = "Channel " + initial;
+						setIdVal("AWifi2.4G_channel", temp);
+						setIdVal("m_AWifi2.4G_channel", temp);
+					}
+					initial = getCfg("wirelessChannel2");
+					if(getCfg("wirelessEnable2")=="0"){
+						HiddenObject("AWifi5G_channel");
+						HiddenObject("m_AWifigG_channel");
+					}else if(initial=="0"){
+						setIdVal("AWifi5G_channel", "Smart (Channel "+ channel[channel_5g_idx][0]+")");
+						setIdVal("m_AWifi5G_channel", "Smart (Channel "+ channel[channel_5g_idx][0]+")");
+					}else{
+						temp = "Channel " + initial;
+						setIdVal("AWifi5G_channel", temp);
+						setIdVal("m_AWifi5G_channel", temp);
+					}
+				}
+			}, 3000);
+		}
+
+		function initialWiFiAndDevice(){
+			var	initial, temp, wireless, wireless5G, key=1;
+			wireless = getCfg("wirelessEnable1");
+			if(wireless==1){
+				setIdVal("Wifi2.4G_status","On");
+				$("#the5goff").hide();	
+				setIdVal("m_Wifi2.4G_status","On");
+				$("#m_the5goff").hide();
+			}
+			else{
+				setIdVal("Wifi2.4G_status","Off");
+				setIdVal("m_Wifi2.4G_status","Off");
+				HiddenObject("the2goff");
+				HiddenObject("m_the2goff");
+				HiddenObject("advanced2gchannel");
+				HiddenObject("m_advanced2gchannel");
+			}
+			initial = decode64(getCfg("SSID_2G"));
+			setIdVal("Wifi2.4G_SSID", initial);
+			setIdVal("m_Wifi2.4G_SSID", initial);
+			// auto adjust SSID font size, minimum size: 10px
+			// temp = parseInt($("#Wifi2\\.4G_SSID").css("font-size"),10);
+			// while($("#Wifi2\\.4G_SSID").height() > 20 && temp > 10) {
+			// 	temp -=1;
+			// 	$("#Wifi2\\.4G_SSID").css("font-size", temp + 'px');
+			// }
+			// temp = parseInt($("#m_Wifi2\\.4G_SSID").css("font-size"),10);
+			// while($("#m_Wifi2\\.4G_SSID").height() > 20 && temp > 10) {
+			// 	temp -=1;
+			// 	$("#m_Wifi2\\.4G_SSID").css("font-size", temp + 'px');
+			// }
+
+			wireless5G = getCfg("wirelessEnable2");
+			if(wireless5G==1){
+				setIdVal("Wifi5G_status","On");
+				setIdVal("m_Wifi5G_status","On");
+			}else{
+				setIdVal("Wifi5G_status","Off");
+				setIdVal("m_Wifi5G_status","Off");
+				HiddenObject("the5goff");
+				HiddenObject("m_the5goff");
+				HiddenObject("advanced5gchannel");
+				HiddenObject("m_advanced5gchannel");
+			}
+			initial = decode64(getCfg("SSID_5G"));
+			setIdVal("Wifi5G_SSID", initial);
+			setIdVal("m_Wifi5G_SSID", initial);
+			// auto adjust SSID font size, minimum size: 10px
+			temp = parseInt($("#Wifi5G_SSID").css("font-size"),10);
+			while($("#Wifi5G_SSID").height() > 20 && temp > 10) {
+				temp -=1;
+				$("#Wifi5G_SSID").css("font-size", temp + 'px');
+			}
+			temp = parseInt($("#m_Wifi5G_SSID").css("font-size"),10);
+			while($("#m_Wifi5G_SSID").height() > 20 && temp > 10) {
+				temp -=1;
+				$("#m_Wifi5G_SSID").css("font-size", temp + 'px');
+			}
+			// If browser support document fonts, adjust font size after font loaded
+			// if(typeof document.fonts !== 'undefined') {
+			// 	document.fonts.ready.then(function () {
+			// 		var temp = 13; // if font load success, reset font size and adjust
+			// 		$("#Wifi2\\.4G_SSID").css("font-size", temp + 'px');
+			// 		while($("#Wifi2\\.4G_SSID").height() > 20 && temp > 10) {
+			// 			temp -=1;
+			// 			$("#Wifi2\\.4G_SSID").css("font-size", temp + 'px');
+			// 		}
+			// 		temp = 13;
+			// 		$("#m_Wifi2\\.4G_SSID").css("font-size", temp + 'px');
+			// 		while($("#m_Wifi2\\.4G_SSID").height() > 20 && temp > 10) {
+			// 			temp -=1;
+			// 			$("#m_Wifi2\\.4G_SSID").css("font-size", temp + 'px');
+			// 		}
+
+			// 		temp = 13;
+			// 		$("#Wifi5G_SSID").css("font-size", temp + 'px');
+			// 		while($("#Wifi5G_SSID").height() > 20 && temp > 10) {
+			// 			temp -=1;
+			// 			$("#Wifi5G_SSID").css("font-size", temp + 'px');
+			// 		}
+			// 		temp = 13;
+			// 		$("#m_Wifi5G_SSID").css("font-size", temp + 'px');
+			// 		while($("#m_Wifi5G_SSID").height() > 20 && temp > 10) {
+			// 			temp -=1;
+			// 			$("#m_Wifi5G_SSID").css("font-size", temp + 'px');
+			// 		}
+			// 	});
+			// }
+
+			//we decide what to show here and decide need channel and security or not
+			if(getCfg("allWirelessEnable2G")=="0" && getCfg("allWirelessEnable5G")=="0"){
+				key = 0;
+				//desktop
+				$("#wifi_box").removeClass('backgroundClass').addClass('backgroundGray');
+				$("#advWifi").removeClass('backgroundClass').addClass('backgroundGray');
+				//basic
+				HiddenObject("wifi_box_text");
+				//adv
+				HiddenObject("advWifi_text");
+				HiddenObject("advWifi_text2");
+
+				//mobile
+				$("#m_basicWifi").removeClass('backgroundClass').addClass('backgroundGray');
+				$("#m_advWifi").removeClass('backgroundClass').addClass('backgroundGray');
+				//basic
+				HiddenObject("m_basicWifiText");
+				//adv
+				HiddenObject("m_advWifiText");
+				HiddenObject("m_advWifiText2");
+			}
+			else if(wireless==0 && wireless5G==0){
+				key = 0;
+				//desktop
+				$("#wifi_box").removeClass('backgroundClass').addClass('backgroundGray');
+				$("#advWifi").removeClass('backgroundClass').addClass('backgroundGray');
+				//basic
+				HiddenObject("wifi_box_text2");
+				//adv
+				HiddenObject("advWifi_text");
+				HiddenObject("advWifi_text3");
+
+				//mobile
+				$("#m_basicWifi").removeClass('backgroundClass').addClass('backgroundGray');
+				$("#m_advWifi").removeClass('backgroundClass').addClass('backgroundGray');
+				//basic
+				HiddenObject("m_basicWifiText2");
+				//adv
+				HiddenObject("m_advWifiText");
+				HiddenObject("m_advWifiText3");
+			}
+			else{
+				//desktop
+				//basic
+				HiddenObject("wifi_box_text2");
+				//adv
+				HiddenObject("advWifi_text2");
+				HiddenObject("advWifi_text3");
+
+				//mobile
+				//basic
+				HiddenObject("m_basicWifiText2");
+				//adv
+				HiddenObject("m_advWifiText2");
+				HiddenObject("m_advWifiText3");
+			}
+
+		//if key == 0, not show information
+		if(key==1){
+			//channel
+			//channel is special because you can't get channel immediately after restarting hub
+			initial = getCfg("wirelessChannel1");
+			var channel = wlan_channel_list;
+			if(channel == "" || channel == null){
+				setTimeout( function(){setChannel();}, 5000);
+			}
+			else{
+				if(getCfg("wirelessEnable1")=="0"){
+					HiddenObject("AWifi2.4G_channel");
+					HiddenObject("m_AWifi2.4G_channel");
+				}else if(initial=="0"){
+					setIdVal("AWifi2.4G_channel", "Smart (Channel "+ channel[0][0]+")");
+					setIdVal("m_AWifi2.4G_channel", "Smart (Channel "+ channel[0][0]+")");
+				}else{
+					temp = "Channel " + initial;
+					setIdVal("AWifi2.4G_channel", temp);
+					setIdVal("m_AWifi2.4G_channel", temp);
+				}
+				initial = getCfg("wirelessChannel2");
+				if(getCfg("wirelessEnable2")=="0"){
+					HiddenObject("AWifi5G_channel");
+					HiddenObject("m_AWifi5G_channel");
+				}else if(initial=="0"){
+					setIdVal("AWifi5G_channel", "Smart (Channel "+ channel[channel_5g_idx][0]+")");
+					setIdVal("m_AWifi5G_channel", "Smart (Channel "+ channel[channel_5g_idx][0]+")");
+				}else{
+					temp = "Channel " + initial;
+					setIdVal("AWifi5G_channel", temp);
+					setIdVal("m_AWifi5G_channel", temp);
+				}
+			}
+
+			//security
+			var wpamode = parseInt(getCfg("wpamode"), 10);
+			if(ap_secmode_001==2)
+			{
+				if(wpamode == 2)
+				{
+					setIdVal("AWifi_securityType", "WPA-Auto");
+					setIdVal("m_AWifi_securityType", "WPA-Auto");
+				}
+				else if(wpamode == 1)
+				{
+					setIdVal("AWifi_securityType", "WPA2");
+					setIdVal("m_AWifi_securityType", "WPA2");
+				}
+			}else if(ap_secmode_001==0){
+				setIdVal("AWifi_securityType", "None");
+				setIdVal("m_AWifi_securityType", "None");
+
+				$('#wifi_box').removeClass('backgroundClass').addClass('backgroundRed');
+				$('#advWifi').removeClass('backgroundClass').addClass('backgroundRed');
+				$('#m_basicWifi').removeClass('backgroundClass').addClass('backgroundRed');
+				$('#m_advWifi').removeClass('backgroundClass').addClass('backgroundRed');
+			}
+		}
+		
+
+			//devices
+			var NUM_WLAN2G = 0;
+			var NUM_WLAN5G = 0;
+			var NUM_LAN1 = 0;
+			var NUM_LAN2 = 0;
+			var NUM_LAN3 = 0;
+			var NUM_LAN4 = 0;
+			var temp, temp2;
+			for (var i = 0; i < known_device_list.length; i++)
+			{
+				var listItem = known_device_list[i];
+				if (listItem == null)
+					break;
+				var kdEntry = new KdEntry(listItem);
+				for (var j = 0; j < kdEntry.ifNum; j++) 
+				{
+					var kdIface = new KdIface(kdEntry, j);
+					var netDevice = new NetDevice(kdIface);
+
+					devicesList_Iface.push(kdIface);
+					devicesList_Device.push(netDevice);
+
+					//device port type
+					temp2 = netDevice.getPortType();
+
+					if(kdIface.isActive4()=="1" || kdIface.isActive6()=="1")
+					{
+						if(temp2=="2.4GHz"){
+							NUM_WLAN2G++;
+						}else if(temp2=="5GHz"){
+							NUM_WLAN5G++;
+						}else if(temp2=="Port 1")
+							NUM_LAN1++;
+						else if(temp2=="Port 2")
+							NUM_LAN2++;
+						else if(temp2=="Port 3")
+							NUM_LAN3++;
+						else if(temp2=="Port 4")
+							NUM_LAN4++;
+					}
+				}
+			}
+			var lan = NUM_LAN1+ NUM_LAN2 + NUM_LAN3 + NUM_LAN4;
+			var total = lan + NUM_WLAN2G + NUM_WLAN5G;
+			setIdVal("ethernet_devices", lan);
+			setIdVal("Wifi2.4g_devices", NUM_WLAN2G);
+			setIdVal("Wifi5g_devices", NUM_WLAN5G);
+			setIdVal("m_ethernet_devices", lan);
+			setIdVal("m_Wifi2.4g_devices", NUM_WLAN2G);
+			setIdVal("m_Wifi5g_devices", NUM_WLAN5G);
+
+			var USB = 0;
+			for (i = 0; i < usb_device_list.length; i++)
+			{
+				var listItem = usb_device_list[i];
+				if (listItem == null)
+					break;
+				if ((listItem.type != "storage") && (listItem.type != "printer"))
+					continue;
+				var usbDevice = new UsbDevice(listItem);
+				if(usbDevice.isConnected()=="1")
+					USB++;
+			}
+			setIdVal("USB_devices", USB);
+			setIdVal("m_USB_devices", USB);
+		}
+
+		function initialLight(){
+			if(cgi_brightness_enable=="1"){
+				setIdVal("light_status", "Off");
+				setIdVal("m_light_status", "Off");
+				$('#hub_light_box').removeClass('backgroundClass').addClass('backgroundGray');
+				$('#m_hubLight').removeClass('backgroundClass').addClass('backgroundGray');
+			}
+			else{
+				setIdVal("light_status", "On");
+				setIdVal("m_light_status", "On");
+				if(cgi_led_schedule=="1"){
+					setIdVal("light_schedule", "On");
+					setIdVal("m_light_schedule", "On");
+				}
+			}
+			//light_brightness
+			if(cgi_led_brightness=="0"){
+				setIdVal("light_brightness", "0");
+				setIdVal("m_light_brightness", "0");
+			}
+			else if(cgi_led_brightness=="1"){
+				setIdVal("light_brightness", "50%");
+				setIdVal("m_light_brightness", "50%");
+			}
+			else{
+				setIdVal("light_brightness", "100%");
+				setIdVal("m_light_brightness", "100%");
+			}
+		}
+
+		function getConfig(key) {
+			return unescape(getCfg(key));
+		}
+
+		function intitialACL(){
+			var initial;
+			initial = acEnable;
+			if(initial=="0"){
+				$('#advAC').removeClass('backgroundClass').addClass('backgroundGray');
+				$('#m_ACL').removeClass('backgroundClass').addClass('backgroundGray');
+			}
+
+			initial = acPause;
+			if(initial=="1"){
+				setIdVal("pause", "On");
+				setIdVal("m_pause", "On");
+			}
+			else{
+				setIdVal("pause", "Off");
+				setIdVal("m_pause", "Off");
+			}
+
+			var default_group_block = false;
+			var group_enable = 0;
+			var countedGroup = [];
+			for(var i = 0; acl_list[i] != null; i++) {
+				// if Default group has "active" schedule rule or pause rule
+				if(unescape(acl_list[i].pid) == "default_profile" && acl_list[i].enable == '1') {
+					default_group_block = true;
+				}
+
+				//schedule type=2, pause type=1
+				//schedule and pause should be counted if its enable is 1
+				if(acl_list[i].pid[0] == "g" && /*acl_list[i].type == '2' &&*/ acl_list[i].enable == '1') {
+					//if group has schedule and pause rule at same time, the acl_list will include 2 records.
+					if(countedGroup.indexOf(acl_list[i].pid) != -1){
+						continue;
+					}
+					else{
+						group_enable++;
+						countedGroup.push(acl_list[i].pid);
+					}
+				}
+			}
+
+			if(default_group_block == true){
+				setIdVal("ACL_en", "On");
+				setIdVal("m_ACL_en", "On");
+			}
+			else{
+				setIdVal("ACL_en", "Off");
+				setIdVal("m_ACL_en", "Off");
+			}
+
+			if (default_group_block == true)
+				group_enable++ ;
+			setIdVal("groups", group_enable);
+			setIdVal("m_groups", group_enable);
+			// initial = getCfg("blockAll");
+			// if(initial=="1"){
+			// 	setIdVal("ACL_per", "Yes");
+			// 	setIdVal("m_ACL_per", "Yes");
+			// }else{
+			// 	setIdVal("ACL_per", "No");
+			// 	setIdVal("m_ACL_per", "No");
+			// }
+
+			// var num = 0;
+			// for (var i = 0; i < MAX_ACS_RULES; i++) {
+			// 	var cfgIndex = i + 1;
+			// 	if (getConfig('enabled' + cfgIndex) == "1") {
+			// 		num++;
+			// 	}
+			// }
+			// setIdVal("ACL_dev", num);
+		}
+
+		function intialBackgroung(){
+			var intial, intial2;
+			//smart setup
+			if(cgi_smartsetup_gray=="1"){
+				$('#setup').removeClass('backgroundClass').addClass('backgroundGray').attr("onclick","");
+				$('#m_SmartSetup').css("backgroundColor", "#999999").attr("onclick","");
+			}
+			else if(getCfg("silence")=="1"){
+				$('#setup').removeClass('backgroundClass').addClass('backgroundGray');
+				document.getElementById("m_SmartSetup").style.backgroundColor = "#999999";
+			}
+			else{
+			}
+
+			//firewall
+			if(getCfg("iBtBlockAll")=="2"){
+				$('#advFirewall').removeClass('backgroundClass').addClass('backgroundRed');
+				document.getElementById("m_firewall").style.backgroundColor = "#eb352c";
+			}
+			else{
+			}
+			//firewll level
+			if(getCfg("iBtBlockAll")=="1"){
+				setIdVal("firewall_level", "Block all");
+				setIdVal("m_firewall_level", "Block all");
+			}
+			else if(getCfg("iBtBlockAll")=="2"){
+				setIdVal("firewall_level", "Disabled");
+				setIdVal("m_firewall_level", "Disabled");
+			}
+			else{
+				setIdVal("firewall_level", "Default");
+				setIdVal("m_firewall_level", "Default");
+			}
+		}
+
+		function init(){
+			/*for mobile*/
+			pm_init();
+			/*end for mobile*/
+
+			//check in home or home-advance
+			var str = document.URL;
+			var x = str.match("advancedPage");
+
+			if(device_version ==0){ //PC
+				var ToppestMenu;
+				ToppestMenu = ShowToppestMenu();
+				document.getElementById("toppest_banner").innerHTML = ToppestMenu;
+				var topMenu;
+				topMenu = ShowTopMenu("home.htm");
+				document.getElementById("TopMenu").innerHTML = topMenu;
+				var LoginScreen;
+				LoginScreen = BuildLoginScreen();
+				document.getElementById("Admin_Login").innerHTML = LoginScreen;
+
+				if(x==null || x==""){	//it means get into home page
+					$('#top_bar').hide();  
+				}
+				else{	//it means get into home-advance
+					$('#top_bar_home').hide();  
+					$("#main_box_first").hide();
+					$("#main_box_second").show();
+				}
+			}
+			else if (device_version ==1){ //mobile 
+				var LoginScreen;
+				LoginScreen = MobileBuildLoginScreen();
+				document.getElementById("m_adminLogin").innerHTML = LoginScreen;
+				var LoginScreenHelp;
+				LoginScreenHelp = MobileBuildLoginScreenHelp();
+				document.getElementById("m_admin_help").innerHTML = LoginScreenHelp;
+				var ToppestMenu;
+				ToppestMenu = ShowMobileToppestMenu();
+				document.getElementById("m_toppest_banner").innerHTML = ToppestMenu;
+				$("#flip_dot").click(function(){
+					$("#m_slider").slideToggle("fast");
+				});
+
+				if(x==null || x==""){	//it means get into home page
+				}
+				else{	//it means get into home-advance 
+					$("#m_main_first").hide();
+					$("#m_main_second").show();
+				}
+			}
+
+			initialWiFiAndDevice();
+			initialLight();
+			intitialACL();
+			initialStatus();
+			initialLTE();
+			initialPhone();
+			intialBackgroung();
+			//init password hint
+			var paswordHint = getCfg("PasswordHint") == "" ? "Password hint not set" : getCfg("PasswordHint");
+			setIdVal("hintText", paswordHint);
+			setIdVal("m_hintText", paswordHint);
+
+			/*
+				in Jquery, for Ipad or IOS mobile, the hover or focus will be the same as click
+				to avoid the issue, we need to distinguish IOS 
+			*/
+			var IOSmobile = distinguishIOSmobile();
+			if(IOSmobile==0){
+
+			}	//end ios judge
+		}
+
+		function pm_init(){
+			var nHeight = screen.height;
+			var nWidth = screen.width;
+			if(nWidth > nHeight)
+				nWidth = nHeight;
+			if (nWidth > 480)
+			{
+				DisplayObject("base");
+				HiddenObject("mobile");
+				device_version =0;
+			}
+			else if(nWidth < 471){
+				DisplayObject("mobile");
+				HiddenObject("base");
+				device_version =1;
+				document.getElementsByTagName('body')[0].style.width = "320px";
+			}
+			else{
+				DisplayObject("mobile");
+				HiddenObject("base");
+				device_version =1;
+				document.getElementById("m_adminLogin").style.left = "20%";
+				document.getElementById("m_admin_help").style.left = "13%";
+				document.getElementsByTagName('body')[0].style.width = "480px";
+			}
+		}
+	</script>
+</head>
+<body onLoad="init()" style="background-color: white;">
+	<div id="base" style="display:none;" class="">
+		<!--this form is for login only, if U need login in this htm add this. -->
+		<form action="login.cgi" method="post" name="tF0">
+			<input type="hidden" name="GO" value="">
+			<input type="hidden" name="usr" value="">
+			<input type="hidden" name="pws" value="">
+		</form>
+		<!--top white background-->
+		<div id="topWhiteBackground" style="position:fixed; left:50%;margin-left: -360px; top:0px; width:720px; height:95px; background: #ffffff; z-index:1001;" >
+		</div>
+		<!--toppest_banner-->
+		<div id="toppest_banner" class="ax_dynamic_panel" data-label="Banner" style="z-index:1005">
+		</div>
+		<!--TopMenu-->
+		<div id="TopMenu" class="ax_dynamic_panel" data-label="TopMenu" style="z-index:1005">
+		</div>
+		<!-- main div -->
+		<main id="main_box" class="ax_dynamic_panel" data-label="main_box">
+			<!-- main_box_first -->
+			<div id="main_box_first" class="panel_state" data-label="basic">
+				<!-- Status box -->
+				<div id="status_box" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Status" onclick="pageChangeNologin('basic_-_status.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('status_box').click()">
+					<!--status Icon (Image) -->
+					<img alt="icon" id="status_icon_img" class="img" src="../images/icon_u480.png"/>
+					<img alt="icon" id="status_icon_img2" class="img" src="../images/home_status_disable.png"/>
+					<!--status Title -->
+					<div id="status_title_text" class="tile_body_text_title">
+						<p id="basicStatusTi"><span>Status</span></p>
+					</div>
+					<!--status Text -->
+					<div id="status_box_text_box" class="ax_paragraph tile_body_text_bold" style="position:absolute;width:205px;height:129px;left:10px;top:50px; ">
+						<div id="status_box_text" class="text">
+							<p>
+								<span id="basicStatus">Broadband status:</span>
+								<span id="status_connectionStatus" class="tile_body_text"></span>
+							</p>
+						</div>
+					</div>
+				</div>
+				<!--Phone -->
+				<div id="phone_box" style="cursor: pointer; display: none;" class="ax_dynamic_panel backgroundClass"  onclick="pageChangeNologin('basic_-_phone.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('phone_box').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="phone_icon_img" class="img" src="../images/icon_u602.png"/>
+					<!--Speed Title (Shape) -->
+					<div id="phone_ti_one_text" class="ax_paragraph tile_body_text_bold">
+						<p id="phoneLine1"><span>Phone: </span><span id="line1_number"></span></p>
+						<p id="phoneLine2"><span>Phone: </span><span id="line2_number"></span></p>
+						<p id="phoneLine" style="margin-top: 8px;"><span>Not configured</span></p>
+					</div>
+				</div>
+				<!-- Wifi box -->
+				<div id="wifi_box" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChangeNologin('basic_-_wifi.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('wifi_box').click()">
+					<!--wifi Icon (Image) -->
+					<img alt="icon" id="wifi_icon_img" class="img" src="../images/icon_u490.png"/>
+					<!--wifi Title -->
+					<div id="wifi_title_text" class="tile_body_text_title">
+						<p><span>Wireless</span></p>
+					</div>
+					<!--wifi Text-->
+					<div id="wifi_box_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="wifi_box_text" class="text">
+							<p>
+								<span>2.4 GHz status: </span>
+								<span id="Wifi2.4G_status" class="tile_body_text"></span>
+							</p>
+							<br>
+							<p>
+								<span>5 GHz status: </span>
+								<span id="Wifi5G_status" class="tile_body_text"></span>
+							</p>
+							<br>
+							<div id="the2goff">
+								<p>
+									<span>Network name: </span>
+									<br>
+									<span id="Wifi2.4G_SSID" class="tile_body_text"></span>
+								</p>
+							</div>
+							<div id="the5goff">
+								<p>
+									<span>Network name: </span>
+									<br>
+									<span id="Wifi5G_SSID" class="tile_body_text"></span>
+								</p>
+							</div>
+						</div>
+						<div id="wifi_box_text2" class="text">
+							<p>
+								<span>Status: </span>
+								<span class="tile_body_text">Wireless disabled</span>
+							</p>
+						</div>
+					</div>
+				</div>
+				<!--Devices-->
+				<div id="devices_box" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChangeNologin('basic_-_my_devices.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('devices_box').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="device_icon_img" class="img" src="../images/icon_u500.png"/>
+					<!-- Title (Shape) -->
+					<div id="device_title_text" class="tile_body_text_title">
+						<p><span>My devices</span></p>
+					</div>
+					<!-- Text (Shape) -->
+					<div id="device_box_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="device_box_text" class="text">
+							<div>
+								<span>Ethernet: </span><span id="ethernet_devices" class="tile_body_text"></span>
+							</div>
+							<br>
+							<div>
+								<span>Wireless: </span>
+								<p style="margin-left: 13px;"><span>2.4 GHz: </span><span id="Wifi2.4g_devices" class="tile_body_text"></span></p>
+								<p style="margin-left: 13px;"><span>5 GHz: </span><span id="Wifi5g_devices" class="tile_body_text"></span></p>
+							</div>
+							<br>
+							<div>
+								<span>USB: </span><span id="USB_devices" class="tile_body_text"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- LTE box -->
+				<div id="lte_box" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Status" onclick="pageChangeNologin('basic_-_mobile_status.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('lte_box').click()">
+					<!-- LTE status Text -->
+					<div id="lte_box_text_box" class="ax_paragraph tile_body_text_bold" style="position:absolute;width:205px;height:129px;left:55px;top:25px; ">
+						<p id="lte_signal_box">
+							<span>Signal strength: </span>
+							<span id="lte_signal">Good</span>
+						</p>
+						<p>
+							<span>Status: </span>
+							<span id="lte_status">Ready</span>
+						</p>
+					</div>
+					<!-- LTE Title -->
+					<div id="lte_title_text" class="tile_body_text_title">
+						<p id="basicModemTitle"><span>Hybrid Connect</span></p>
+					</div>
+					<!-- LTE Icon (Image) -->
+					<img alt="icon" id="lte_icon_img0" class="img" src="../images/bar_signal0.svg"/>
+					<img alt="icon" id="lte_icon_img1" class="img" src="../images/bar_signal1.svg"/>
+					<img alt="icon" id="lte_icon_img2" class="img" src="../images/bar_signal2.svg"/>
+					<img alt="icon" id="lte_icon_img3" class="img" src="../images/bar_signal3.svg"/>
+					<!-- LTE focus (no use?) -->
+				</div>
+
+				<!-- Help -->
+				<div id="help_box" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChangeNologin('basic_-_help.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('help_box').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="help_icon_img" class="img" src="../images/icon_u512.png"/>
+					<!-- Help Title -->
+					<div id="help_title_text" class="tile_body_text_title">
+						<p><span>Help</span></p>
+					</div>
+					<!-- Help Text -->
+					<div id="help_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="help_text" class="text">
+							<p><span>Wizards</span></p>
+							<p><span>FAQs</span></p>
+							<p><span style="display: none;">User guide</span></p>
+						</div>
+					</div>
+				</div>
+				<!-- Hub Lights -->
+				<div id="hub_light_box" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChange('basic_-_hub_light_control.htm');"  onkeydown="if (event.keyCode == 13) document.getElementById('hub_light_box').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="hub_light_icon_img" class="img" src="../images/icon_u524.png"/>
+					<!--Hub Lights Title -->
+					<div id="light_tit_one_text" class="tile_body_text_title" style="line-height:18px;">
+						<p><span>Hub</span><span>&nbsp;</span><span>light</span></p>
+						<p><span>control</span></p>
+					</div>
+					<!--light Text -->
+					<div id="light_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="light_text" class="text">
+							<p><span>Status: </span><span id="light_status" class="tile_body_text"></span></p>
+							<p><span>Brightness: </span><span id="light_brightness" class="tile_body_text">100%</span></p>
+							<p><span>Schedule: </span><span id="light_schedule" class="tile_body_text">Off</span></p>
+						</div>
+					</div>
+				</div>
+				<!--broadband performance Speed -->
+				<div id="speed_box" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Speed" onclick="pageChangeNologin('basic_-_broadband_performance_test.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('speed_box').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="speed_icon_img" class="img" src="../images/icon_u622.png"/>
+					<!--Speed Title (Shape) -->
+					<div id="speed_ti_one_text" class="tile_body_text_title" style="line-height:18px;">
+						<p><span>Broadband</span></p>
+						<p><span>performance test</span></p>
+					</div>
+				</div>
+
+				<!--Smart Setup -->
+				<div id="setup" style="cursor: pointer;display: none;" class="ax_dynamic_panel backgroundClass" onclick="pageChange('smart_setup.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('setup').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="setup_icon_img" class="img" src="../images/icon_u550.png"/>
+					<!-- Title (Shape) -->
+					<div id="speed_title_box_text" class="tile_body_text_title">
+						<p><span>Smart Setup</span></p>
+					</div>
+				</div>
+				<!-- Restart (Dynamic Panel) -->
+				<div id="restart" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChange('restart.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('restart').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="restart_icon_img" class="img" src="../images/icon_u562.png"/>
+					<!-- Title (Shape) -->
+					<div id="restart_ti_one_text" class="tile_body_text_title" style="line-height:18px;">
+						<p>
+							<span>Restart the</span><br><span>Hub</span>
+						</p>
+					</div>
+				</div>
+				<!-- Go to Advanced (Dynamic Panel) -->
+				<div id="gotoA" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Go to Advanced" onclick="return slide();" onkeydown="if (event.keyCode == 13) document.getElementById('gotoA').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="gotoA_icon_img" class="img" src="../images/icon_u576.png"/>
+					<!-- Title (Shape) -->
+					<div id="gotoA_title_text" class="tile_body_text_title">
+						<p><span>Advanced settings</span></p>
+					</div>
+				</div>
+			</div>
+			<!-- main_box_second -->
+			<div id="main_box_second" class="panel_state" data-label="advanced">
+				<!-- Adv Broadband -->
+				<div id="advBroadband" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChange('broadband.htm');" style="cursor: pointer" onkeydown="if (event.keyCode == 13) document.getElementById('advBroadband').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="advBroadband_icon_img" class="img" src="../images/icon_u584.png"/>
+					<!-- Title -->
+					<div id="advBroadband_title_text" class="tile_body_text_title">
+						<p><span>Broadband</span></p>
+					</div>
+					<!-- Text -->
+					<div id="advBroadband_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="advBroadband_text" class="text">
+							<p><span>Internet</span></p>
+							<p><span>VPN</span></p>
+							<p><span>Dynamic DNS</span></p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Adv WiFi -->
+				<div id="advWifi" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Adv WiFi" onclick="pageChange('wifi.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('advWifi').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="advWifi_icon_img" class="img" src="../images/icon_u490.png"/>
+					<!-- Title -->
+					<div id="advWifi_title_text" class="tile_body_text_title">
+						<p><span>Wireless</span></p>
+					</div>
+					<!-- Text (Shape) -->
+					<div id="advWifi_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="advWifi_text" class="text">
+							<div id="advanced2gchannel">
+								<p>
+									<span>2.4 GHz channel:</span>
+									<br>
+									<span id="AWifi2.4G_channel" class="tile_body_text"></span>
+								</p>
+							</div>
+							<div id="advanced5gchannel" style="margin-top: 5px;">
+								<p>
+									<span>5 GHz channel:</span>
+									<br>
+									<span id="AWifi5G_channel" class="tile_body_text"></span>
+								</p>
+							</div>
+							<div id="advancedSecurity" style="margin-top: 5px;">
+								<p>
+									<span>Security: </span>
+									<span id="AWifi_securityType" class="tile_body_text"></span>
+								</p>
+							</div>
+						</div>
+						<div id="advWifi_text2" class="text">
+							<p>
+								<span id="advancedwifiStatus">
+									2.4 GHz status: <span class='tile_body_text'>Off</span>
+									<br><br>
+									5 GHz status: <span class='tile_body_text'>Off</span>
+								</span>
+							</p>
+						</div>
+						<div id="advWifi_text3" class="text">
+							<p>
+								<span>Status: </span>
+								<span class='tile_body_text'>Wireless disabled</span>
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Adv Firewall -->
+				<div id="advFirewall" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Adv Firewall" onclick="pageChange('firewall.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('advFirewall').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="advFirewall_icon_img" class="img" src="../images/icon_u608.png"/>
+					<!-- Title (Shape) -->
+					<div id="advFirewall_title_text" class="tile_body_text_title">
+						<p><span>Firewall</span></p>
+					</div>
+					<!-- Text (Shape) -->
+					<div id="advFirewall_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="advFirewall_text" class="text">
+							<p><span>Mode:</span></p>
+							<p><span id="firewall_level" class="tile_body_text"></span></p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Adv Devices -->
+				<div id="advDevice" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Adv Devices" onclick="pageChange('my_network.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('advDevice').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="advDevice_icon_img" class="img" src="../images/icon_u500.png"/>
+					<!-- Title (Shape) -->
+					<div id="advDevice_title_text" class="tile_body_text_title">
+						<p><span>My network</span></p>
+					</div>
+					<!-- Text (Shape) -->
+					<div id="advDevice_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="advDevice_text" class="text">
+							<p><span>Devices</span></p>
+							<p><span>IPv4 configuration</span></p>
+							<p><span>Address table</span></p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Adv Helpdesk (Dynamic Panel) -->
+				<div id="advHelpdesk" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChange('helpdesk.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('advHelpdesk').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="advHelpdesk_icon_img" class="img" src="../images/icon_u722.png"/>
+					<!-- Title (Shape) -->
+					<div id="advHelpdesk_title_text" class="tile_body_text_title">
+						<p><span>Technical log</span></p>
+					</div>
+				</div>
+				<!-- Back to Home (Dynamic Panel) -->
+				<div id="b2home" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Back to Home" onclick="return slide_home();" onkeydown="if (event.keyCode == 13) document.getElementById('b2home').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="b2home_icon_img" class="img" src="../images/icon_u642.png"/>
+					<!-- Title (Shape) -->
+					<div id="b2home_title_text" class="tile_body_text_title">
+						<p><span>Back to</span><span>&nbsp;</span></p><p><span>home page</span></p>
+					</div>
+				</div>
+
+				<!-- Adv Access Control (Dynamic Panel) -->
+				<div id="advAC" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" data-label="Adv Access Control" onclick="pageChange('bt_access_control.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('advAC').click()">
+					<!-- Title (Shape) -->
+					<div id="advAC_title_text" class="tile_body_text_title">
+						<p><span>Access control</span></p>
+					</div>
+					<!-- Icon (Image) -->
+					<img alt="icon" id="advAC_icon_img" class="img" src="../images/icon_u654.png"/>
+					<!-- Text (Shape) -->
+					<div id="advAC_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="advAC_text" class="text">
+							<p><span>Default group blocked: </span><span id="ACL_en" class="tile_body_text"></span></p>
+							<p><span>Internet paused: </span><span id="pause" class="tile_body_text"></span></p>
+							<p><span>Active groups: </span><span id="groups" class="tile_body_text"></span></p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Adv IPv6 (Dynamic Panel) -->
+				<div id="advIPv6" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChange('IPv6.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('advIPv6').click()">	
+					<!-- Title (Shape) -->
+					<div id="advIPv6_title_text" class="tile_body_text_title">
+						<p><span>IPv6</span></p>
+					</div>
+					<!-- Icon (Image) -->
+					<img alt="icon" id="advIPv6_icon_img" class="img" src="../images/icon_u764.png"/>
+					<!-- Text (Shape) -->
+					<div id="advIPv6_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="advIPv6_text" class="text">
+							<p><span>Status</span></p>
+							<p><span>Configuration</span></p>
+							<p><span>Pinholes</span></p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Adv System (Dynamic Panel) -->
+				<div id="advSystem" style="cursor: pointer;" class="ax_dynamic_panel backgroundClass" onclick="pageChange('system.htm');" onkeydown="if (event.keyCode == 13) document.getElementById('advSystem').click()">
+					<!-- Icon (Image) -->
+					<img alt="icon" id="advSystem_icon_img" class="img" src="../images/icon_u676.png"/>
+					<!-- Title (Shape) -->
+					<div id="advSystem_title_text" class="tile_body_text_title">
+						<p><span>System</span></p>
+					</div>
+					<!-- Text (Shape) -->
+					<div id="advSystem_text_box" class="ax_paragraph tile_body_text_bold" data-label="Text">
+						<div id="advSystem_text" class="text">
+							<!-- <p><span>Date / Time</span></p> -->
+							<p><span>Admin password</span></p>
+							<p><span>Back up / Restore</span></p>
+							<p><span>Factory reset</span></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Admin Login -->
+		<div id="Admin_Login" class="ax_dynamic_panel" data-label="Admin Login">
+		</div><!-- end Admin Login -->
+
+		<div id="login_light_box">
+		</div>
+	</main>
+
+	<!-- moblie version -->
+	<div id="mobile" style="display:none;" class="mobile_width">
+		<!--top white background-->
+		<div class="mobile_width" style="position:fixed; top:0px; height:80px; background: #ffffff; z-index:1001;" >
+		</div>
+		<!--top bar-->
+		<div id="m_toppest_banner" class="mobile_width" style="position:fixed; height:40px ;z-index:1006;">
+		</div>
+
+		<div id="m_main_first" class="mobile_width" style="position:absolute; top:42px; height:930px;">
+			<div id="m_menubar" class="mobile_width m_breadcrumb_background" style="position:fixed; top:42px; height:40px; z-index:1005;">
+				<a href="home.htm">
+					<p>
+						<span class="m_breadcrumb_text" style="position:absolute; top:12px; left:10px;">Home</span>
+					</p>
+				</a>
+			</div>
+			<!-- basic status moblie-->
+			<div id="m_basicStatus" class="mobile_Swidth backgroundClass" onclick="pageChangeNologin('m_basic_-_status.htm');" style="position:absolute; top:50px; left:10px; height:80px;">
+				<img alt="icon" class="mobile_tile_icon" id="moblie_statusImg" src="../images/icon_u480.png"/>
+				<img alt="icon" class="mobile_tile_icon" id="moblie_statusImg2" src="../images/home_status_disable.png"/>
+				<p><span id="moblie_statusTi" class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">Status</span></p>
+				<div id="moblie_status" class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p>Broadband status:
+						<span id="m_status_connectionStatus" class="m_regularFont"></span>
+					</p>
+				</div>
+			</div>
+			<!-- basic phone moblie-->
+			<div id="m_phone_box" class="mobile_Swidth backgroundClass" onclick="pageChangeNologin('m_basic_-_phone.htm');" style="position:absolute; top:140px; left:10px; height:50px; display: none;">
+				<img alt="icon" class="mobile_tile_icon" style="top: 12px;" src="../images/icon_u602.png"/>
+				<p id="m_phoneLine1" style="position: absolute; top:6px; left:45px; color:#ffffff;"><span class="m_titleFont mobile_font_size2" >Phone: <span id="m_line1_number" ></span></span></p>
+				<p id="m_phoneLine2" style="position: absolute; top:25px; left:45px; color:#ffffff;"><span class="m_titleFont mobile_font_size2">Phone: <span id="m_line2_number" ></span></span></p>
+				<p id="m_phoneLine" style="position:absolute; top:15px; left:45px; color:#ffffff;"><span class="m_titleFont mobile_font_size2">Not configured</span></p>
+			</div>
+			<!--basic wifi moblie -->
+			<div id="m_basicWifi" class="mobile_Swidth backgroundClass" onclick="pageChangeNologin('m_basic_-_wifi.htm');" style="position:absolute; top:200px; left:10px; height:150px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u490.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">Wireless</span></p>
+				<div id="m_basicWifiText" class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<div>
+						<span>2.4 GHz status: </span>
+						<span id="m_Wifi2.4G_status" class="m_regularFont"></span>
+					</div>
+					<br>
+					<div>
+						<span>5 GHz status: </span>
+						<span id="m_Wifi5G_status" class="m_regularFont"></span>
+					</div>
+					<br>
+					<div id="m_the2goff">
+						<p>
+							<span>Network name: </span>
+							<br>
+							<span id="m_Wifi2.4G_SSID" class="m_regularFont"></span>
+						</p>
+					</div>
+					<div id="m_the5goff">
+						<p>
+							<span>Network name: </span>
+							<br>
+							<span id="m_Wifi5G_SSID" class="m_regularFont"></span>
+						</p>
+					</div>
+				</div>
+				<div id="m_basicWifiText2" class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<div>
+						<span>Status: </span>
+						<span class="m_regularFont">Wireless disabled</span>
+					</div>
+				</div>
+			</div>
+			<!-- basic device moblie-->
+			<div id="m_basicDevice" class="mobile_Swidth backgroundClass" onclick="pageChangeNologin('m_basic_-_my_devices.htm');" style="position:absolute; top:360px; left:10px; height:150px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u500.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">My devices</span></p>
+				<div class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<div>
+						<span>Ethernet: </span><span id="m_ethernet_devices"></span>
+					</div>
+					<br>
+					<div>
+						<span>Wireless </span>
+						<p style="margin-left: 14px;"><span>2.4 GHz: </span><span id="m_Wifi2.4g_devices"></span></p>
+						<p style="margin-left: 14px;"><span>5 GHz: </span><span id="m_Wifi5g_devices"></span></p>
+					</div>
+					<div style="margin-top: 10px;">
+						<span>USB: </span><span id="m_USB_devices"></span>
+					</div>
+				</div>
+			</div>
+			<!-- basic Hybrid Connect -->
+			<div id="m_basicLTEModem" class="mobile_Swidth backgroundClass" onclick="pageChangeNologin('m_basic_-_mobile_status.htm');" style="position:absolute; top:460px; left:10px; height:50px; display: none;">
+				<img alt="icon" style="position:absolute; top:0px; left:0px; width:50px; height:50px;" id="m_lte_icon_img0" src="../images/bar_signal0.svg" />
+				<img alt="icon" style="position:absolute; top:0px; left:0px; width:50px; height:50px;" id="m_lte_icon_img1" src="../images/bar_signal1.svg" />
+				<img alt="icon" style="position:absolute; top:0px; left:0px; width:50px; height:50px;" id="m_lte_icon_img2" src="../images/bar_signal2.svg" />
+				<img alt="icon" style="position:absolute; top:0px; left:0px; width:50px; height:50px;" id="m_lte_icon_img3" src="../images/bar_signal3.svg" />
+				<p><span id="moblie_statusTi" class="m_tile_body_text_title" style="position:absolute; top:3px; left:55px;">Hybrid Connect</span></p>
+				<div id="moblie_status" class="mobile_width m_tile_body_text" style="position:absolute; left:55px; top:10px;">
+					<p>
+						<br>
+						<span class="m_regularFont">Signal strength: </span><span id="m_lte_signal" class="m_regularFont">Good</span>
+						<span class="m_regularFont" style="margin-left: 5px;">Status: </span><span id="m_lte_status" class="m_regularFont">Ready</span>
+					</p>
+				</div>
+			</div>
+			<!-- help -->
+			<div id="m_help" class="mobile_Swidth backgroundClass" onclick="pageChangeNologin('m_basic_-_help.htm');" style="position:absolute; top:520px; left:10px; height:50px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u512.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">Help</span></p>
+			</div>
+			<!--basci hub light -->
+			<div id="m_hubLight" class="mobile_Swidth backgroundClass" onclick="pageChange('m_basic_-_hub_light_control.htm');" style="position:absolute; top:580px; left:10px; height:100px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u524.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">Hub light control</span></p>
+				<div class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p><span>Status: </span><span id="m_light_status" class="m_regularFont"></span></p>
+					<p><span>Brightness: </span><span id="m_light_brightness" class="m_regularFont">100%</span></p>
+					<p><span>Schedule: </span><span id="m_light_schedule" class="m_regularFont">Off</span></p>
+				</div>
+			</div>
+			<!-- broadband performance test -->
+			<div id="m_broadbandTest" class="mobile_Swidth backgroundClass" onclick="pageChangeNologin('m_basic_-_broadband_performance_test.htm');" style="position:absolute; top:690px; left:10px; height:50px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u622.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:12px; left:45px;">Broadband performance test</span></p>
+			</div>
+			<!-- Smart Setup -->
+			<div id="m_SmartSetup" class="mobile_Swidth backgroundClass" onclick="pageChange('m_smart_setup.htm');" style="position:absolute; top:750px; left:10px; height:50px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u550.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:12px; left:45px;">Smart Setup</span></p>
+			</div>
+			<!-- restart -->
+			<div id="m_restart" class="mobile_Swidth backgroundClass" onclick="pageChange('m_restart.htm');" style="position:absolute; top:870px; left:10px; height:50px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u562.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:12px; left:45px;">Restart the Hub</span></p>
+			</div>
+			<!-- advanced settings -->
+			<div id="m_advanceSetting" class="mobile_Swidth backgroundClass" onclick="m_slide();" style="position:absolute; top:810px; left:10px; height:50px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u576.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:12px; left:45px;">Advanced settings</span></p>
+			</div>
+		</div> <!--end m_main_first-->
+		<div id="m_main_second" class="mobile_width" style="position:absolute; top:42px; height:930px; display:none;">
+			<div id="m_menubar_advan" class="mobile_width breadcrumb_background" style="position:fixed; top:42px;height:40px; z-index:1005;">
+				<a href="home.htm"><img alt="Home" style="position:absolute; top:13px; left:10px; width:17px; height:17px;" src="../images/left_arrow.svg"/></a>
+				<a href="home.htm#advancedPage"><p><span class="m_breadcrumb_text" style="position:absolute; top:10px; left:40px;">Advanced settings</span></p></a>
+			</div>
+			<!-- back to home -->
+			<div id="m_back2home" class="mobile_Swidth backgroundClass" onclick="m_slide2home();" style="position:absolute; top:50px; left:10px; height:60px;">
+				<img alt="icon" class="mobile_tile_icon" style="top: 15px;" src="../images/icon_u642.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:19px; left:45px;">Back to home page</span></p>
+			</div>
+			<!-- broadband -->
+			<div id="m_broadband" class="mobile_Swidth backgroundClass" onclick="pageChange('m_broadband.htm');" style="position:absolute; top:120px; left:10px; height:130px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u584.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">Broadband</span></p>
+				<div class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p><span>Internet </span></p>
+					<p><span>VPN </span></p>
+					<p><span>Dynamic DNS </span></p>
+				</div>
+			</div>
+			<!-- Wifi -->
+			<div id="m_advWifi" class="mobile_Swidth backgroundClass" onclick="pageChange('m_wifi.htm');" style="position:absolute; top:260px; left:10px; height:100px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u490.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">Wireless</span></p>
+				<div id="m_advWifiText" class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p>
+						<div id="m_advanced2gchannel">
+							<span>2.4 GHz channel: </span>
+						</div>
+						<div id="m_advanced5gchannel">
+							<span style="position:absolute; left:140px;top:0px;">5 GHz channel:</span>
+						</div>
+					</p>
+					<br>
+					<span id="m_AWifi2.4G_channel" class="m_regularFont" style="position:absolute; top: 20px;"></span>
+					<span id="m_AWifi5G_channel" class="m_regularFont" style="position:absolute; top: 20px; left:140px;"></span>
+					<br>
+					<p style="position: absolute;top: 40px;">Security: <span id="m_AWifi_securityType" class="m_regularFont"></span></p>
+				</div>
+				<div id="m_advWifiText2" class="mobile_width mobile_font_size3 m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p>
+						<span id="m_advancedwifiStatus">
+							2.4 GHz status: <span class='m_regularFont'>Off</span>
+							<br><br>
+							5 GHz status: <span class='m_regularFont'>Off</span>
+						</span>
+					</p>
+				</div>
+				<div id="m_advWifiText3" class="mobile_width mobile_font_size3 m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p>
+						<span>Status: </span>
+						<span class="m_regularFont">Wireless disabled</span>
+					</p>
+				</div>
+			</div>
+			<!-- mynetwork -->
+			<div id="m_mynetwork" class="mobile_Swidth backgroundClass" onclick="pageChange('m_my_network.htm');" style="position:absolute; top:370px; left:10px; height:100px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u500.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">My network</span></p>
+				<div class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px; ">
+					<p><span>Devices </span></p>
+					<p><span>IPv4 configuration </span></p>
+					<p><span>Address table </span></p>
+				</div>
+			</div>
+			<!-- Access control -->
+			<div id="m_ACL" class="mobile_Swidth backgroundClass" onclick="pageChange('m_bt_access_control.htm');" style="position:absolute; top:480px; left:10px; height:100px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u654.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">Access control</span></p>
+				<div class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p><span>Default group blocked:: </span><span id="m_ACL_en" class="m_regularFont"></span></p>
+					<p><span>Internet paused: </span><span id="m_pause" class="m_regularFont"></span></p>
+					<p><span>Active groups: </span><span id="m_groups" class="m_regularFont"></span></p>
+				</div>
+			</div>
+			<!-- firewall -->
+			<div id="m_firewall" class="mobile_Swidth backgroundClass" onclick="pageChange('m_firewall.htm');" style="position:absolute; top:590px; left:10px; height:80px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u608.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">Firewall</span></p>
+				<div class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p><span>Mode: </span></p>
+					<p><span id="m_firewall_level" class="m_regularFont"></span></p>
+				</div>
+			</div>
+			<!--IPv6-->
+			<div id="m_IPv6" class="mobile_Swidth backgroundClass" onclick="pageChange('m_IPv6.htm');" style="position:absolute; top:680px; left:10px; height:100px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u764.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">IPv6</span></p>
+				<div class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<p><span>Status </span></p>
+					<p><span>Configuration </span></p>
+					<p><span>Pinholes </span></p>
+				</div>
+			</div>
+			<!-- helpdesk -->
+			<div id="m_helpdesk" class="mobile_Swidth backgroundClass" onclick="pageChange('m_helpdesk.htm');" style="position:absolute; top:790px; left:10px; height:60px;">
+				<img alt="icon" class="mobile_tile_icon" style="top: 15px;" src="../images/icon_u722.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:17px; left:45px;">Technical log</span></p>
+			</div> 
+			<!-- system -->
+			<div id="m_system" class="mobile_Swidth backgroundClass" onclick="pageChange('m_system.htm');" style="position:absolute; top:860px; left:10px; height:130px;">
+				<img alt="icon" class="mobile_tile_icon" src="../images/icon_u676.png"/>
+				<p><span class="m_tile_body_text_title" style="position:absolute; top:11px; left:45px;">System</span></p>
+				<div class="mobile_width m_tile_body_text" style="position:absolute; left:10px; top:40px;">
+					<!-- <p><span>Date / Time</span></p> -->
+					<p><span>Admin password</span></p>
+					<p><span>Back up / Restore</span></p>
+					<p><span>Factory reset</span></p>
+				</div>
+			</div>
+		</div> <!--end m_main_second-->
+
+		<!--mobile admin login-->
+		<div id="m_adminLogin" style="position:fixed; top:100px; width:320px; height:324px; z-index:1010; display:none;">
+		</div> <!--end mobile admin login-->
+		<!--mobile admin_help part -->
+		<div id="m_admin_help" style="position:fixed; top: 100px; width:320px; height:360px; background:#ffffff; z-index:1010; display:none;">
+		</div>
+		<div id="m_login_light_box">
+		</div>
+	</div>
+</body>
+</html>
+

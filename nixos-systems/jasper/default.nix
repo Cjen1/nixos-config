@@ -8,6 +8,7 @@
 
     # Services
     ./jellyfin.nix
+    ./grist.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -128,6 +129,9 @@
   # Jellyfin - remainder is configured as in jellyfin.nix
   services.caddy.virtualHosts."jellyfin.jentek.dev".extraConfig = ''
     reverse_proxy 127.0.0.1:8096
+  '';
+  services.caddy.virtualHosts."rsvp.jensenking.dev".extraConfig = ''
+    reverse_proxy 127.0.0.1:10001
   '';
 
   # Logrotate to minimise log issues
