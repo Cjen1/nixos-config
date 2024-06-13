@@ -130,8 +130,22 @@
   services.caddy.virtualHosts."jellyfin.jentek.dev".extraConfig = ''
     reverse_proxy 127.0.0.1:8096
   '';
-  services.caddy.virtualHosts."rsvp.jensenking.dev".extraConfig = ''
+  services.caddy.virtualHosts."rsvp.jensenking.com".extraConfig = ''
+    @cors_preflight {
+      method OPTIONS
+    }
+    respond @cors_preflight 204
+
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods GET,POST,OPTIONS,HEAD,PATCH,PUT,DELETE
+        Access-Control-Allow-Headers User-Agent,Content-Type,X-Api-Key,X-Requested-With
+    }
+    
     reverse_proxy 127.0.0.1:10001
+  '';
+  services.caddy.virtualHosts."jasper.jentek.dev".extraConfig = ''
+    reverse_proxy 127.0.0.1:10002
   '';
 
   # Logrotate to minimise log issues

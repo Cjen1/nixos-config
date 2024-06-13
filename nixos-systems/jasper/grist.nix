@@ -9,6 +9,7 @@
       restart = "unless-stopped";
 
       environment = {
+        GRIST_SESSION_SECRET="1234";
       };
       
       volumes = [
