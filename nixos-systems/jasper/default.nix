@@ -9,6 +9,7 @@
     # Services
     ./jellyfin.nix
     ./grist.nix
+    ./wedding-rsvp
   ];
 
   nixpkgs.config.allowUnfree = true;

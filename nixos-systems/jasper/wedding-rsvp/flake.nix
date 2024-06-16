@@ -10,7 +10,7 @@
   flake-utils.lib.eachDefaultSystem (system:
   let 
     pkgs = nixpkgs.legacyPackages.${system};
-    python = pkgs.python3.withPackages (ps: [ps.flask]);
+    python = pkgs.python3.withPackages (ps: [ps.flask ps.requests]);
   in {
     devShell = pkgs.mkShell {
       buildInputs = [python];
