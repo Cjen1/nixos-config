@@ -7,7 +7,7 @@ web = { 'api': '7a6d1a68ea349ff6d4ecebc93c16c246af9fb9c7',
         'url':  "https://docs.getgrist.com/api/docs/eXNCAMGkjMh5eomzX3SuzR/tables/Rsvp/records",
         }
 local = { 'api': 'a3eb369ea2d33c32ce16c6de3cd3f77a5e13f7d6',
-          'url':  "http://192.168.1.101:8484/api/docs/wEjSZMn7f6Cg/tables/Rsvp/records"}
+          'url':  "http://192.168.1.239:8484/api/docs/wEjSZMn7f6Cg/tables/Rsvp/records"}
 
 app = Flask(__name__)
 
@@ -28,13 +28,13 @@ def site():
             fd.write(f'{str(request.origin)}\n{str(request.form)}\n')
         send_post(request, web).raise_for_status()
         send_post(request, local).raise_for_status()
-        print("OK")
+        print("OK", file=sys.stderr)
         return "OK"
     except requests.exceptions.HTTPError as err:
-        print(err)
+        print(err, file=sys.stderr)
         return "Failed to write rsvp to DBs"
     except OSError as err:
-        print(err)
+        print(err, file=sys.stderr)
         return "Failed to log rsvp"
 
 if __name__ == '__main__':

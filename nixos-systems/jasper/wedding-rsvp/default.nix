@@ -1,17 +1,6 @@
 {pkgs, ...}:
 let
     python = pkgs.python3.withPackages (ps: [ps.flask ps.requests]);
-#    webapp = pkgs.stdenv.mkDerivation {
-#      name = "wedding-rsvp";
-#      src = ./.;
-#      buildInputs = [python];
-#
-#      installPhase = ''
-#        mkdir -p $out/bin
-#        cp ${./webapp.py} $out/bin/webapp.py
-#        chmod +x $out/bin/webapp.py
-#      '';
-#    };
 in{
   systemd.services.wedding_rsvp = {
     description = "Wedding RSVP form";
