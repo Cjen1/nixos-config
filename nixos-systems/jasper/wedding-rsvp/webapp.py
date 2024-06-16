@@ -32,7 +32,10 @@ def site():
         return "OK"
     except requests.exceptions.HTTPError as err:
         print(err)
-        return "Failed to write to DBs"
+        return "Failed to write rsvp to DBs"
+    except OSError as err:
+        print(err)
+        return "Failed to log rsvp"
 
 if __name__ == '__main__':
     log_path = sys.argv[3]
