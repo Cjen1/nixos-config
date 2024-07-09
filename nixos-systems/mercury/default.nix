@@ -12,6 +12,7 @@
     ../../modules/nixos/cambridge.nix
     ../../modules/nixos/persist.nix
     ../../modules/nixos/polkit.nix
+    ../../modules/nixos/cpufreq.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -60,7 +61,7 @@
     (nerdfonts.override { fonts = [ "Hack" ]; })
   ];
 
-  environment.systemPackages = 
+  environment.systemPackages =
     with pkgs; [
     vim 
     networkmanager
@@ -79,7 +80,15 @@
   users.users.cjen1 = {
     shell = pkgs.fish;
     isNormalUser = true;
-    extraGroups = [ "wheel" "audio" "video" "pulse-access" "docker" "adbusers" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ 
+      "wheel" 
+      "audio" 
+      "video" 
+      "pulse-access" 
+      "docker" 
+      "adbusers"
+      "dialout"
+      ]; # Enable ‘sudo’ for the user.
   };
 
   home-manager = 

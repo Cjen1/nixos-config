@@ -14,6 +14,4 @@
     zoom-us
     discord
   ];
-
-  services.dunst.enable = true;
 }

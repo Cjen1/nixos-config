@@ -15,6 +15,7 @@
     htop
     reflex
     jq
+    viddy
   ];
 
   programs.fish = {

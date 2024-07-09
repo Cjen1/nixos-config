@@ -8,10 +8,18 @@
       default_realm = DC.CL.CAM.AC.UK
       '';
   };
-  # Enable CUPS to print documents.
+
+  #services = {
+  #  printing.enable = true;
+  #  avahi.enable = true;
+  #  avahi.nssmdns = true;
+  #  avahi.openFirewall = true;
+  #};
+
   services.printing = {
     enable = true;
+#    browsing = true;
+#    defaultShared = true;
     clientConf = "ServerName cups-serv.cl.cam.ac.uk";
   };
-
 }

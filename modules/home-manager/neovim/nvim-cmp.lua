@@ -115,7 +115,7 @@ lspconfig['texlab'].setup {
             "%l:1:%f",
             "%p"
           },
-          executable = "zathura"
+          executable = "okular"
         }
       }
     }
