@@ -1,12 +1,9 @@
 {pkgs, ...}:{
   environment.systemPackages = [pkgs.krb5];
   # Kerberos for cambridge
-  krb5 = {
-    config = ''
-      [libdefaults]
-      forwardable = true
-      default_realm = DC.CL.CAM.AC.UK
-      '';
+  security.krb5.settings.libdefaults = {
+    forwardable = true;
+    default_realm = "DC.CL.CAM.AC.UK";
   };
 
   #services = {

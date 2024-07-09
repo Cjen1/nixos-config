@@ -3,7 +3,7 @@ let
   set_gov = option: pkgs.makeDesktopItem {
     name = "cpufreq-gov-${option}";
     desktopName = "Set CPU to ${option}";
-    exec = "sudo ${pkgs.cpupower}/bin/cpupower frequency-set -g ${option}";
+    exec = "sudo cpupower frequency-set -g ${option}";
     terminal = true;
   };
 in {

@@ -11,6 +11,7 @@
       nil
       sumneko-lua-language-server
       ltex-ls
+      typst-lsp
     ];
     extraLuaConfig = builtins.readFile ./init.lua;
     plugins = with pkgs.vimPlugins; [
@@ -153,6 +154,8 @@
             vim.keymap.set('n', '<leader>P', function() api.tree.toggle{find_file = true} end, { desc = "Find files" })
         '';
       }
+
+      typst-vim
     ];
   };
 }
