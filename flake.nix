@@ -11,6 +11,8 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     arion.url = "github:hercules-ci/arion";
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+
+    nixpkgs-zotify.url = "github:bwkam/nixpkgs/init-zotify";
   };
 
   outputs = {nixpkgs, home-manager, ... }@inputs: 
@@ -47,7 +49,9 @@
           ./nixos-systems/jasper
 =======
       shale = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;};
+        specialArgs = {inherit inputs;
+                       zotify-dev = inputs.nixpkgs-zotify.legacyPackages.x86_64-linux.zotify;
+                      };
         modules = [
           ./nixos-systems/shale
 >>>>>>> 19ac2e3 (Add shale config)

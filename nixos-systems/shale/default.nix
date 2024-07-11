@@ -1,4 +1,4 @@
-{inputs, pkgs, lib, config, ...}:{
+{inputs, pkgs, lib, config, zotify-dev,...}:{
   imports = [
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
@@ -37,6 +37,7 @@
     with pkgs; [
     vim 
     networkmanager
+    zotify-dev
   ];
 
   security.sudo.wheelNeedsPassword = false;
