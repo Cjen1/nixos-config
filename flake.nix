@@ -40,21 +40,20 @@
           ./nixos-systems/hematite
         ];
       };
-<<<<<<< HEAD
       jasper = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; 
                         unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
                       };
         modules = [
           ./nixos-systems/jasper
-=======
+        ];
+      };
       shale = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs;
                        zotify-dev = inputs.nixpkgs-zotify.legacyPackages.x86_64-linux.zotify;
                       };
         modules = [
           ./nixos-systems/shale
->>>>>>> 19ac2e3 (Add shale config)
         ];
       };
     };
