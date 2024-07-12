@@ -11,8 +11,8 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     arion.url = "github:hercules-ci/arion";
     nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
-
     nixpkgs-zotify.url = "github:bwkam/nixpkgs/init-zotify";
+    agenix.url = "github:ryantm/agenix";
   };
 
   outputs = {nixpkgs, home-manager, ... }@inputs: 
