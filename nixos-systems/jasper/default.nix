@@ -10,13 +10,15 @@
     ./jellyfin.nix
     ./grist.nix
     ./wedding-rsvp
+    ./deluge.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
   nix = {
-    registry = lib.mapAttrs (_: value: {flake = value; }) inputs;
+    registry = lib.mapAttrs (_: value: { flake = value; }) inputs;
 
-    nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}") config.nix.registry;
+    nixPath = lib.mapAttrsToList (key: value: "${key}=${value.to.path}")
+      config.nix.registry;
 
     settings = {
       experimental-features = "nix-command flakes";
@@ -104,7 +106,7 @@
     };
   in {
     extraSpecialArgs = { inherit inputs wayland_display_config unstable; };
-    users = { cjen1 = import ../../home-manager/hematite; };
+    users = { cjen1 = import ../../home-manager/jasper; };
   };
   xdg.portal = {
     enable = true;
@@ -149,6 +151,12 @@
     '';
     "jasper.jentek.dev".extraConfig = ''
       reverse_proxy 127.0.0.1:10002
+    '';
+    "forester.jentek.dev".extraConfig = ''
+      root * /data/forester/output
+      file_server {
+        index index.xml
+      }
     '';
   };
 

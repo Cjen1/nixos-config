@@ -5,6 +5,10 @@
     ./scripts.nix
   ];
 
+  home.sessionVariables = {
+    EDITOR = "vim";
+  };
+
   home.packages = with pkgs; [
     gnumake
     tmux
