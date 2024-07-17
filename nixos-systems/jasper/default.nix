@@ -11,6 +11,7 @@
     ./grist.nix
     ./wedding-rsvp
     ./deluge.nix
+    ./calibre.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
