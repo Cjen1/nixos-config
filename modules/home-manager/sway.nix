@@ -47,5 +47,6 @@
         terminal = true;
       }
     )
+    pkgs.wdisplays
   ];
 }

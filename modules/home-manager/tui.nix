@@ -21,6 +21,7 @@
     jq
     viddy
     krb5
+    fzf
   ];
 
   programs.fish = {
