@@ -66,11 +66,18 @@
           ./home-manager/graphite
         ];
       };
-      "cjen1@binky" = home-manager.lib.homeManagerConfiguration {
+      "cjj39@binky" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         extraSpecialArgs = { inherit inputs;};
         modules = [
           ./home-manager/binky
+        ];
+      };
+      "cjj39@quoth" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = { inherit inputs;};
+        modules = [
+          ./home-manager/quoth
         ];
       };
       "cjen1@shale" = home-manager.lib.homeManagerConfiguration {

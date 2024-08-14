@@ -57,6 +57,8 @@
 
       vim-fugitive
 
+      vim-surround
+
       {
         plugin = lualine-nvim;
         type = "lua";
