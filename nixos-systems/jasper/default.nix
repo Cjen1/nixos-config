@@ -77,6 +77,7 @@
     docker-client
     htop
     inputs.agenix.packages.${system}.default
+    beets
   ];
 
   virtualisation.docker.enable = true;
