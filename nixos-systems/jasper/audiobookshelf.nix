@@ -10,6 +10,7 @@
 
       environment.PUID=1003;
       environment.PGID=1003;
+      user = "1003:1003";
 
       volumes = [
         "/data/media/audiobookshelf/books:/audiobooks"
