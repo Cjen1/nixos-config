@@ -6,7 +6,7 @@
   ];
   services.jellyfin = {
     enable = true;
-    user = "cjen1";
+    user = "dockeruser";
     cacheDir = "/data/jellyfin/cache";
     configDir = "/data/jellyfin/config";
     dataDir = "/data/jellyfin/data";

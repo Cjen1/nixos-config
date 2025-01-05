@@ -10,8 +10,10 @@
     ./jellyfin.nix
     ./grist.nix
     ./wedding-rsvp
-    ./deluge.nix
+    #./deluge.nix
     ./calibre.nix
+    #./radarr/docker-compose.nix
+    ./audiobookshelf.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -44,9 +46,8 @@
 
   networking.networkmanager.enable = true;
 
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport = true;
     extraPackages = with pkgs; [
       intel-media-driver
       vaapiIntel
@@ -57,7 +58,6 @@
 
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-cjk
     noto-fonts-emoji
     liberation_ttf
     fira-code
@@ -65,7 +65,7 @@
     dina-font
     proggyfonts
     libertine
-    (nerdfonts.override { fonts = [ "Hack" ]; })
+    nerd-fonts.hack
   ];
 
   environment.systemPackages = with pkgs; [

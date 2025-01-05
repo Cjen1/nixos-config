@@ -8,8 +8,8 @@
       image = "lscr.io/linuxserver/calibre:latest";
       restart = "unless-stopped";
 
-      environment.PUID=1000;
-      environment.PGID=100;
+      environment.PUID=1003;
+      environment.PGID=1003;
 
       volumes = [
         "/data/calibre/calibre-config:/config"
@@ -26,8 +26,8 @@
       image = "lscr.io/linuxserver/calibre-web:latest";
       restart = "unless-stopped";
 
-      environment.PUID=1000;
-      environment.PGID=100;
+      environment.PUID=1003;
+      environment.PGID=1003;
 
       environment.DOCKER_MODS="linuxserver/mods:universal-calibre";
 
