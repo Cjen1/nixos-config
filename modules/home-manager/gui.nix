@@ -5,7 +5,7 @@
 
   home.packages = with pkgs; [
     firefox
-    okular
+    kdePackages.okular
     vlc
     drawio
     unstable.signal-desktop

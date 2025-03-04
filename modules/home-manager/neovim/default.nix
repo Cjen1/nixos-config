@@ -11,7 +11,6 @@
       nil
       sumneko-lua-language-server
       ltex-ls
-      typst-lsp
     ];
     extraLuaConfig = builtins.readFile ./init.lua;
     plugins = with pkgs.vimPlugins; [
