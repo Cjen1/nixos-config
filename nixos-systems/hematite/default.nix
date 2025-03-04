@@ -1,4 +1,4 @@
-{inputs, pkgs, lib, config, ...}:{
+{inputs, pkgs, lib, config, unstable, ...}:{
   imports = [
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
@@ -96,7 +96,7 @@
   };
   in
   {
-    extraSpecialArgs = {inherit inputs wayland_display_config; };
+    extraSpecialArgs = {inherit inputs wayland_display_config unstable; };
     users = {
       cjen1 = import ../../home-manager/hematite;
     };
@@ -118,6 +118,7 @@
   };
   users.users."cjen1".openssh.authorizedKeys.keys = [
   "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEPav2s9tR5yIY6eeaGlag9YAC0HFoj/Lc0iNq2MvcIhvEC81fPHXg1Ie/s2ZykHofGo0EeN92kn3Rl3cflO9n9G5mLxZMX4ABFARO6rk2JZbLjPI1BFZ4CiayFMUaPkT6Ogx2ByWUQkY5WaTJsJHYV/d97ZTzQ0JDSKhcpgLqbiiioJ4I6N1gIMy4cIx84e3FSy/eW78FoBlEMoLVCyNcTaN7HGRT00AuENUTepTnzNcGXFJs34kKm9d3IqAT9zM+k8oK92Ec7nQ7PzkNWt1TY6W4jMXmkyH9yvwvPBQr3QXpnWUTumpksq62pJENTGinesKTYZO7aR+UodBrJ8bqnZXBk/9AG9HG4uYARepggidHzlxcXhjfpTFiHtFSD8OnMUAkcN6jy3YjiZTL5FV/84rPiye5iPpIZviOm/7V2Mt2YeOKThJ/rTcjmI6ZOuzlO9WM9QyZ9c9EL2//cho+4LrFWKleYR/todXyUZbh5LztV7dQYNZZUCIXTkEmA8k= cjen1@shale"
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOeHK5WOR8Yyt6bj9cBOmBshsGfulZC0czWufimgALzc cjen1@jasper"
   ];
 
   system.stateVersion = "23.11";
