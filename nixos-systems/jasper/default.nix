@@ -77,7 +77,7 @@
     docker-client
     htop
     inputs.agenix.packages.${system}.default
-    beets
+    #beets
   ];
 
   virtualisation.docker.enable = true;
@@ -159,6 +159,9 @@
       file_server {
         index index.xml
       }
+    '';
+    "ps-todos.jentek.dev".extraConfig = ''
+      reverse_proxy 127.0.0.1:5000
     '';
   };
 
