@@ -11,6 +11,7 @@
       nil
       sumneko-lua-language-server
       ltex-ls
+      tinymist
     ];
     extraLuaConfig = builtins.readFile ./init.lua;
     plugins = with pkgs.vimPlugins; [

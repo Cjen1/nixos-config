@@ -2,7 +2,7 @@
 
   imports = [
     ../../modules/home-manager/tui.nix
-    ../../modules/home-manager/gui.nix
+#    ../../modules/home-manager/gui.nix
   ];
 
   nixpkgs.config = {
