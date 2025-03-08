@@ -22,6 +22,7 @@
     viddy
     krb5
     fzf
+    dig
   ];
 
   programs.fish = {

@@ -48,6 +48,7 @@
     ];
   };
 
+  fonts.enableDefaultPackages = true;
   fonts.packages = with pkgs; [
     noto-fonts
     noto-fonts-cjk
@@ -58,7 +59,10 @@
     dina-font
     proggyfonts
     libertine
-    (nerdfonts.override { fonts = [ "Hack" ]; })
+    #(nerdfonts.override { fonts = [ "Hack" "Helvetica" "Arial" ]; })
+    nerdfonts
+
+    pkgs.cm_unicode
   ];
 
   environment.systemPackages =
