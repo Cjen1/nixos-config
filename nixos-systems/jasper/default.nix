@@ -14,6 +14,7 @@
     ./calibre.nix
     #./radarr/docker-compose.nix
     ./audiobookshelf.nix
+    ./immich.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
