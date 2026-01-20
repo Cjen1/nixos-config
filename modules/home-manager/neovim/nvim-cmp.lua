@@ -27,18 +27,18 @@ local capabilities = vim.tbl_deep_extend("force",
 )
 capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
 
-local lspconfig = require('lspconfig')
-
--- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'nil_ls', 'gopls', 'marksman', 'ocamllsp', 'typst_lsp' }
+-- Enable language servers with the new vim.lsp.config API
+local servers = { 'clangd', 'rust_analyzer', 'pyright', 'ts_ls', 'nil_ls', 'gopls', 'marksman', 'ocamllsp', 'tinymist' }
 for _, lsp in ipairs(servers) do
-  lspconfig[lsp].setup {
+  vim.lsp.config(lsp, {
     on_attach = on_attach,
     capabilities = capabilities,
-  }
+  })
+  vim.lsp.enable(lsp)
 end
 
-lspconfig['lua_ls'].setup {
+-- lua_ls with specific settings
+vim.lsp.config('lua_ls', {
   on_attach = on_attach,
   capabilities = capabilities,
   settings = {
@@ -62,9 +62,11 @@ lspconfig['lua_ls'].setup {
       },
     },
   },
-}
+})
+vim.lsp.enable('lua_ls')
 
-lspconfig['ltex'].setup {
+-- ltex with specific settings
+vim.lsp.config('ltex', {
   on_attach = on_attach,
   capabilities = capabilities,
   cmd = { "ltex-ls" },
@@ -88,44 +90,47 @@ lspconfig['ltex'].setup {
       },
     },
   },
-}
+})
+vim.lsp.enable('ltex')
 
-lspconfig['texlab'].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    settings = {
-      texlab = {
-        build = {
-          onSave = true,
-          args = {
-            "-xelatex",
-            "-verbose",
-            "-file-line-error",
-            "-synctex=1",
-            "-interaction=nonstopmode",
-            "%f"
-          },
-          executable = "latexmk",
-          forwardSearchAfter = true
+-- texlab with specific settings
+vim.lsp.config('texlab', {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  settings = {
+    texlab = {
+      build = {
+        onSave = true,
+        args = {
+          "-xelatex",
+          "-verbose",
+          "-file-line-error",
+          "-synctex=1",
+          "-interaction=nonstopmode",
+          "%f"
         },
-        chktex = {onOpenAndSave = true},
-        forwardSearch = {
-          args = {
-            "--synctex-forward",
-            "%l:1:%f",
-            "%p"
-          },
-          executable = "okular"
-        }
+        executable = "latexmk",
+        forwardSearchAfter = true
+      },
+      chktex = {onOpenAndSave = true},
+      forwardSearch = {
+        args = {
+          "--synctex-forward",
+          "%l:1:%f",
+          "%p"
+        },
+        executable = "okular"
       }
     }
-}
+  }
+})
+vim.lsp.enable('texlab')
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
 cmp.setup {
   mapping = cmp.mapping.preset.insert({
-    ['<C-u>'] = cmp.mapping.scroll_docs( -4),
+    ['<C-u>'] = cmp.mapping.scroll_docs(-4),
     ['<C-d>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<Tab>'] = cmp.mapping.confirm {

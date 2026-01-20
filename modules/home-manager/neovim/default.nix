@@ -25,14 +25,6 @@
         '';
       }
 
-      {
-        plugin = nvim-lspconfig;
-        type = "lua";
-        config = ''
-          -- setup done in cmp below
-        '';
-      }
-
       cmp-nvim-lsp
       cmp-nvim-lsp-signature-help
       cmp-path
@@ -122,11 +114,12 @@
         plugin = nvim-treesitter.withAllGrammars;
         type = "lua";
         config = ''
-          require'nvim-treesitter.configs'.setup {
-            highlight = {
-              enable = true,
-            },
-          }
+          -- Enable treesitter highlighting
+          vim.api.nvim_create_autocmd("FileType", {
+            callback = function()
+              pcall(vim.treesitter.start)
+            end,
+          })
           vim.opt.foldmethod = "expr"
           vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
           vim.opt.foldenable = false
