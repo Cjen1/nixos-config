@@ -23,7 +23,7 @@
       ];
     };
     services."calibre-web".service = {
-      image = "lscr.io/linuxserver/calibre-web:latest";
+      image = "lscr.io/linuxserver/calibre-web:0.6.25";
       restart = "unless-stopped";
 
       environment.PUID=1003;
@@ -42,6 +42,8 @@
     };
   };
   services.caddy.virtualHosts."calibre-web.jentek.dev".extraConfig = ''
-    reverse_proxy 127.0.0.1:8083
+    reverse_proxy 127.0.0.1:8083 {
+            header_up X-Scheme {http.request.scheme}
+    }
   '';
 }

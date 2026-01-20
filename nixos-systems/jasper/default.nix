@@ -33,7 +33,7 @@
 
   # ZFS
   boot.supportedFilesystems = [ "zfs" ];
-  boot.kernelPackages = pkgs.zfs.latestCompatibleLinuxPackages;
+  #boot.kernelPackages = pkgs.zfs.linuxPackages;
   services.zfs.autoScrub.enable = true;
   boot.zfs.extraPools = [ "tank" ];
 
@@ -50,15 +50,15 @@
     enable = true;
     extraPackages = with pkgs; [
       intel-media-driver
-      vaapiIntel
-      vaapiVdpau
+      intel-vaapi-driver
+      libva-vdpau-driver
       libvdpau-va-gl
     ];
   };
 
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-emoji
+    noto-fonts-color-emoji
     liberation_ttf
     fira-code
     fira-code-symbols
@@ -77,7 +77,7 @@
     docker-client
     htop
     inputs.agenix.packages.${system}.default
-    #beets
+    beets
   ];
 
   virtualisation.docker.enable = true;
@@ -130,7 +130,7 @@
     dataDir = "/data/caddy/data";
     logDir = "/data/caddy/log";
   };
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 8096 ];
 
   # Jellyfin - remainder is configured as in jellyfin.nix
   services.caddy.virtualHosts = {

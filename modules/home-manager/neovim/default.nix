@@ -9,7 +9,7 @@
       marksman
       alejandra
       nil
-      sumneko-lua-language-server
+      lua-language-server
       ltex-ls
       tinymist
     ];
