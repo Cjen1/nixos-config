@@ -23,6 +23,7 @@
     krb5
     fzf
     dig
+    claude-code
   ];
 
   programs.fish = {
