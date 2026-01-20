@@ -76,7 +76,7 @@
     arion
     docker-client
     htop
-    inputs.agenix.packages.${system}.default
+    inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
     beets
   ];
 
