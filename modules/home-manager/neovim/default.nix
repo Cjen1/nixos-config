@@ -10,7 +10,7 @@
       alejandra
       nil
       lua-language-server
-      ltex-ls
+
       tinymist
     ];
     extraLuaConfig = builtins.readFile ./init.lua;

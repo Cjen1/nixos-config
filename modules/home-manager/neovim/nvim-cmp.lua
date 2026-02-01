@@ -65,33 +65,6 @@ vim.lsp.config('lua_ls', {
 })
 vim.lsp.enable('lua_ls')
 
--- ltex with specific settings
-vim.lsp.config('ltex', {
-  on_attach = on_attach,
-  capabilities = capabilities,
-  cmd = { "ltex-ls" },
-  filetypes = { "markdown", "tex", "text" },
-  flags = { debounce_text_changes = 300 },
-  settings = {
-    ltex = {
-      language = "en-GB",
-      dictionary = {
-        ["en-GB"] = {
-          "MultiPaxos", "LogPaxos", "Paxos", "FastPaxos", "FlexiblePaxos", "EPaxos", "automerge",
-          "multipaxos", "paxos",
-          "RDMA", "SMR", "RPC",
-          "OCons"
-        },
-      },
-      disabledRules = {
-        ["en-GB"] = {
-          "OXFORD_SPELLING_Z_NOT_S",
-        },
-      },
-    },
-  },
-})
-vim.lsp.enable('ltex')
 
 -- texlab with specific settings
 vim.lsp.config('texlab', {
