@@ -31,12 +31,10 @@
   time.timeZone = "Europe/London";
 
   networking.hostName = "shale";
-  networking.networkmanager.enable = true;
 
-  environment.systemPackages = 
+  environment.systemPackages =
     with pkgs; [
-    vim 
-    networkmanager
+    vim
     zotify-dev
   ];
 
