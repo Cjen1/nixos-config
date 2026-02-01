@@ -1,5 +1,7 @@
 {pkgs, ...}:{
   environment.systemPackages = [pkgs.krb5];
+
+  programs.ssh.package = pkgs.openssh.override { withKerberos = true; };
   # Kerberos for cambridge
   security.krb5.settings.libdefaults = {
     forwardable = true;
