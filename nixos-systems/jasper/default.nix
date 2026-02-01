@@ -15,6 +15,7 @@
     #./radarr/docker-compose.nix
     ./audiobookshelf.nix
     ./immich.nix
+    ./audiomuse-ai.nix
   ];
 
   nixpkgs.config.allowUnfree = true;

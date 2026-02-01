@@ -4,4 +4,5 @@ let
 in {
   "protonvpn.age".publicKeys = [ home-key jasper-host-key ];
   "protonvpn-netherlands.wireguard.age".publicKeys = [ home-key jasper-host-key ];
+  "audiomuse-jellyfin-token.age".publicKeys = [ home-key jasper-host-key ];
 }
