@@ -39,7 +39,7 @@
         SERVICE_TYPE = "flask";
         MEDIASERVER_TYPE = "jellyfin";
         JELLYFIN_URL = "http://host.docker.internal:8096";
-        JELLYFIN_USER_ID = "cjen1";
+        JELLYFIN_USER_ID = "2f4f189341894a5ea56edb6fe765a9b2";
         POSTGRES_HOST = "audiomuse-postgres";
         POSTGRES_USER = "audiomuse";
         POSTGRES_PASSWORD = "audiomuse";
@@ -53,6 +53,7 @@
       volumes = [
         "/data/audiomuse-ai/temp-audio-flask:/app/temp_audio"
       ];
+      extra_hosts = ["host.docker.internal:host-gateway"];
       ports = ["8000:8000"];
       depends_on = ["audiomuse-redis" "audiomuse-postgres"];
     };
@@ -65,7 +66,7 @@
         SERVICE_TYPE = "worker";
         MEDIASERVER_TYPE = "jellyfin";
         JELLYFIN_URL = "http://host.docker.internal:8096";
-        JELLYFIN_USER_ID = "cjen1";
+        JELLYFIN_USER_ID = "2f4f189341894a5ea56edb6fe765a9b2";
         POSTGRES_HOST = "audiomuse-postgres";
         POSTGRES_USER = "audiomuse";
         POSTGRES_PASSWORD = "audiomuse";
@@ -79,11 +80,8 @@
       volumes = [
         "/data/audiomuse-ai/temp-audio-worker:/app/temp_audio"
       ];
+      extra_hosts = ["host.docker.internal:host-gateway"];
       depends_on = ["audiomuse-redis" "audiomuse-postgres"];
     };
   };
-
-  services.caddy.virtualHosts."audiomuse.jentek.dev".extraConfig = ''
-    reverse_proxy 127.0.0.1:8000
-  '';
 }
