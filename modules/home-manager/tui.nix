@@ -24,6 +24,7 @@
     fzf
     dig
     claude-code
+    opencode
   ];
 
   programs.fish = {
