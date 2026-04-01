@@ -3,6 +3,7 @@
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
     inputs.nixos-wsl.nixosModules.wsl
+    ../../modules/nixos/ssh-kerberos.nix
     #../../modules/nixos/greetd.nix
     #../../modules/nixos/cam-vpn
     #../../modules/nixos/cam-vpn/desktop_items.nix

@@ -2,6 +2,7 @@
   imports = [
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
+    ../../modules/nixos/ssh-kerberos.nix
     ../../modules/nixos/greetd.nix
 #    ../../modules/nixos/qmk.nix
     ../../modules/nixos/audio.nix
