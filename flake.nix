@@ -2,10 +2,10 @@
   description = "nixos config";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
@@ -19,7 +19,10 @@
   {
     nixosConfigurations = {
       graphite = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs;};
+        specialArgs = {
+          inherit inputs;
+          unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+        };
         modules = [
           ./nixos-systems/graphite
         ];
@@ -49,9 +52,11 @@
         ];
       };
       shale = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;
-                       zotify-dev = inputs.nixpkgs-zotify.legacyPackages.x86_64-linux.zotify;
-                      };
+        specialArgs = {
+          inherit inputs;
+          unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+          zotify-dev = inputs.nixpkgs-zotify.legacyPackages.x86_64-linux.zotify;
+        };
         modules = [
           ./nixos-systems/shale
         ];
@@ -61,35 +66,52 @@
     homeConfigurations = {
       "cjen1@graphite" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = { inherit inputs;};
+        extraSpecialArgs = {
+          inherit inputs;
+          unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+          wayland_display_config = { };
+        };
         modules = [
           ./home-manager/graphite
         ];
       };
       "cjj39@binky" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = { inherit inputs;};
+        extraSpecialArgs = {
+          inherit inputs;
+          unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+        };
         modules = [
           ./home-manager/binky
         ];
       };
       "cjj39@quoth" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = { inherit inputs;};
+        extraSpecialArgs = {
+          inherit inputs;
+          unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+        };
         modules = [
           ./home-manager/quoth
         ];
       };
       "cjen1@shale" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = { inherit inputs;};
+        extraSpecialArgs = {
+          inherit inputs;
+          unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+        };
         modules = [
           ./home-manager/shale
         ];
       };
       "cjen1@hematite" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        extraSpecialArgs = { inherit inputs;};
+        extraSpecialArgs = {
+          inherit inputs;
+          unstable = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux;
+          wayland_display_config = { };
+        };
         modules = [
           ./home-manager/hematite
         ];

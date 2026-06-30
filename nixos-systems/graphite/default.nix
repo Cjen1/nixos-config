@@ -1,4 +1,4 @@
-{inputs, pkgs, lib, config, ...}:{
+{inputs, pkgs, lib, config, unstable, ...}:{
   imports = [
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
@@ -33,33 +33,26 @@
   boot.extraModprobeConfig = ''
     options iwlwifi 11n_disable=8
   '';
-  networking.networkmanager.enableStrongSwan = true;
-
-
   services.davfs2.enable = true;
 
   # vaapi crud 
   nixpkgs.config.packageOverrides = pkgs: {
-    vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
+    intel-vaapi-driver = pkgs.intel-vaapi-driver.override { enableHybridCodec = true; };
   };
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport = true;
     extraPackages = with pkgs; [
       intel-media-driver
-      vaapiIntel
-      vaapiVdpau
+      intel-vaapi-driver
+      libva-vdpau-driver
       libvdpau-va-gl
     ];
   };
 
   # Kerberos for cambridge
-  krb5 = {
-    config = ''
-      [libdefaults]
-      forwardable = true
-      default_realm = DC.CL.CAM.AC.UK
-      '';
+  security.krb5.settings.libdefaults = {
+    forwardable = true;
+    default_realm = "DC.CL.CAM.AC.UK";
   };
   # Enable CUPS to print documents.
   services.printing = {
@@ -69,15 +62,15 @@
 
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-cjk
-    noto-fonts-emoji
+    noto-fonts-cjk-sans
+    noto-fonts-color-emoji
     liberation_ttf
     fira-code
     fira-code-symbols
     dina-font
     proggyfonts
     libertine
-    (nerdfonts.override { fonts = [ "Hack" ]; })
+    nerd-fonts.hack
   ];
 
   environment.systemPackages = 
@@ -99,8 +92,10 @@
     isNormalUser = true;
     extraGroups = [ "wheel" "audio" "video" "pulse-access" "docker" "adbusers" ]; # Enable ‘sudo’ for the user.
   };
-  home-manager = {
-    extraSpecialArgs = {inherit inputs; };
+  home-manager = let
+    wayland_display_config = { };
+  in {
+    extraSpecialArgs = { inherit inputs unstable wayland_display_config; };
     users = {
       cjen1 = import ../../home-manager/graphite;
     };

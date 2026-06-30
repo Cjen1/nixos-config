@@ -23,7 +23,7 @@
       ];
     };
     services."calibre-web".service = {
-      image = "lscr.io/linuxserver/calibre-web:0.6.25";
+      image = "lscr.io/linuxserver/calibre-web:0.6.26";
       restart = "unless-stopped";
 
       environment.PUID=1003;

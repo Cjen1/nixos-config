@@ -3,14 +3,10 @@
 
   programs.git = {
     enable = true;
-    ignores = [
-      "*.swp"
-    ];
+    ignores = [ "*.swp" ];
     settings = {
-      user = {
-        email = "cjjensen01@aol.com";
-        name = "cjen1";
-      };
+      user.email = "cjjensen01@aol.com";
+      user.name = "cjen1";
       init.defaultBranch = "main";
       core.editor = "vim";
     };

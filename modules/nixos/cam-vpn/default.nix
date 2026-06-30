@@ -1,6 +1,6 @@
-{pkgs, ...}: 
+{pkgs, ...}:
 {
-  networking.networkmanager.enableStrongSwan = true;
+  networking.networkmanager.plugins = [ pkgs.networkmanager-strongswan ];
   services.strongswan = {
     enable = true;
     # Passwords set up as per https://help.uis.cam.ac.uk/service/network-services/remote-access/uis-vpn/ubuntu1604#password-file

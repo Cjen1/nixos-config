@@ -37,13 +37,12 @@
   #  options iwlwifi 11n_disable=8
   #'';
 
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport = true;
     extraPackages = with pkgs; [
       intel-media-driver
-      vaapiIntel
-      vaapiVdpau
+      intel-vaapi-driver
+      libva-vdpau-driver
       libvdpau-va-gl
     ];
   };
@@ -51,16 +50,15 @@
   fonts.enableDefaultPackages = true;
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-cjk
-    noto-fonts-emoji
+    noto-fonts-cjk-sans
+    noto-fonts-color-emoji
     liberation_ttf
     fira-code
     fira-code-symbols
     dina-font
     proggyfonts
     libertine
-    #(nerdfonts.override { fonts = [ "Hack" "Helvetica" "Arial" ]; })
-    nerdfonts
+    nerd-fonts.hack
 
     pkgs.cm_unicode
   ];
