@@ -6,6 +6,8 @@
   home.file.".config/niri/config.kdl".text = ''
     include "${pkgs.niri.doc}/share/doc/niri/default-config.kdl"
 
+    prefer-no-csd
+
     input {
         focus-follows-mouse max-scroll-amount="0%"
     }

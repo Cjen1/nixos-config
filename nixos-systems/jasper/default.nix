@@ -2,7 +2,6 @@
   imports = [
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.home-manager
-    ../../modules/nixos/greetd.nix
     ../../modules/nixos/audio.nix
     ../../modules/nixos/polkit.nix
 
@@ -86,7 +85,6 @@
 
   security.sudo.wheelNeedsPassword = false;
   programs.fish.enable = true;
-  programs.light.enable = true;
   users.users.cjen1 = {
     shell = pkgs.fish;
     isNormalUser = true;
