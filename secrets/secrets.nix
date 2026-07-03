@@ -5,4 +5,6 @@ in {
   "protonvpn.age".publicKeys = [ home-key jasper-host-key ];
   "protonvpn-netherlands.wireguard.age".publicKeys = [ home-key jasper-host-key ];
   "audiomuse-jellyfin-token.age".publicKeys = [ home-key jasper-host-key ];
+  "dex-password-hash.age".publicKeys = [ home-key jasper-host-key ];
+  "dex-tailscale-client-secret.age".publicKeys = [ home-key jasper-host-key ];
 }

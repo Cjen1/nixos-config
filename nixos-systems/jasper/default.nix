@@ -15,6 +15,7 @@
     ./audiobookshelf.nix
     ./immich.nix
     ./audiomuse-ai.nix
+    ./dex.nix
   ];
 
   nixpkgs.config.allowUnfree = true;

@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OIDC support plan for jasper.jentek.dev</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #5c6670;
+      --line: #d9dee5;
+      --accent: #0b6bcb;
+      --accent-bg: #e8f2ff;
+      --warn: #8a5b00;
+      --warn-bg: #fff6db;
+      --ok: #126b45;
+      --ok-bg: #e8f7ef;
+      --code: #f1f3f6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #101317;
+        --panel: #171b21;
+        --text: #e7ebef;
+        --muted: #a6b0ba;
+        --line: #303742;
+        --accent: #78b7ff;
+        --accent-bg: #10243a;
+        --warn: #ffd072;
+        --warn-bg: #332706;
+        --ok: #7bd9ab;
+        --ok-bg: #0f2b20;
+        --code: #20262e;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 36px 20px 64px;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+    h1, h2, h3 { line-height: 1.15; margin: 0; }
+    h1 { font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: 0; }
+    h2 { font-size: 1.45rem; margin-top: 34px; }
+    h3 { font-size: 1.08rem; margin-top: 22px; }
+    p { margin: 10px 0; }
+    a { color: var(--accent); }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+    code { background: var(--code); padding: 0.12rem 0.28rem; border-radius: 4px; }
+    pre {
+      background: var(--code);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow-x: auto;
+      padding: 14px;
+      white-space: pre;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 22px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      display: table;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: color-mix(in srgb, var(--panel), var(--code) 70%);
+      font-weight: 650;
+    }
+    tr:last-child td { border-bottom: 0; }
+    ul, ol { padding-left: 22px; }
+    li { margin: 6px 0; }
+    .lede { color: var(--muted); font-size: 1.05rem; max-width: 860px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .pill {
+      display: inline-block;
+      padding: 0.16rem 0.48rem;
+      border-radius: 999px;
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-weight: 650;
+      font-size: 0.82rem;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: var(--accent-bg);
+      padding: 12px 14px;
+      border-radius: 6px;
+      margin: 14px 0;
+    }
+    .warning {
+      border-left: 4px solid var(--warn);
+      background: var(--warn-bg);
+      padding: 12px 14px;
+      border-radius: 6px;
+      margin: 14px 0;
+    }
+    .ok {
+      border-left: 4px solid var(--ok);
+      background: var(--ok-bg);
+      padding: 12px 14px;
+      border-radius: 6px;
+      margin: 14px 0;
+    }
+    .muted { color: var(--muted); }
+    .small { font-size: 0.9rem; }
+    @media (max-width: 760px) {
+      table { display: block; overflow-x: auto; }
+      main { padding-top: 24px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="pill">Grounded in nixos-config, Jasper host</p>
+    <h1>Adding OIDC support to jasper.jentek.dev</h1>
+    <p class="lede">
+      This report is based on the current repository state for <code>nixos-systems/jasper</code>.
+      It assumes the identity provider would be exposed as <code>oidc.jentek.dev</code>. The main target is Tailscale custom OIDC authentication, using <code>cjen1@jentek.dev</code> as the login identity.
+    </p>
+    <p class="small muted">Generated 2026-07-03. External project details were checked against current upstream documentation where practical.</p>
+  </header>
+
+  <section>
+    <h2>Executive recommendation</h2>
+    <div class="ok">
+      <strong>Recommended path:</strong> run <strong>Dex</strong> as a NixOS-native service on Jasper, expose it behind Caddy at <code>oidc.jentek.dev</code>, and register a single Tailscale OIDC client with callback URL <code>https://login.tailscale.com/a/oauth_response</code>.
+    </div>
+    <p>
+      Dex aligns well with this goal because Tailscale only needs a standards-compliant OIDC provider, not a full app portal, reverse-proxy auth gateway, SCIM suite, or policy UI. The local NixOS channel already includes <code>services.dex</code>, and Tailscale's current custom OIDC docs list Dex as needing no extra provider-specific configuration.
+    </p>
+    <p>
+      The main operational requirement is not Dex itself; it is stable issuer discovery. Tailscale requires WebFinger at the email domain and the issuer in WebFinger must exactly match Dex's <code>/.well-known/openid-configuration</code> issuer. Serving <code>jentek.dev</code> from Cloudflare is the missing piece that makes this work.
+    </p>
+  </section>
+
+  <section>
+    <h2>Current Jasper facts</h2>
+    <table>
+      <thead>
+        <tr><th>Area</th><th>Observed config</th><th>Implication for OIDC</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Host identity</td>
+          <td><code>networking.hostName = "jasper"</code>; public host mentioned by you is <code>jasper.jentek.dev</code>.</td>
+          <td>Dex issuer should be a stable HTTPS origin, e.g. <code>https://oidc.jentek.dev</code>. For Tailscale, the WebFinger domain has to be the email domain, so <code>jentek.dev</code> needs to serve the lookup.</td>
+        </tr>
+        <tr>
+          <td>Reverse proxy</td>
+          <td><code>services.caddy.enable = true</code>; Caddy data/logs live under <code>/data/caddy</code>.</td>
+          <td>Caddy can expose the IdP and enforce auth checks in front of selected upstreams.</td>
+        </tr>
+        <tr>
+          <td>Existing virtual hosts</td>
+          <td><code>jellyfin</code>, <code>rsvp</code>, <code>jasper</code>, <code>forester</code>, <code>todos</code>, plus service modules for Immich, Calibre Web, Audiobookshelf.</td>
+          <td>Each app can be migrated independently; do not put a blanket auth wall in front of media or API services without checking client behavior.</td>
+        </tr>
+        <tr>
+          <td>Service deployment pattern</td>
+          <td>Docker is enabled; most non-NixOS services use <code>virtualisation.arion.projects</code>.</td>
+          <td>Dex can be deployed more simply as <code>services.dex</code> instead of another Arion stack. Kanidm, Authelia, and Keycloak also have local NixOS modules.</td>
+        </tr>
+        <tr>
+          <td>Secrets</td>
+          <td>Agenix is already present and used for at least one app secret.</td>
+          <td>OIDC client secrets, database passwords, and signing keys should be age-encrypted instead of literal Nix strings.</td>
+        </tr>
+        <tr>
+          <td>Auth module state</td>
+          <td><code>nixos-systems/jasper/authentik.nix</code> exists but is not imported by <code>default.nix</code> and has an empty image. No Dex module exists yet.</td>
+          <td>For Dex, add a new <code>dex.nix</code> module and import it from Jasper's <code>default.nix</code>. The Authentik stub can stay unused.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Target architecture</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Identity provider</h3>
+        <p>Runs on Jasper as <code>services.dex</code>. Public issuer URL: <code>https://oidc.jentek.dev</code>.</p>
+      </div>
+      <div class="card">
+        <h3>Caddy</h3>
+        <p>Terminates HTTPS, proxies Dex, and serves the WebFinger JSON needed by Tailscale at the email domain.</p>
+      </div>
+      <div class="card">
+        <h3>Tailscale</h3>
+        <p>Configured as one Dex static client using scopes <code>openid profile email</code> and callback <code>https://login.tailscale.com/a/oauth_response</code>.</p>
+      </div>
+    </div>
+    <p>
+      Treat Dex as the root authentication path for your tailnet. Once Tailscale depends on it, the issuer hostname, WebFinger endpoint, Dex storage, signing keys, and admin recovery path become critical infrastructure.
+    </p>
+  </section>
+
+  <section>
+    <h2>Tool options and tradeoffs</h2>
+    <table>
+      <thead>
+        <tr><th>Tool</th><th>Fit for this server</th><th>Strengths</th><th>Costs and risks</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Dex</strong></td>
+          <td>Best fit for Tailscale custom OIDC on this server.</td>
+          <td>NixOS module exists as <code>services.dex</code>. Small OIDC provider, declarative static clients, good for brokering login to a local password DB or an upstream connector. Tailscale's custom OIDC docs list Dex with no extra provider-specific configuration.</td>
+          <td>Minimal UI and limited user lifecycle management. It is not an app portal or reverse-proxy auth gateway. You must provide WebFinger, durable storage, secrets, and a recovery path yourself.</td>
+        </tr>
+        <tr>
+          <td><strong>Kanidm</strong></td>
+          <td>Strong NixOS-native alternative if you later want identity management, not just Tailscale login.</td>
+          <td>Packaged as <code>services.kanidm</code>; supports OIDC/OAuth2 client integrations; can also integrate with PAM/NSS later.</td>
+          <td>Less broad app-proxy ecosystem than Authentik. Some setup is CLI-driven. Reverse-proxy auth for non-OIDC apps needs an additional component such as oauth2-proxy or app-native OIDC.</td>
+        </tr>
+        <tr>
+          <td><strong>Authentik</strong></td>
+          <td>Better if you want an app portal, rich policies, and proxy auth for many web apps.</td>
+          <td>OIDC provider, proxy provider/outposts, LDAP/SAML options, good UI, app-level policy model. Good choice for managing many self-hosted apps.</td>
+          <td>More moving parts: server, worker, PostgreSQL, Redis. Heavier than needed if the real target is only Tailscale auth.</td>
+        </tr>
+        <tr>
+          <td><strong>Authelia</strong></td>
+          <td>Good if the primary goal is protecting Caddy routes with login and MFA.</td>
+          <td>NixOS module exists locally as <code>services.authelia.instances</code>. Caddy has a built-in <code>forward_auth</code> directive, and Authelia documents Caddy integration. Authelia also has OIDC provider support.</td>
+          <td>Historically strongest as an auth gateway rather than full IAM. Multi-domain protection may require multiple instances according to the NixOS module text. OIDC admin UX is less polished than Authentik.</td>
+        </tr>
+        <tr>
+          <td><strong>oauth2-proxy</strong></td>
+          <td>Useful companion, not a full identity provider.</td>
+          <td>Can sit in front of apps and delegate login to Authentik, Kanidm, Dex, Keycloak, Google, GitHub, etc. Official docs cover generic OIDC provider configuration.</td>
+          <td>Adds another proxy/session layer. It solves "protect this upstream," not "manage identities." Caddy can often call an auth gateway directly via <code>forward_auth</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Keycloak</strong></td>
+          <td>Technically solid but likely too heavy here.</td>
+          <td>Mature enterprise IAM, realms, clients, groups, SAML/OIDC depth. NixOS module exists.</td>
+          <td>Higher operational complexity, Java service footprint, more concepts than a personal Jasper server probably needs.</td>
+        </tr>
+        <tr>
+          <td><strong>Pocket ID / ZITADEL</strong></td>
+          <td>Worth considering only for specific preferences.</td>
+          <td>Pocket ID emphasizes passkeys and simplicity. ZITADEL is polished and cloud-native.</td>
+          <td>Less aligned with the existing repo than Authentik/Kanidm/Authelia. Validate packaging and backup story before adopting.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>How to add it here</h2>
+    <h3>1. Decide and reserve the issuer host</h3>
+    <p>
+      Use one canonical issuer. OIDC clients validate issuer URLs exactly, and Tailscale says changing issuer later requires updating WebFinger and contacting support. I would choose <code>https://oidc.jentek.dev</code>.
+    </p>
+
+    <h3>2. Add a Jasper Dex module</h3>
+    <p>
+      Dex can run as a NixOS service rather than an Arion container. Use local PostgreSQL storage once this gates your tailnet. Use an Agenix-backed file for the Tailscale client secret.
+    </p>
+    <pre><code># nixos-systems/jasper/default.nix
+imports = [
+  # ...
+  ./dex.nix
+];</code></pre>
+
+    <pre><code># sketch only: nixos-systems/jasper/dex.nix
+{ config, ... }: {
+  imports = [
+    ../../secrets
+  ];
+
+  services.dex = {
+    enable = true;
+    settings = {
+      issuer = "https://oidc.jentek.dev";
+      storage = {
+        type = "postgres";
+        config.host = "/var/run/postgresql";
+      };
+      web.http = "127.0.0.1:5556";
+      oauth2.skipApprovalScreen = true;
+      enablePasswordDB = true;
+
+      staticClients = [
+        {
+          id = "tailscale";
+          name = "Tailscale";
+          redirectURIs = [ "https://login.tailscale.com/a/oauth_response" ];
+          secretFile = config.age.secrets."dex-tailscale-client-secret".path;
+        }
+      ];
+
+      staticPasswords = [
+        {
+          email = "cjen1@jentek.dev";
+          username = "cjen1";
+          userID = "cjen1";
+          # Generate with: dex hash-password
+          hash = "$2a$10$REPLACE_WITH_BCRYPT_HASH";
+        }
+      ];
+    };
+  };
+
+  services.postgresql = {
+    enable = true;
+    ensureDatabases = [ "dex" ];
+    ensureUsers = [
+      {
+        name = "dex";
+        ensureDBOwnership = true;
+      }
+    ];
+  };
+
+  services.caddy.virtualHosts."oidc.jentek.dev".extraConfig = ''
+    reverse_proxy 127.0.0.1:5556
+  '';
+}</code></pre>
+    <div class="warning">
+      The snippet above is a structure sketch, not a drop-in final module. The client secret must exist as an age secret, and the password hash should be generated with Dex tooling.
+    </div>
+
+    <h3>3. Serve WebFinger from the email domain</h3>
+    <p>
+      Tailscale discovers the issuer using the email domain, not the issuer subdomain. For <code>cjen1@jentek.dev</code>, serve <code>https://jentek.dev/.well-known/webfinger</code> with a JRD whose issuer exactly equals Dex's issuer.
+    </p>
+      <pre><code>{
+  "subject": "acct:cjen1@jentek.dev",
+  "links": [
+    {
+      "rel": "http://openid.net/specs/connect/1.0/issuer",
+      "href": "https://oidc.jentek.dev"
+    }
+  ]
+}</code></pre>
+    <p>
+      If the login domain is not yours, you cannot complete this step yourself and should stop at the Dex deployment.
+    </p>
+
+    <h3>4. Configure Tailscale custom OIDC</h3>
+    <p>
+      In Tailscale's custom OIDC setup, provide:
+    </p>
+    <ul>
+      <li><code>Issuer URL</code>: <code>https://oidc.jentek.dev</code>.</li>
+      <li><code>Client ID</code>: <code>tailscale</code>.</li>
+      <li><code>Client secret</code>: the value stored in <code>dex-tailscale-client-secret</code>.</li>
+      <li><code>Scopes</code>: <code>openid profile email</code>.</li>
+      <li><code>Callback URL</code>: already fixed by Tailscale as <code>https://login.tailscale.com/a/oauth_response</code>; it must be in Dex's <code>redirectURIs</code>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Per-service notes</h2>
+    <table>
+      <thead>
+        <tr><th>Service</th><th>Current route</th><th>OIDC/proxy auth guidance</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Jellyfin</td>
+          <td><code>jellyfin.jentek.dev -> 127.0.0.1:8096</code></td>
+          <td>Be careful. Media clients, TVs, mobile apps, and API tokens can break behind proxy auth. Prefer a Jellyfin OIDC/plugin route only if client compatibility is acceptable.</td>
+        </tr>
+        <tr>
+          <td>Immich</td>
+          <td><code>immich.jentek.dev -> 127.0.0.1:2283</code></td>
+          <td>Prefer native OAuth/OIDC if supported by the deployed Immich version. Avoid blanket Caddy auth because mobile sync and app API behavior may be affected.</td>
+        </tr>
+        <tr>
+          <td>Calibre Web</td>
+          <td><code>calibre-web.jentek.dev -> 127.0.0.1:8083</code></td>
+          <td>Good candidate for either native OAuth/OIDC if available or proxy auth if browser-only usage is enough.</td>
+        </tr>
+        <tr>
+          <td>Audiobookshelf</td>
+          <td><code>audiobookshelf.jentek.dev -> 127.0.0.1:10004</code></td>
+          <td>Check client support before proxy auth. Native OIDC is preferable if the app version supports it.</td>
+        </tr>
+        <tr>
+          <td>Grist</td>
+          <td>Container exposes <code>8484</code>, but no Caddy vhost was observed.</td>
+          <td>Likely a strong OIDC candidate because Grist is web-app oriented. First decide whether it should be public and add a Caddy vhost.</td>
+        </tr>
+        <tr>
+          <td>Todos</td>
+          <td><code>todos.jentek.dev -> 127.0.0.1:5000</code></td>
+          <td>Good proxy-auth candidate if it is a simple browser app and does not already have OIDC.</td>
+        </tr>
+        <tr>
+          <td>Forester</td>
+          <td>Static file server at <code>forester.jentek.dev</code>.</td>
+          <td>Use Caddy auth if it should be private. Static sites are the easiest case for proxy auth.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Security and operational checklist</h2>
+    <ol>
+      <li>Pick one permanent issuer hostname before configuring clients.</li>
+      <li>Add DNS for the issuer hostname to Jasper, and add the matching Caddy vhost.</li>
+      <li>Serve WebFinger at the domain part of the Tailscale login email.</li>
+      <li>Put the Dex Tailscale client secret into Agenix.</li>
+      <li>Generate the Dex password hash with <code>dex hash-password</code>; do not store a cleartext password in Nix.</li>
+      <li>Back up the Dex PostgreSQL database before switching the tailnet to it.</li>
+      <li>Keep an SSH recovery path to Jasper that does not depend on Tailscale auth.</li>
+      <li>Document the exact issuer, client ID, callback URL, and WebFinger response before completing Tailscale setup.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Sources checked</h2>
+    <ul>
+      <li>Local repo: <code>nixos-systems/jasper/default.nix</code>, <code>dex.nix</code>, <code>immich.nix</code>, <code>calibre.nix</code>, <code>audiobookshelf.nix</code>, <code>jellyfin.nix</code>, <code>grist.nix</code>, <code>modules/nixos/docker-services/default.nix</code>.</li>
+      <li>Local NixOS module tree: <code>services.kanidm</code>, <code>services.authelia.instances</code>, <code>services.keycloak</code>, and <code>services.dex</code> are present in the available channel.</li>
+      <li><a href="https://tailscale.com/docs/integrations/identity/custom-oidc">Tailscale custom OIDC provider documentation</a>.</li>
+      <li><a href="https://dexidp.io/docs/configuration/">Dex configuration documentation</a> and <a href="https://dexidp.io/docs/configuration/custom-scopes-claims-clients/">Dex scopes, claims, and clients documentation</a>.</li>
+      <li><a href="https://docs.goauthentik.io/add-secure-apps/providers/oauth2/">Authentik OAuth2/OIDC provider documentation</a>.</li>
+      <li><a href="https://caddyserver.com/docs/caddyfile/directives/forward_auth">Caddy <code>forward_auth</code> documentation</a>.</li>
+      <li><a href="https://www.authelia.com/integration/proxies/caddy/">Authelia Caddy integration documentation</a> and <a href="https://www.authelia.com/integration/openid-connect/introduction/">Authelia OIDC integration documentation</a>.</li>
+      <li><a href="https://kanidm.github.io/kanidm/stable/integrations/oauth2.html">Kanidm OAuth2/OIDC integration documentation</a>.</li>
+      <li><a href="https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/openid_connect/">oauth2-proxy OpenID Connect provider documentation</a>.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
