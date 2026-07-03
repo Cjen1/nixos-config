@@ -16,6 +16,8 @@
   ];
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.permittedInsecurePackages = [ ];
+
   nix = {
     registry = lib.mapAttrs (_: value: {flake = value; }) inputs;
 
@@ -78,7 +80,6 @@
 
   security.sudo.wheelNeedsPassword = false;
   programs.fish.enable = true;
-  programs.light.enable = true;
   users.users.cjen1 = {
     shell = pkgs.fish;
     isNormalUser = true;
@@ -87,7 +88,6 @@
       "audio" 
       "video" 
       "pulse-access" 
-      "docker" 
       "adbusers"
       "dialout"
       ]; # Enable ‘sudo’ for the user.

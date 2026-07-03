@@ -13,7 +13,7 @@
 
       tinymist
     ];
-    extraLuaConfig = builtins.readFile ./init.lua;
+    initLua = builtins.readFile ./init.lua;
     plugins = with pkgs.vimPlugins; [
       {
         plugin = gruvbox-nvim;
