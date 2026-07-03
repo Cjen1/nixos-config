@@ -1,6 +1,6 @@
 {pkgs, unstable, ...}: {
   imports = [
-    ./sway.nix
+    ./niri.nix
   ];
 
   home.packages = with pkgs; [

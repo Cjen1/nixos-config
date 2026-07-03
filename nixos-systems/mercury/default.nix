@@ -120,13 +120,15 @@
   services.fwupd.enable = true;
 
   # use suspend-then-hibernate on lid close
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=3600s
-    SuspendState=mem
-  '';
-  services.logind.lidSwitch="suspend-then-hibernate";
-  services.logind.powerKey="suspend-then-hibernate";
-  services.logind.powerKeyLongPress="poweroff";
+  systemd.sleep.settings.Sleep = {
+    HibernateDelaySec = "3600s";
+    SuspendState = "mem";
+  };
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend-then-hibernate";
+    HandlePowerKey = "suspend-then-hibernate";
+    HandlePowerKeyLongPress = "poweroff";
+  };
 
   system.stateVersion = "23.10";
 }

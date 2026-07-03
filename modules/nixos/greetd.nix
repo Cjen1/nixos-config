@@ -1,4 +1,8 @@
 {pkgs, ...}: {
+  imports = [
+    ./niri.nix
+  ];
+
   services.greetd = {
     enable = true;
     settings.default_session.command = ''
@@ -6,7 +10,7 @@
         --time \
         --asterisks \
         --user-menu \
-        --cmd sway
+        --cmd niri-session
     '';
   };
 
@@ -24,6 +28,6 @@
   };
 
   environment.etc."greetd/environments".text = ''
-    sway
+    niri-session
   '';
 }
