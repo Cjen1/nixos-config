@@ -168,5 +168,10 @@
   # Logrotate to minimise log issues
   services.logrotate.enable = true;
 
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
+  };
+
   system.stateVersion = "24.05";
 }

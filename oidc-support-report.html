@@ -338,8 +338,8 @@ imports = [
           email = "cjen1@jentek.dev";
           username = "cjen1";
           userID = "cjen1";
-          # Generate with: dex hash-password
-          hash = "$2a$10$REPLACE_WITH_BCRYPT_HASH";
+          # Generate with: nix shell nixpkgs#whois -c mkpasswd -m bcrypt
+          hash = "$2b$05$REPLACE_WITH_BCRYPT_HASH";
         }
       ];
     };
@@ -447,7 +447,7 @@ imports = [
       <li>Add DNS for the issuer hostname to Jasper, and add the matching Caddy vhost.</li>
       <li>Serve WebFinger at the domain part of the Tailscale login email.</li>
       <li>Put the Dex Tailscale client secret into Agenix.</li>
-      <li>Generate the Dex password hash with <code>dex hash-password</code>; do not store a cleartext password in Nix.</li>
+      <li>Generate the Dex password hash with <code>nix shell nixpkgs#whois -c mkpasswd -m bcrypt</code>; do not store a cleartext password in Nix.</li>
       <li>Back up the Dex PostgreSQL database before switching the tailnet to it.</li>
       <li>Keep an SSH recovery path to Jasper that does not depend on Tailscale auth.</li>
       <li>Document the exact issuer, client ID, callback URL, and WebFinger response before completing Tailscale setup.</li>

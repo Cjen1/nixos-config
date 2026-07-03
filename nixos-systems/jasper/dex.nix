@@ -1,4 +1,7 @@
-{ config, ... }: {
+{ config, lib, pkgs, ... }:
+let
+  dexPasswordHash = config.age.secrets."dex-password-hash".path;
+in {
   imports = [
     ../../secrets
   ];
@@ -16,7 +19,6 @@
 
   services.dex = {
     enable = true;
-    environmentFile = config.age.secrets."dex-password-hash".path;
     settings = {
       issuer = "https://oidc.jentek.dev";
       storage = {
@@ -41,11 +43,15 @@
           email = "cjen1@jentek.dev";
           username = "cjen1";
           userID = "cjen1";
-          hash = "$DEX_PASSWORD_HASH";
+          hash = dexPasswordHash;
         }
       ];
     };
   };
+
+  systemd.services.dex.serviceConfig.ExecStartPre = lib.mkAfter [
+    "+${pkgs.replace-secret}/bin/replace-secret '${dexPasswordHash}' '${dexPasswordHash}' /run/dex/config.yaml"
+  ];
 
   services.caddy.virtualHosts."jentek.dev".extraConfig = ''
     @webfinger path /.well-known/webfinger
