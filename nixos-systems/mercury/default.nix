@@ -13,6 +13,7 @@
     ../../modules/nixos/persist.nix
     ../../modules/nixos/polkit.nix
     ../../modules/nixos/cpufreq.nix
+    ../../modules/nixos/tailscale.nix
   ];
 
   nixpkgs.config.allowUnfree = true;

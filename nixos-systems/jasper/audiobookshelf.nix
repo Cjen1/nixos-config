@@ -18,11 +18,8 @@
         "/data/media/audiobookshelf/metadata:/metadata"
       ];
       ports = [
-        "10004:80"
+        "127.0.0.1:10004:80"
       ];
     };
   };
-  services.caddy.virtualHosts."audiobookshelf.jentek.dev".extraConfig = ''
-    reverse_proxy 127.0.0.1:10004
-  '';
 }

@@ -11,4 +11,10 @@
     mode = "0440";
   };
   age.secrets."dex-tailscale-client-secret".file = ./dex-tailscale-client-secret.age;
+  age.secrets."cloudflare-caddy-dns-env" = {
+    file = ./cloudflare-caddy-dns-env.age;
+    owner = "caddy";
+    group = "caddy";
+    mode = "0400";
+  };
 }
