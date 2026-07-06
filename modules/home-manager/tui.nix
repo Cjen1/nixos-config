@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, unstable, ...}: {
   imports = [
     ./git.nix
     ./neovim
@@ -24,7 +24,7 @@
     fzf
     dig
     opencode
-    codex
+    unstable.codex
   ];
 
   programs.fish = {

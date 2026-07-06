@@ -15,6 +15,7 @@
     ./immich.nix
     ./audiomuse-ai.nix
     ./dex.nix
+    ./ps-todos.nix
   ];
 
   nixpkgs.config.allowUnfree = true;
@@ -195,11 +196,6 @@
       @transmission host transmission.ts.jentek.dev
       handle @transmission {
         reverse_proxy 127.0.0.1:9091
-      }
-
-      @bazarr host bazarr.ts.jentek.dev
-      handle @bazarr {
-        reverse_proxy 127.0.0.1:6767
       }
 
       @immich host immich.ts.jentek.dev
