@@ -16,6 +16,14 @@
 
   wsl.enable = true;
   wsl.defaultUser = "cjen1";
+  wsl.interop.register = true;
+
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      stdenv.cc.cc
+    ];
+  };
 
   nixpkgs.config.allowUnfree = true;
   nix = {
@@ -36,6 +44,7 @@
   environment.systemPackages =
     with pkgs; [
     vim
+    wget
     zotify-dev
   ];
 
