@@ -25,6 +25,7 @@
     dig
     opencode
     unstable.codex
+    (pkgs.callPackage ./github-copilot-cli { })
   ];
 
   programs.fish = {
