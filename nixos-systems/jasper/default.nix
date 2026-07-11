@@ -209,6 +209,11 @@
         reverse_proxy 127.0.0.1:10004
       }
 
+      @audiomuse host audiomuse.ts.jentek.dev
+      handle @audiomuse {
+        reverse_proxy 127.0.0.1:8000
+      }
+
       respond 404
     '';
   };

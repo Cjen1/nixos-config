@@ -54,7 +54,7 @@
         "/data/audiomuse-ai/temp-audio-flask:/app/temp_audio"
       ];
       extra_hosts = ["host.docker.internal:host-gateway"];
-      ports = ["8000:8000"];
+      ports = ["127.0.0.1:8000:8000"];
       depends_on = ["audiomuse-redis" "audiomuse-postgres"];
     };
 
