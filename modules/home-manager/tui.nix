@@ -1,4 +1,4 @@
-{pkgs, unstable, ...}: {
+{pkgs, ...}: {
   imports = [
     ./git.nix
     ./neovim
@@ -24,7 +24,7 @@
     fzf
     dig
     opencode
-    unstable.codex
+    (pkgs.callPackage ./codex-cli { })
     (pkgs.callPackage ./github-copilot-cli { })
   ];
 
