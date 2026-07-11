@@ -15,6 +15,7 @@
     ./audiobookshelf.nix
     ./immich.nix
     ./audiomuse-ai.nix
+    ./forgejo.nix
     ./dex.nix
     ./ps-todos.nix
   ];
@@ -212,6 +213,11 @@
       @audiomuse host audiomuse.ts.jentek.dev
       handle @audiomuse {
         reverse_proxy 127.0.0.1:8000
+      }
+
+      @forgejo host forgejo.ts.jentek.dev
+      handle @forgejo {
+        reverse_proxy 127.0.0.1:3000
       }
 
       respond 404
