@@ -14,6 +14,7 @@
     nixpkgs-zotify.url = "github:bwkam/nixpkgs/init-zotify";
     agenix.url = "github:ryantm/agenix";
     ps-todos.url = "github:Cjen1/ps-todos/nix-flake-systemd-service";
+    custom-tooling.url = "git+https://forgejo.ts.jentek.dev/cjen1/custom-tooling";
   };
 
   outputs = {nixpkgs, home-manager, ... }@inputs: 

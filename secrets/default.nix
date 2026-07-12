@@ -17,4 +17,8 @@
     group = "caddy";
     mode = "0400";
   };
+  age.secrets."forgejo-runner-token" = {
+    file = ./forgejo-runner-token.age;
+    mode = "0400";
+  };
 }

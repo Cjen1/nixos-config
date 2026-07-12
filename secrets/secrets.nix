@@ -8,4 +8,5 @@ in {
   "dex-password-hash.age".publicKeys = [ home-key jasper-host-key ];
   "dex-tailscale-client-secret.age".publicKeys = [ home-key jasper-host-key ];
   "cloudflare-caddy-dns-env.age".publicKeys = [ home-key jasper-host-key ];
+  "forgejo-runner-token.age".publicKeys = [ home-key jasper-host-key ];
 }

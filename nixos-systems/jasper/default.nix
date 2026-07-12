@@ -6,6 +6,7 @@
     ../../modules/nixos/audio.nix
     ../../modules/nixos/polkit.nix
     ../../modules/nixos/tailscale.nix
+    inputs.custom-tooling.nixosModules.default
 
     # Services
     ./jellyfin.nix
@@ -19,6 +20,40 @@
     ./dex.nix
     ./ps-todos.nix
   ];
+
+  services.custom-tooling.automerge-server = {
+    enable = true;
+    dataDir = "/data/custom-tooling/automerge";
+    syncUrl = "wss://sync.ts.jentek.dev/api/sync";
+  };
+
+  services.custom-tooling.voice-notes = {
+    enable = true;
+  };
+
+  services.custom-tooling.voice-notes-transcriber = {
+    enable = true;
+    indexUrl = "automerge:89QtZ2ArR6tojHLozs4X4VVrX7V";
+  };
+
+  systemd.services.custom-tooling-storage-setup = {
+    description = "Prepare custom-tooling storage";
+    after = [ "zfs-mount.service" ];
+    requires = [ "zfs-mount.service" ];
+    before = [ "custom-tooling-automerge-server.service" ];
+    unitConfig.ConditionPathIsMountPoint = "/data/custom-tooling";
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.coreutils}/bin/install -d -m 0750 -o custom-tooling-automerge -g custom-tooling-automerge /data/custom-tooling/automerge";
+    };
+  };
+
+  systemd.services.custom-tooling-automerge-server = {
+    after = [ "zfs-mount.service" "custom-tooling-storage-setup.service" ];
+    requires = [ "zfs-mount.service" "custom-tooling-storage-setup.service" ];
+    unitConfig.ConditionPathIsMountPoint = "/data/custom-tooling";
+  };
 
   nixpkgs.config.allowUnfree = true;
   nix = {
@@ -218,6 +253,16 @@
       @forgejo host forgejo.ts.jentek.dev
       handle @forgejo {
         reverse_proxy 127.0.0.1:3000
+      }
+
+      @customToolingSync host sync.ts.jentek.dev
+      handle @customToolingSync {
+        reverse_proxy 127.0.0.1:5070
+      }
+
+      @voiceNotes host voice-notes.ts.jentek.dev
+      handle @voiceNotes {
+        reverse_proxy 127.0.0.1:5080
       }
 
       respond 404

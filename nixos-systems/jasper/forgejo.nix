@@ -1,5 +1,26 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
+  imports = [
+    ../../secrets
+  ];
+
+  systemd.services.forgejo-secrets = {
+    after = [ "zfs-mount.service" ];
+    requires = [ "zfs-mount.service" ];
+    unitConfig.ConditionPathIsMountPoint = "/data/forgejo";
+  };
+
+  systemd.services.forgejo = {
+    after = [ "zfs-mount.service" ];
+    requires = [ "zfs-mount.service" ];
+    unitConfig.ConditionPathIsMountPoint = "/data/forgejo";
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /data/forgejo/custom 0750 forgejo forgejo -"
+    "d /data/forgejo/custom/conf 0750 forgejo forgejo -"
+  ];
+
   services.forgejo = {
     enable = true;
     database.type = "sqlite3";
@@ -25,10 +46,7 @@
       name = "jasper-runner";
       url = "https://forgejo.ts.jentek.dev/";
 
-      # Create this file after creating a runner token in Forgejo:
-      #   /var/lib/forgejo-runner/token
-      # The file must contain: TOKEN=<runner-token>
-      tokenFile = "/var/lib/forgejo-runner/token";
+      tokenFile = config.age.secrets."forgejo-runner-token".path;
 
       labels = [
         "docker:docker://node:22-bookworm"
