@@ -1,4 +1,17 @@
 { config, pkgs, ... }:
+let
+  forgejoRunnerConfig = (pkgs.formats.yaml { }).generate "forgejo-runner-config.yaml" {
+    server.connections.forgejo = {
+      url = "https://forgejo.ts.jentek.dev/";
+      uuid = "737ed90b-d611-4be3-92c3-36f5ba7b5f4d";
+      token_url = "file:$CREDENTIALS_DIRECTORY/forgejo-runner-token";
+      labels = [
+        "docker:docker://node:22-bookworm"
+        "ubuntu-latest:docker://node:22-bookworm"
+      ];
+    };
+  };
+in
 {
   imports = [
     ../../secrets
@@ -39,19 +52,25 @@
     };
   };
 
-  services.gitea-actions-runner = {
-    package = pkgs.forgejo-runner;
-    instances.jasper = {
-      enable = true;
-      name = "jasper-runner";
-      url = "https://forgejo.ts.jentek.dev/";
+  systemd.services.forgejo-runner-jasper = {
+    description = "Forgejo Actions Runner";
+    after = [ "network-online.target" "docker.service" ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
 
-      tokenFile = config.age.secrets."forgejo-runner-token".path;
+    environment.HOME = "/var/lib/forgejo-runner";
 
-      labels = [
-        "docker:docker://node:22-bookworm"
-        "ubuntu-latest:docker://node:22-bookworm"
+    serviceConfig = {
+      DynamicUser = true;
+      StateDirectory = "forgejo-runner";
+      WorkingDirectory = "-/var/lib/forgejo-runner";
+      SupplementaryGroups = [ "docker" ];
+      LoadCredential = [
+        "forgejo-runner-token:${config.age.secrets."forgejo-runner-token".path}"
       ];
+      ExecStart = "${pkgs.forgejo-runner}/bin/forgejo-runner daemon --config ${forgejoRunnerConfig}";
+      Restart = "on-failure";
+      RestartSec = 2;
     };
   };
 
