@@ -15,6 +15,14 @@
     homeDirectory = "/home/cjen1-msft";
   };
 
+  nix = {
+    package = pkgs.nix;
+    settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+  };
+
   programs.git.settings = {
     http.sslCAInfo = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     diff.tool = "vscode";
