@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
 
   imports = [
     ../../modules/home-manager/tui.nix
@@ -16,9 +16,14 @@
   };
 
   programs.git.settings = {
-    http.sslCAInfo = "/etc/pki/tls/certs/ca-bundle.trust.crt";
+    http.sslCAInfo = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     diff.tool = "vscode";
     difftool.vscode.cmd = "code --wait --diff \"$LOCAL\" \"$REMOTE\"";
+  };
+
+  programs.neovim = {
+    withPython3 = true;
+    withRuby = true;
   };
 
   programs.home-manager.enable = true;
