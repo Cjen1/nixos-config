@@ -6,6 +6,7 @@
     ignores = [
       "*.swp"
       ".worktrees"
+      "docs/superpowers"
     ];
     settings = {
       user.email = "cjjensen01@aol.com";

@@ -15,7 +15,11 @@
     homeDirectory = "/home/cjen1-msft";
   };
 
-  programs.git.settings.http.sslCAInfo = "/etc/pki/tls/certs/ca-bundle.trust.crt";
+  programs.git.settings = {
+    http.sslCAInfo = "/etc/pki/tls/certs/ca-bundle.trust.crt";
+    diff.tool = "vscode";
+    difftool.vscode.cmd = "code --wait --diff \"$LOCAL\" \"$REMOTE\"";
+  };
 
   programs.home-manager.enable = true;
 
