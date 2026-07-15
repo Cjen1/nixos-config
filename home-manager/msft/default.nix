@@ -29,12 +29,33 @@
     difftool.vscode.cmd = "code --wait --diff \"$LOCAL\" \"$REMOTE\"";
   };
 
+  programs.bash = {
+    enable = true;
+    bashrcExtra = ''
+      if [ -r /etc/bash.bashrc ]; then
+        . /etc/bash.bashrc
+      fi
+      if [ -r "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+      fi
+      if [ -r "$HOME/.profile" ]; then
+        . "$HOME/.profile"
+      fi
+    '';
+  };
+
   programs.neovim = {
     withPython3 = true;
     withRuby = true;
   };
 
   programs.home-manager.enable = true;
+
+  home.file = {
+    ".bash_profile".force = true;
+    ".bashrc".force = true;
+    ".profile".force = true;
+  };
 
   home.stateVersion = "24.11";
 }
