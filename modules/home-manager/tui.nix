@@ -26,6 +26,7 @@
     opencode
     (pkgs.callPackage ./codex-cli { })
     (pkgs.callPackage ./github-copilot-cli { })
+    (pkgs.callPackage ./pi-coding-agent { })
   ];
   
   programs.fish = {
