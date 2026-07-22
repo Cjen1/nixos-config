@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  t3CodePackage ? pkgs.callPackage ./t3-code { },
+  ...
+}: {
   imports = [
     ./git.nix
     ./neovim
@@ -27,7 +31,8 @@
     (pkgs.callPackage ./opencode-cli { })
     (pkgs.callPackage ./codex-cli { })
     (pkgs.callPackage ./github-copilot-cli { })
-    (pkgs.callPackage ./t3-code { })
+    t3CodePackage
+    nodejs_26
   ];
   
   programs.fish = {

@@ -8,12 +8,12 @@
 
 buildNpmPackage rec {
   pname = "t3-code";
-  version = "0.0.28";
+  version = "0.0.29-nightly.20260722.875";
 
   src = ./.;
   nodejs = nodejs_22;
 
-  npmDepsHash = "sha256-Rv2HehnVQA963hDca1TZ7LZ72c1bXwn7Ig5cCtf3gnQ=";
+  npmDepsHash = "sha256-Mtc8iqlw298mA4JYIQjh1Hx+WKJj7EzV7qSJ5NOijyY=";
 
   dontNpmBuild = true;
 
