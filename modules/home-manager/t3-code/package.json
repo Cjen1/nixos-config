@@ -1,0 +1,8 @@
+{
+  "name": "t3-code-nix",
+  "version": "0.0.28",
+  "private": true,
+  "dependencies": {
+    "t3": "0.0.28"
+  }
+}

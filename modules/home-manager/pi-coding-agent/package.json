@@ -1,8 +1,0 @@
-{
-  "name": "pi-coding-agent-nix",
-  "version": "0.80.10",
-  "private": true,
-  "dependencies": {
-    "@earendil-works/pi-coding-agent": "0.80.10"
-  }
-}

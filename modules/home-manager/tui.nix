@@ -10,6 +10,7 @@
   };
 
   home.packages = with pkgs; [
+    atuin
     gnumake
     tmux
     unzip
@@ -23,10 +24,10 @@
     krb5
     fzf
     dig
-    opencode
+    (pkgs.callPackage ./opencode-cli { })
     (pkgs.callPackage ./codex-cli { })
     (pkgs.callPackage ./github-copilot-cli { })
-    (pkgs.callPackage ./pi-coding-agent { })
+    (pkgs.callPackage ./t3-code { })
   ];
   
   programs.fish = {
