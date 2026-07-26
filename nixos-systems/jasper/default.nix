@@ -195,6 +195,9 @@
     "todos.jentek.dev".extraConfig = ''
       reverse_proxy 127.0.0.1:5000
     '';
+    "audiobookshelf.jentek.dev".extraConfig = ''
+      reverse_proxy 127.0.0.1:10004
+    '';
     "http://jellyseerr.ts.jentek.dev".extraConfig = ''
       @notTailnet not remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
       respond @notTailnet 403
@@ -238,11 +241,6 @@
       @immich host immich.ts.jentek.dev
       handle @immich {
         reverse_proxy 127.0.0.1:2283
-      }
-
-      @audiobookshelf host audiobookshelf.ts.jentek.dev
-      handle @audiobookshelf {
-        reverse_proxy 127.0.0.1:10004
       }
 
       @audiomuse host audiomuse.ts.jentek.dev
