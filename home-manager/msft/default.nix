@@ -52,6 +52,10 @@ in
   home = {
     username ="cjen1-msft";
     homeDirectory = "/home/cjen1-msft";
+    sessionVariables = {
+      LANG = "en_US.UTF-8";
+      LC_CTYPE = "en_US.UTF-8";
+    };
     packages = [
       codespaceKeepAlive
       pkgs.nix
