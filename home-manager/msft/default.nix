@@ -95,6 +95,19 @@ in
     fish_add_path --prepend "$HOME/.nix-profile/bin"
   '';
 
+  programs.tmux = {
+    enable = true;
+    mouse = true;
+    historyLimit = 200000;
+    terminal = "xterm-256color";
+    extraConfig = ''
+      set -g extended-keys on
+      set -g extended-keys-format csi-u
+      set -as terminal-features ",xterm-256color:RGB"
+      bind-key -T root WheelUpPane copy-mode -e
+    '';
+  };
+
   programs.neovim = {
     withPython3 = true;
     withRuby = true;
@@ -154,6 +167,12 @@ in
     ".bash_profile".force = true;
     ".bashrc".force = true;
     ".profile".force = true;
+    ".tmux.conf" = {
+      force = true;
+      text = ''
+        source-file "$HOME/.config/tmux/tmux.conf"
+      '';
+    };
   };
 
   home.stateVersion = "24.11";
