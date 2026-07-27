@@ -6,16 +6,24 @@
   autoPatchelfHook,
   pkg-config,
   libsecret,
+  webkitgtk_4_1,
+  gtk3,
+  cairo,
+  gdk-pixbuf,
+  libsoup_3,
+  wayland,
+  dbus,
+  xdotool,
 }:
 
 buildNpmPackage rec {
   pname = "github-copilot-cli";
-  version = "1.0.70";
+  version = "1.0.75";
 
   src = ./.;
   nodejs = nodejs_22;
 
-  npmDepsHash = "sha256-OUcvYZCfuWcSV+z7EH2BlWKAxBwbcV4a4hqmK6Tj/aA=";
+  npmDepsHash = "sha256-PFZZN+16N6AdOKZMlbZ6oNMT0L6zebpG5qHGcRetHZI=";
 
   dontNpmBuild = true;
 
@@ -27,7 +35,17 @@ buildNpmPackage rec {
   buildInputs = [
     stdenv.cc.cc.lib
     libsecret
+    webkitgtk_4_1
+    gtk3
+    cairo
+    gdk-pixbuf
+    libsoup_3
+    wayland
+    dbus
+    xdotool
   ];
+
+  autoPatchelfIgnoreMissingDeps = [ "libc.musl-x86_64.so.1" ];
 
   postInstall = ''
     mkdir -p $out/bin

@@ -12,6 +12,30 @@ let
          <servicedir>${pkgs.gnome-keyring}/share/dbus-1/services</servicedir>
          <servicedir>${pkgs.gcr}/share/dbus-1/services</servicedir>'
   '';
+  codespaceKeepAliveLoop = pkgs.writeShellScript "codespace-keepalive-loop" ''
+    while true; do
+      if ! ${pkgs.openssh}/bin/ssh \
+        -o BatchMode=yes \
+        -o ConnectTimeout=30 \
+        -o ServerAliveInterval=15 \
+        -o ServerAliveCountMax=3 \
+        ghcs1-raw \
+        'printf "pong %s\n" "$(/bin/date --iso-8601=seconds)"'
+      then
+        printf 'Codespaces keep-alive failed at %s\n' \
+          "$(${pkgs.coreutils}/bin/date --iso-8601=seconds)" >&2
+      fi
+      ${pkgs.coreutils}/bin/sleep 240
+    done
+  '';
+  codespaceKeepAlive = pkgs.writeShellScriptBin "codespace-keepalive" ''
+    session=codespace-keepalive-ghcs1
+    if ! ${pkgs.tmux}/bin/tmux has-session -t "$session" 2>/dev/null; then
+      if ! ${pkgs.tmux}/bin/tmux new-session -d -s "$session" ${codespaceKeepAliveLoop}; then
+        printf 'Failed to start local Codespaces keep-alive session\n' >&2
+      fi
+    fi
+  '';
 in
 {
 
@@ -28,6 +52,10 @@ in
   home = {
     username ="cjen1-msft";
     homeDirectory = "/home/cjen1-msft";
+    packages = [
+      codespaceKeepAlive
+      pkgs.nix
+    ];
   };
 
   nix = {
@@ -58,6 +86,10 @@ in
       fi
     '';
   };
+
+  programs.fish.shellInit = lib.mkBefore ''
+    fish_add_path --prepend "$HOME/.nix-profile/bin"
+  '';
 
   programs.neovim = {
     withPython3 = true;
@@ -92,6 +124,27 @@ in
   };
 
   programs.home-manager.enable = true;
+
+  home.activation.setLoginShell = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    fish_path="$HOME/.nix-profile/bin/fish"
+    current_shell="$(${pkgs.getent}/bin/getent passwd "$USER" | ${pkgs.coreutils}/bin/cut -d: -f7)"
+    sudo_bin="$(PATH=/usr/bin:/bin command -v sudo || true)"
+    chsh_bin="$(PATH=/usr/bin:/bin command -v chsh || true)"
+
+    if [ "$current_shell" != "$fish_path" ]; then
+      if [ -z "$sudo_bin" ] || ! "$sudo_bin" -n true 2>/dev/null; then
+        echo "warning: passwordless sudo is required to set the login shell to $fish_path" >&2
+      elif [ -z "$chsh_bin" ]; then
+        echo "error: chsh is required to set the login shell to $fish_path" >&2
+        exit 1
+      else
+        if ! ${pkgs.gnugrep}/bin/grep -Fqx "$fish_path" /etc/shells; then
+          printf '%s\n' "$fish_path" | "$sudo_bin" -n ${pkgs.coreutils}/bin/tee -a /etc/shells >/dev/null
+        fi
+        "$sudo_bin" -n "$chsh_bin" -s "$fish_path" "$USER"
+      fi
+    fi
+  '';
 
   home.file = {
     ".bash_profile".force = true;
