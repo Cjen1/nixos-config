@@ -1,8 +1,4 @@
-{
-  pkgs,
-  t3CodePackage ? pkgs.callPackage ./t3-code { },
-  ...
-}: {
+{ pkgs, ... }: {
   imports = [
     ./git.nix
     ./neovim
@@ -28,11 +24,6 @@
     krb5
     fzf
     dig
-    (pkgs.callPackage ./opencode-cli { })
-    (pkgs.callPackage ./codex-cli { })
-    (pkgs.callPackage ./github-copilot-cli { })
-    t3CodePackage
-    nodejs_26
   ];
   
   programs.fish = {

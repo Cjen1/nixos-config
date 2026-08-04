@@ -27,7 +27,7 @@ sed -i \
   -e "s#npmDepsHash = \"sha256-[^\"]*\";#npmDepsHash = \"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\";#" \
   default.nix
 
-build_expr="let flake = builtins.getFlake \"git+file://${repo_root}\"; pkgs = flake.inputs.nixpkgs.legacyPackages.x86_64-linux; src = builtins.path { path = \"${package_dir}\"; name = \"opencode-cli-src\"; }; in pkgs.callPackage src {}"
+build_expr="let flake = builtins.getFlake \"git+file://${repo_root}?dir=hosts/mercury\"; pkgs = flake.inputs.nixpkgs.legacyPackages.x86_64-linux; src = builtins.path { path = \"${package_dir}\"; name = \"opencode-cli-src\"; }; in pkgs.callPackage src {}"
 
 set +e
 build_output="$(nix build --max-jobs "$max_jobs" --cores "$max_jobs" --impure --no-link --show-trace --print-build-logs --expr "$build_expr" 2>&1)"

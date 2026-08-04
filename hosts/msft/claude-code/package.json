@@ -1,0 +1,8 @@
+{
+  "name": "anthropic-claude-code-nix",
+  "version": "2.1.220",
+  "private": true,
+  "dependencies": {
+    "@anthropic-ai/claude-code": "2.1.220"
+  }
+}

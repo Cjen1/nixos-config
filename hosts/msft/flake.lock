@@ -1,0 +1,107 @@
+{
+  "nodes": {
+    "copilot-in-cc": {
+      "inputs": {
+        "home-manager": "home-manager",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1785776837,
+        "narHash": "sha256-hQmIF7L9oYL4xW9XBEmBFn+7xZa2d1/YpxeDH8Uw4KE=",
+        "ref": "main",
+        "rev": "b73612ce0c9cb4416f32b3a696e9ee59239f45c2",
+        "revCount": 48,
+        "type": "git",
+        "url": "ssh://git@github.com/cjen1-msft/copilot-in-cc.git"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "ssh://git@github.com/cjen1-msft/copilot-in-cc.git"
+      }
+    },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "copilot-in-cc",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785306346,
+        "narHash": "sha256-DScBkW0fOgpGPK2trNoX3ryLTlaC14+gglFo/BhGJ4g=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "e705714e918c3b11affcdd15db2cbe3a070420a0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "home-manager_2": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1782704057,
+        "narHash": "sha256-G1I1gd32F7mp9LAe1DaZ4ZL7NX5gyiKwdCMwro1Vrck=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "868d0a692de703c2de98fab61968e4e310b7c28e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "release-26.05",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1785318670,
+        "narHash": "sha256-dN6Ou5x/+23FZLEpYP3IffO+NyJFzUlGumt1uu3MMaY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "0954f7ee2f6bb3dc7d4e3d0d8bcb8fd4bde4cfc5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1782847225,
+        "narHash": "sha256-JC9PjqKYG9ve5U8aDOLQipp3+KLANBHUvGdLZlxzdKI=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "95ca1e203c0750115fd4a6f17d5a245dfe6b1edd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "copilot-in-cc": "copilot-in-cc",
+        "home-manager": "home-manager_2",
+        "nixpkgs": "nixpkgs_2"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
