@@ -7,15 +7,15 @@ version="${1:-latest}"
 
 cd "$package_dir"
 
-nix shell nixpkgs#nodejs_22 -c npm install --package-lock-only --ignore-scripts --save-exact "@github/copilot@${version}"
+nix shell nixpkgs#nodejs_22 -c npm install --package-lock-only --ignore-scripts --save-exact "@anthropic-ai/claude-code@${version}"
 
 pinned_version="$(
   nix shell nixpkgs#nodejs_22 -c node -p \
-    "require('./package-lock.json').packages['node_modules/@github/copilot'].version"
+    "require('./package-lock.json').packages['node_modules/@anthropic-ai/claude-code'].version"
 )"
 
 nix shell nixpkgs#nodejs_22 -c node -e \
-  "const fs = require('fs'); const version = '${pinned_version}'; const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); pkg.version = version; pkg.dependencies['@github/copilot'] = version; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
+  "const fs = require('fs'); const version = '${pinned_version}'; const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); pkg.version = version; pkg.dependencies['@anthropic-ai/claude-code'] = version; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
 nix shell nixpkgs#nodejs_22 -c npm install --package-lock-only --ignore-scripts
 
 sed -i \
@@ -23,7 +23,7 @@ sed -i \
   -e "s#npmDepsHash = \"sha256-[^\"]*\";#npmDepsHash = \"sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\";#" \
   default.nix
 
-build_expr="let flake = builtins.getFlake \"git+file://${repo_root}?dir=hosts/mercury\"; pkgs = flake.inputs.nixpkgs.legacyPackages.x86_64-linux; src = builtins.path { path = \"${package_dir}\"; name = \"github-copilot-cli-src\"; }; in pkgs.callPackage src {}"
+build_expr="let flake = builtins.getFlake \"git+file://${repo_root}?dir=hosts/mercury\"; pkgs = import flake.inputs.nixpkgs { system = \"x86_64-linux\"; config.allowUnfree = true; }; src = builtins.path { path = \"${package_dir}\"; name = \"claude-code-src\"; }; in pkgs.callPackage src {}"
 
 set +e
 build_output="$(nix build --impure --no-link --show-trace --print-build-logs --expr "$build_expr" 2>&1)"
@@ -47,5 +47,5 @@ sed -i "s#npmDepsHash = \"sha256-[^\"]*\";#npmDepsHash = \"${new_hash}\";#" defa
 
 nix build --impure --no-link --expr "$build_expr"
 
-echo "Pinned @github/copilot ${pinned_version}"
+echo "Pinned @anthropic-ai/claude-code ${pinned_version}"
 echo "npmDepsHash = ${new_hash}"
