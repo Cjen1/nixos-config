@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1785776837,
-        "narHash": "sha256-hQmIF7L9oYL4xW9XBEmBFn+7xZa2d1/YpxeDH8Uw4KE=",
+        "lastModified": 1785928695,
+        "narHash": "sha256-BzHkdFF9J6pXo+MUXhlRCM3W6BSBE8uWw2CyWeybxjQ=",
         "ref": "main",
-        "rev": "b73612ce0c9cb4416f32b3a696e9ee59239f45c2",
-        "revCount": 48,
+        "rev": "31c62e0c0c438dddb787262c65e1ed59c6354fda",
+        "revCount": 50,
         "type": "git",
         "url": "ssh://git@github.com/cjen1-msft/copilot-in-cc.git"
       },

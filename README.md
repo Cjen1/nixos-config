@@ -23,8 +23,8 @@ sudo nixos-rebuild switch --flake ./hosts/mercury#mercury
 For MSFT Home Manager:
 
 ```sh
-nix build './hosts/msft#homeConfigurations."cjen1-msft@msft".activationPackage'
-home-manager switch --flake ./hosts/msft#cjen1-msft@msft
+nix build ./hosts/msft#homeConfigurations.cjen1-msft.activationPackage
+home-manager switch --flake ./hosts/msft
 ```
 
 Update only one host's dependencies:

@@ -13,7 +13,7 @@
   outputs =
     inputs@{ nixpkgs, home-manager, ... }:
     {
-      homeConfigurations."cjen1-msft@msft" = home-manager.lib.homeManagerConfiguration {
+      homeConfigurations.cjen1-msft = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         modules = [
           inputs.copilot-in-cc.homeManagerModules.default
