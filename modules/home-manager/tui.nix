@@ -24,6 +24,8 @@
     krb5
     fzf
     dig
+    bubblewrap
+    ripgrep
   ];
   
   programs.fish = {

@@ -26,7 +26,7 @@ sed -i \
 build_expr="let flake = builtins.getFlake \"git+file://${repo_root}?dir=hosts/mercury\"; pkgs = flake.inputs.nixpkgs.legacyPackages.x86_64-linux; src = builtins.path { path = \"${package_dir}\"; name = \"github-copilot-cli-src\"; }; in pkgs.callPackage src {}"
 
 set +e
-build_output="$(nix build --impure --no-link --show-trace --print-build-logs --expr "$build_expr" 2>&1)"
+build_output="$(NIXPKGS_ALLOW_UNFREE=1 nix build --impure --no-link --show-trace --print-build-logs --expr "$build_expr" 2>&1)"
 build_status=$?
 set -e
 
@@ -45,7 +45,7 @@ fi
 
 sed -i "s#npmDepsHash = \"sha256-[^\"]*\";#npmDepsHash = \"${new_hash}\";#" default.nix
 
-nix build --impure --no-link --expr "$build_expr"
+NIXPKGS_ALLOW_UNFREE=1 nix build --impure --no-link --expr "$build_expr"
 
 echo "Pinned @github/copilot ${pinned_version}"
 echo "npmDepsHash = ${new_hash}"
