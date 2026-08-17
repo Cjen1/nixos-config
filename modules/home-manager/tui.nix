@@ -11,6 +11,7 @@
 
   home.packages = with pkgs; [
     atuin
+    elan
     gnumake
     tmux
     unzip
