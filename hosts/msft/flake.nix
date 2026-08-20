@@ -6,19 +6,29 @@
 
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    copilot-in-cc.url = "git+ssh://git@github.com/cjen1-msft/copilot-in-cc.git?ref=main";
   };
 
   outputs =
-    inputs@{ nixpkgs, home-manager, ... }:
+    { nixpkgs, home-manager, ... }:
+    let
+      homeConfiguration =
+        extraSpecialArgs:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux;
+          inherit extraSpecialArgs;
+          modules = [
+            ./home.nix
+          ];
+        };
+    in
     {
-      homeConfigurations.cjen1-msft = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
-        modules = [
-          inputs.copilot-in-cc.homeManagerModules.default
-          ./home.nix
-        ];
+      homeConfigurations = {
+        cjen1-msft = homeConfiguration {
+          isRemote = false;
+        };
+        remote = homeConfiguration {
+          isRemote = true;
+        };
       };
     };
 }

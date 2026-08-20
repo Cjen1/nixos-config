@@ -1,4 +1,6 @@
 {
+  config,
+  isRemote,
   lib,
   pkgs,
   ...
@@ -53,8 +55,8 @@ in
   };
 
   home = {
-    username ="cjen1-msft";
-    homeDirectory = "/home/cjen1-msft";
+    username = if isRemote then "root" else "cjen1-msft";
+    homeDirectory = if isRemote then "/root" else "/home/cjen1-msft";
     sessionVariables = {
       LANG = "en_US.UTF-8";
       LC_CTYPE = "en_US.UTF-8";
@@ -117,7 +119,7 @@ in
     withRuby = true;
   };
 
-  systemd.user.services.dbus = {
+  systemd.user.services.dbus = lib.mkIf (!isRemote) {
     Unit.Description = "D-Bus User Message Bus";
     Service = {
       ExecStart = "${pkgs.dbus}/bin/dbus-daemon --config-file=${dbusSessionConfig} --address=unix:path=%t/bus --nofork --nopidfile";
@@ -130,12 +132,12 @@ in
     Install.WantedBy = [ "default.target" ];
   };
 
-  services.gnome-keyring = {
+  services.gnome-keyring = lib.mkIf (!isRemote) {
     enable = true;
     components = [ "secrets" ];
   };
 
-  systemd.user.services.gnome-keyring = {
+  systemd.user.services.gnome-keyring = lib.mkIf (!isRemote) {
     Unit = {
       Requires = [ "dbus.service" ];
       After = [ "dbus.service" ];
@@ -146,38 +148,50 @@ in
 
   programs.home-manager.enable = true;
 
-  programs.copilot-in-cc = {
-    enable = true;
-    service.enable = false;
-    claudePackage = pkgs.callPackage ./claude-code { };
-  };
+  codingAgents.copilot.instructionsSlug =
+    if isRemote then
+      ''
+        # Host machine
 
-  codingAgents.copilot.instructionsSlug = ''
-    # Host machine
+        - This is a remote Azure Linux 3 machine reached over SSH. Nix is installed without an init service because the machine runs `/pause` as PID 1.
+        - Use `nix shell nixpkgs#<tool>` or `nix run` for one-off tools rather than installing them globally.
+        - Do not assume that WSL, `explorer.exe`, `wslpath`, or a local Windows browser is available.
+        - The repository is at `/root/nixos-config`.
+        - Link to this workspace with `<a href="vscode://vscode-remote/ssh-remote+20.91.249.202/root/nixos-config">workspace</a>`.
+      ''
+    else
+      ''
+        # Host machine
 
-    - This is an Azure Linux 3 machine with nix installed. Reach for a `nix shell nixpkgs#<tool>` or `nix run` for one-off tools rather than installing them globally.
-    - To open a generated HTML document in the Windows browser, convert its path first: `explorer.exe "$(wslpath -w file.html)"`. A bare WSL path won't resolve.
-    - To make a file clickable from HTML or a browser into the editor, use `vscode://vscode-remote/wsl+AzureLinux3.0/<absolute-path>:<line>:<col>`. There is no `file/` segment in the WSL remote form. It opens the file at that line in the most recently active VS Code window, launching one if none is open. `vscode://file/...` and `vscodium://` do not work here.
-    - Link to this workspace with `<a href="vscode://vscode-remote/wsl+AzureLinux3.0/home/cjen1-msft/">workspace</a>`.
-  '';
+        - This is an Azure Linux 3 machine with nix installed. Reach for a `nix shell nixpkgs#<tool>` or `nix run` for one-off tools rather than installing them globally.
+        - To open a generated HTML document in the Windows browser, convert its path first: `explorer.exe "$(wslpath -w file.html)"`. A bare WSL path won't resolve.
+        - To make a file clickable from HTML or a browser into the editor, use `vscode://vscode-remote/wsl+AzureLinux3.0/<absolute-path>:<line>:<col>`. There is no `file/` segment in the WSL remote form. It opens the file at that line in the most recently active VS Code window, launching one if none is open. `vscode://file/...` and `vscodium://` do not work here.
+        - Link to this workspace with `<a href="vscode://vscode-remote/wsl+AzureLinux3.0/home/cjen1-msft/">workspace</a>`.
+      '';
 
   home.activation.setLoginShell = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     fish_path="$HOME/.nix-profile/bin/fish"
-    current_shell="$(${pkgs.getent}/bin/getent passwd "$USER" | ${pkgs.coreutils}/bin/cut -d: -f7)"
+    current_shell="$(${pkgs.getent}/bin/getent passwd "${config.home.username}" | ${pkgs.coreutils}/bin/cut -d: -f7)"
     sudo_bin="$(PATH=/usr/bin:/bin command -v sudo || true)"
     chsh_bin="$(PATH=/usr/bin:/bin command -v chsh || true)"
 
     if [ "$current_shell" != "$fish_path" ]; then
-      if [ -z "$sudo_bin" ] || ! "$sudo_bin" -n true 2>/dev/null; then
+      if [ "$(${pkgs.coreutils}/bin/id -u)" -eq 0 ]; then
+        run_as_root() { "$@"; }
+      elif [ -n "$sudo_bin" ] && "$sudo_bin" -n true 2>/dev/null; then
+        run_as_root() { "$sudo_bin" -n "$@"; }
+      else
         echo "warning: passwordless sudo is required to set the login shell to $fish_path" >&2
-      elif [ -z "$chsh_bin" ]; then
+      fi
+
+      if command -v run_as_root >/dev/null 2>&1 && [ -z "$chsh_bin" ]; then
         echo "error: chsh is required to set the login shell to $fish_path" >&2
         exit 1
-      else
+      elif command -v run_as_root >/dev/null 2>&1; then
         if ! ${pkgs.gnugrep}/bin/grep -Fqx "$fish_path" /etc/shells; then
-          printf '%s\n' "$fish_path" | "$sudo_bin" -n ${pkgs.coreutils}/bin/tee -a /etc/shells >/dev/null
+          printf '%s\n' "$fish_path" | run_as_root ${pkgs.coreutils}/bin/tee -a /etc/shells >/dev/null
         fi
-        "$sudo_bin" -n "$chsh_bin" -s "$fish_path" "$USER"
+        run_as_root "$chsh_bin" -s "$fish_path" "${config.home.username}"
       fi
     fi
   '';

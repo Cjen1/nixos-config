@@ -27,6 +27,14 @@ nix build ./hosts/msft#homeConfigurations.cjen1-msft.activationPackage
 home-manager switch --flake ./hosts/msft
 ```
 
+To initialize the remote Azure Linux host, run:
+
+```sh
+./hosts/msft/bootstrap-remote.sh
+```
+
+The script installs Nix without an init service, clones this repository into `/root/nixos-config`, builds `./hosts/msft#remote`, and activates it. Override connection settings with the `MSFT_REMOTE_HOST`, `MSFT_REMOTE_PORT`, `MSFT_REMOTE_USER`, and `MSFT_REMOTE_IDENTITY` environment variables.
+
 Update only one host's dependencies:
 
 ```sh
