@@ -98,6 +98,9 @@ in
 
   programs.fish.shellInit = lib.mkBefore ''
     fish_add_path --prepend "$HOME/.nix-profile/bin"
+    if test -r "$HOME/.config/copilot/token"
+      set -gx COPILOT_GITHUB_TOKEN (string trim < "$HOME/.config/copilot/token")
+    end
   '';
 
   programs.tmux = {
