@@ -1,47 +1,6 @@
 {
   "nodes": {
-    "copilot-in-cc": {
-      "inputs": {
-        "home-manager": "home-manager",
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "lastModified": 1785928695,
-        "narHash": "sha256-BzHkdFF9J6pXo+MUXhlRCM3W6BSBE8uWw2CyWeybxjQ=",
-        "ref": "main",
-        "rev": "31c62e0c0c438dddb787262c65e1ed59c6354fda",
-        "revCount": 50,
-        "type": "git",
-        "url": "ssh://git@github.com/cjen1-msft/copilot-in-cc.git"
-      },
-      "original": {
-        "ref": "main",
-        "type": "git",
-        "url": "ssh://git@github.com/cjen1-msft/copilot-in-cc.git"
-      }
-    },
     "home-manager": {
-      "inputs": {
-        "nixpkgs": [
-          "copilot-in-cc",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1785306346,
-        "narHash": "sha256-DScBkW0fOgpGPK2trNoX3ryLTlaC14+gglFo/BhGJ4g=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "e705714e918c3b11affcdd15db2cbe3a070420a0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "home-manager_2": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -64,22 +23,6 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1785318670,
-        "narHash": "sha256-dN6Ou5x/+23FZLEpYP3IffO+NyJFzUlGumt1uu3MMaY=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "0954f7ee2f6bb3dc7d4e3d0d8bcb8fd4bde4cfc5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
         "lastModified": 1782847225,
         "narHash": "sha256-JC9PjqKYG9ve5U8aDOLQipp3+KLANBHUvGdLZlxzdKI=",
         "owner": "NixOS",
@@ -96,9 +39,8 @@
     },
     "root": {
       "inputs": {
-        "copilot-in-cc": "copilot-in-cc",
-        "home-manager": "home-manager_2",
-        "nixpkgs": "nixpkgs_2"
+        "home-manager": "home-manager",
+        "nixpkgs": "nixpkgs"
       }
     }
   },

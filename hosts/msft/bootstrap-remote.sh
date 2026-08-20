@@ -3,17 +3,16 @@ set -euo pipefail
 
 host="${MSFT_REMOTE_HOST:-20.91.249.202}"
 port="${MSFT_REMOTE_PORT:-22}"
-user="${MSFT_REMOTE_USER:-root}"
 identity="${MSFT_REMOTE_IDENTITY:-$HOME/.ssh/azure}"
 repo_url="${MSFT_REPO_URL:-https://github.com/Cjen1/nixos-config.git}"
-repo_dir="${MSFT_REMOTE_REPO_DIR:-/root/nixos-config}"
+repo_dir="/root/nixos-config"
 
 ssh_args=(
   -i "$identity"
   -o BatchMode=yes
   -o StrictHostKeyChecking=accept-new
   -p "$port"
-  "$user@$host"
+  "root@$host"
 )
 
 ssh "${ssh_args[@]}" bash -s -- "$repo_url" "$repo_dir" <<'REMOTE'
@@ -34,12 +33,17 @@ elif [[ -r /nix/var/nix/profiles/default/etc/profile.d/nix.sh ]]; then
 fi
 
 if [[ -d "$repo_dir/.git" ]]; then
-  if ! git -C "$repo_dir" diff --quiet || ! git -C "$repo_dir" diff --cached --quiet; then
+  if [[ -n "$(git -C "$repo_dir" status --porcelain --untracked-files=all)" ]]; then
     echo "error: refusing to update dirty checkout at $repo_dir" >&2
     exit 1
   fi
   git -C "$repo_dir" checkout main
-  git -C "$repo_dir" pull --ff-only
+  git -C "$repo_dir" fetch origin main
+  if ! git -C "$repo_dir" merge-base --is-ancestor HEAD origin/main; then
+    echo "error: $repo_dir has commits that are not on origin/main" >&2
+    exit 1
+  fi
+  git -C "$repo_dir" merge --ff-only origin/main
 else
   git clone "$repo_url" "$repo_dir"
 fi
@@ -49,6 +53,7 @@ activation="$(
   nix build \
     ./hosts/msft#homeConfigurations.remote.activationPackage \
     --no-link \
+    --no-write-lock-file \
     --print-out-paths
 )"
 "$activation/activate"
