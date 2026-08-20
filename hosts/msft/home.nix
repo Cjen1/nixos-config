@@ -152,6 +152,15 @@ in
     claudePackage = pkgs.callPackage ./claude-code { };
   };
 
+  codingAgents.copilot.instructionsSlug = ''
+    # Host machine
+
+    - This is an Azure Linux 3 machine with nix installed. Reach for a `nix shell nixpkgs#<tool>` or `nix run` for one-off tools rather than installing them globally.
+    - To open a generated HTML document in the Windows browser, convert its path first: `explorer.exe "$(wslpath -w file.html)"`. A bare WSL path won't resolve.
+    - To make a file clickable from HTML or a browser into the editor, use `vscode://vscode-remote/wsl+AzureLinux3.0/<absolute-path>:<line>:<col>`. There is no `file/` segment in the WSL remote form. It opens the file at that line in the most recently active VS Code window, launching one if none is open. `vscode://file/...` and `vscodium://` do not work here.
+    - Link to this workspace with `<a href="vscode://vscode-remote/wsl+AzureLinux3.0/home/cjen1-msft/">workspace</a>`.
+  '';
+
   home.activation.setLoginShell = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     fish_path="$HOME/.nix-profile/bin/fish"
     current_shell="$(${pkgs.getent}/bin/getent passwd "$USER" | ${pkgs.coreutils}/bin/cut -d: -f7)"
