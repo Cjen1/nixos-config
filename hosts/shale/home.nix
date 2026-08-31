@@ -2,6 +2,7 @@
 {
   imports = [
     ../../modules/home-manager/tui.nix
+    ../../modules/home-manager/coding-agents/codex.nix
   ];
 
   nixpkgs.config = {

@@ -17,13 +17,15 @@ let
         --add-flags --experimental
     '';
   };
-  skills = {
-    source = ./copilot-skills;
-    recursive = true;
-    force = true;
-  };
 in
 {
+  imports = [
+    (import ./install-skills.nix {
+      agent = "copilot";
+      target = ".copilot/skills";
+    })
+  ];
+
   options.codingAgents.copilot.instructionsSlug = lib.mkOption {
     type = lib.types.lines;
     default = "";
@@ -35,24 +37,11 @@ in
       copilotWithDefaults
     ];
 
-    home.file = {
-      ".agents/skills" = skills;
-      ".claude/skills" = skills;
-      ".copilot/copilot-instructions.md" = {
-        force = true;
-        text =
-          lib.optionalString (cfg.instructionsSlug != "") "${cfg.instructionsSlug}\n\n"
-          + builtins.readFile ./copilot-instructions.md;
-      };
-      ".copilot/skills" = skills;
+    home.file.".copilot/copilot-instructions.md" = {
+      force = true;
+      text =
+        lib.optionalString (cfg.instructionsSlug != "") "${cfg.instructionsSlug}\n\n"
+        + builtins.readFile ./copilot-instructions.md;
     };
-
-    home.activation.removeLegacySkillSymlinks = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
-      for path in "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.copilot/skills"; do
-        if [ -L "$path" ]; then
-          $DRY_RUN_CMD ${pkgs.coreutils}/bin/rm "$path"
-        fi
-      done
-    '';
   };
 }
