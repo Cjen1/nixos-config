@@ -24,9 +24,12 @@
 
 Rankings, higher = better. Cost reflects the time cost of different APIs, not listed price. Intelligence is how hard a problem you can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy editing.
 
-| model       | cost | intelligence | taste | notes |
-| ----------- | ---- | ------------ | ----- | ----- |
-| gpt-5.6-sol | 6    | 9            | 6     |       |
+| model           | cost | intelligence | taste | notes |
+| --------------- | ---- | ------------ | ----- | ----- |
+| gpt-5.6-sol     | 7    | 9            | 6     |       |
+| opus-5          | 2    | 7            | 8     |       |
+| opus-4.8        | 4    | 5            | 8     |       |
+| gemini-4.8-flash| 8    | 6            | 7     |       |
 
 How to apply:
 
