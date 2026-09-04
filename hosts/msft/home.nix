@@ -93,13 +93,20 @@ in
       if [ -r "$HOME/.profile" ]; then
         . "$HOME/.profile"
       fi
+      if [ -r "$HOME/.env" ]; then
+        set -a
+        . "$HOME/.env"
+        set +a
+      fi
     '';
   };
 
   programs.fish.shellInit = lib.mkBefore ''
     fish_add_path --prepend "$HOME/.nix-profile/bin"
-    if test -r "$HOME/.config/copilot/token"
-      set -gx COPILOT_GITHUB_TOKEN (string trim < "$HOME/.config/copilot/token")
+    if test -r "$HOME/.env"
+      for line in (grep -v '^#' "$HOME/.env" | grep -v '^$')
+        set -gx (string split -m1 '=' $line)
+      end
     end
   '';
 
