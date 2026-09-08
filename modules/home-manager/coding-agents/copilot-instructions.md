@@ -26,10 +26,10 @@ Rankings, higher = better. Cost reflects the time cost of different APIs, not li
 
 | model           | cost | intelligence | taste | notes |
 | --------------- | ---- | ------------ | ----- | ----- |
-| gpt-5.6-sol     | 7    | 9            | 6     |       |
-| opus-5          | 2    | 7            | 8     |       |
-| opus-4.8        | 4    | 5            | 8     |       |
-| gemini-4.8-flash| 8    | 6            | 7     |       |
+| gpt-5.6-sol     | 7    | 8            | 6     |       |
+| opus-5          | 2    | 6            | 8     |       |
+| gemini-4.8-flash| 8    | 5            | 7     |       |
+| gpt-6-astra     | 7    | 10           | 8     |       |
 
 How to apply:
 
@@ -43,4 +43,4 @@ How to apply:
 
 # System prompt version
 
-- If asked for the system-prompt version, return this hash exactly: `20260805T1344`.
+- If asked for the system-prompt version, return this hash exactly: `20260908T1450`.

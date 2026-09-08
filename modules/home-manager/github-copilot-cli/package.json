@@ -1,8 +1,8 @@
 {
   "name": "github-copilot-cli-nix",
-  "version": "1.0.82",
+  "version": "1.0.83",
   "private": true,
   "dependencies": {
-    "@github/copilot": "1.0.82"
+    "@github/copilot": "1.0.83"
   }
 }
