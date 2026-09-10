@@ -7,7 +7,7 @@ let
       extraSpecialArgs.isRemote = remote;
       modules = [
         ../hosts/msft/home.nix
-        { codingAgents.copilot.wmuxHooks.attentionExtension = mode; }
+        { codingAgents.copilot.wmuxHooks.attentionExtension = flake.inputs.nixpkgs.lib.mkForce mode; }
       ];
     }).config;
   manifest =

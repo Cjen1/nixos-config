@@ -9,6 +9,39 @@ permissions:
   contents: read
 
 jobs:
+  wmux-attention:
+    name: Test wmux attention
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: cachix/install-nix-action@v31
+      - name: Install transport test tools
+        run: sudo apt-get update -qq && sudo apt-get install -y tmux
+      - name: Test permission tracking and hook transport
+        run: |
+          node --test scripts/test-wmux-attention.mjs
+          python3 scripts/test-wmux-copilot-hooks.py
+      - name: Build and check notification modes
+        run: |
+          nix build --impure --no-link --print-out-paths \
+            --file scripts/test-wmux-attention.nix > "$RUNNER_TEMP/wmux-attention-builds"
+      - name: Test built extension transport
+        run: |
+          tested=false
+          while IFS= read -r build; do
+            if [ -f "$build/config.mjs" ] && grep -qx 'export const dryRun = false;' "$build/config.mjs"; then
+              python3 scripts/test-wmux-attention-transport.py "$build"
+              tested=true
+            fi
+          done < "$RUNNER_TEMP/wmux-attention-builds"
+          if [ "$tested" != true ]; then
+            echo "::error::No notify-mode extension build found"
+            exit 1
+          fi
+
   build:
     name: Build ${{ matrix.host }}
     runs-on: ubuntu-24.04
