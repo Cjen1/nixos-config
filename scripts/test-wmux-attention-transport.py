@@ -29,7 +29,14 @@ with tempfile.TemporaryDirectory(prefix="wmux-attention-test-") as directory:
         shutil.copyfile(build / name, root / name)
     (root / "config.mjs").write_text(config)
     (root / "sdk.mjs").write_text("""
-export async function joinSession() {
+export async function joinSession(config) {
+    if (typeof config?.onPermissionRequest !== "function") {
+        throw new Error("Permission event access was not requested");
+    }
+    const decision = await config.onPermissionRequest({});
+    if (decision.kind !== "no-result") {
+        throw new Error("Observer must not decide permissions");
+    }
     return {
         sessionId: "transport-test",
         on(callback) {
@@ -39,6 +46,12 @@ export async function joinSession() {
                     data: { requestId: "test-request" },
                 });
             }, 0);
+            setTimeout(() => {
+                callback({
+                    type: "permission.completed",
+                    data: { requestId: "test-request", result: { kind: "approved" } },
+                });
+            }, process.env.WMUX_TEST_FAST_APPROVAL ? 80 : 1650);
             setTimeout(() => process.exit(0), 1800);
             return () => {};
         },
@@ -70,11 +83,17 @@ export async function resolve(specifier, context, nextResolve) {
         + b"\x07"
     )
     transport.check_transport(shlex.join(command), expected)
+    tty = root / "tty"
+    tty.write_bytes(b"")
+    env = dict(os.environ, WMUX_TTY_PATH=str(tty), TMUX="", TMUX_PANE="", WMUX_TEST_FAST_APPROVAL="1")
+    result = subprocess.run(command, env=env, capture_output=True, check=True)
+    assert b"resolved test-request before alert" in result.stderr
+    assert tty.read_bytes() == b""
+    print("PASS: quickly completed request emits no alert")
 
     (root / "config.mjs").write_text(
         config.replace("export const dryRun = false;", "export const dryRun = true;")
     )
-    tty = root / "tty"
     tty.write_bytes(b"")
     env = dict(os.environ, WMUX_TTY_PATH=str(tty), TMUX="", TMUX_PANE="")
     result = subprocess.run(command, env=env, capture_output=True, check=True)

@@ -4,7 +4,11 @@ import { watchPermissions } from "./attention.mjs";
 import { hookCommand, dryRun } from "./config.mjs";
 
 const log = (message) => console.error(`[wmux-attention] ${message}`);
-const session = await joinSession();
+const session = await joinSession({
+    // An explicit handler opts into permission events. Leave every decision
+    // to the CLI's existing permission UI and autopilot.
+    onPermissionRequest: () => ({ kind: "no-result" }),
+});
 const dispose = await watchPermissions(session, {
     log,
     notify(payload) {

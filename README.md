@@ -41,6 +41,9 @@ The MSFT configuration enables status hooks and the experimental `wmux-attention
 extension. Apply Home Manager on the machine running Copilot, then restart
 Copilot. Over SSH, keep the tmux pane visible and attached.
 
+On first load, approve the extension's request for permission-event access.
+The handler always returns no decision, leaving approval to Copilot.
+
 Permission alerts wait 1.5 seconds and cancel if the request resolves first.
 Slow automatic approvals can still alert. The extension does not change
 permission decisions.

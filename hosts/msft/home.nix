@@ -42,6 +42,7 @@ in
 {
 
   imports = [
+    ../../modules/home-manager/manual-source-links.nix
     ../../modules/home-manager/tui.nix
     ../../modules/home-manager/excalidraw.nix
     ../../modules/home-manager/coding-agents/opencode.nix
