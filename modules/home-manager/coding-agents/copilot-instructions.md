@@ -17,7 +17,7 @@
 - If a request would take a lot of work at once, stop and say so plainly rather than grinding through it. Suggest a smaller first slice and let me choose scope.
 - Don't use the question or multiple-choice tool. Ask in structured but natural language instead, with the options laid out plainly when there are any.
 - If code requires a paragraph-long comment to convince readers of correctness, the code is wrong.
-- **Verify before explaining.** Do not present speculation as a confirmed explanation of behavior or a bug. When the claim is material or uncertain, validate it with a minimal reproduction, focused test, trace, or direct source inspection. Then have an independent agent review the evidence-backed explanation for logical soundness, completeness, and alternative explanations. Scale the effort to the risk and complexity, and state any remaining uncertainty.
+- **Verify before explaining.** Validate material or uncertain claims with a reproduction, focused test, trace, or source inspection. For independent review, load `factory-workflow`. State remaining uncertainty.
 - When reporting information to me, be extremely concise and sacrifice grammar for concision.
 
 # Picking the right models for workflows and subagents
@@ -29,17 +29,11 @@ Rankings, higher = better. Cost reflects the time cost of different APIs, not li
 | gpt-5.6-sol     | 7    | 8            | 6     |       |
 | opus-5          | 2    | 6            | 8     |       |
 | gemini-4.8-flash| 8    | 5            | 7     |       |
-| gpt-6-astra     | 7    | 10           | 8     |       |
+| gpt-6-astra     | 4    | 10           | 8     |       |
 
-How to apply:
-
-- These are defaults, not limits. You have standing permission to override them. If a model's output is not good enough, rerun or redo the work with a smarter model without asking. Judge the output, not the price tag.
-- Only use models listed in the table above.
-- Don't let cost prevent you from using the right model for the job. Use cheaper options to gather information and try things before moving the work to a more expensive option.
-- Anything user-facing, including UI/UX, API design, and copy, needs taste >= 7.
-- For substantial or important work, fan out reviewers with different lenses and coalesce their responses. Use more reviewers when correctness matters more.
-- For mechanical work, pick the cheapest model in the table and use no or low thinking.
-- Unless there is a good reason, prevent subagents from spawning subagents.
+- Use models from this table by default. If the user explicitly requests another model, you may use it.
+- For substantial multi-agent work, load `factory-workflow`. It owns task-specific factory orchestration, model selection, and review.
+- Keep small tasks direct. Do not create a factory merely to parallelize a few tool calls.
 
 # System prompt version
 
