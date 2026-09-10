@@ -35,6 +35,16 @@ let
     "errorOccurred"
     "sessionEnd"
   ];
+  attentionConfig = pkgs.writeText "wmux-attention-config.mjs" ''
+    export const hookCommand = ${builtins.toJSON "${wmuxHook}/bin/wmux-copilot-hook"};
+    export const dryRun = ${lib.boolToString (cfg.wmuxHooks.attentionExtension == "observe")};
+  '';
+  attentionExtension = pkgs.runCommand "wmux-attention-extension" { } ''
+    mkdir -p "$out"
+    cp ${./wmux-attention/extension.mjs} "$out/extension.mjs"
+    cp ${./wmux-attention/attention.mjs} "$out/attention.mjs"
+    cp ${attentionConfig} "$out/config.mjs"
+  '';
 in
 {
   imports = [
@@ -51,8 +61,27 @@ in
   };
   options.codingAgents.copilot.wmuxHooks.enable =
     lib.mkEnableOption "Copilot status and notification hooks for wmux terminals";
+  options.codingAgents.copilot.wmuxHooks.attentionExtension = lib.mkOption {
+    type = lib.types.enum [
+      "off"
+      "observe"
+      "notify"
+    ];
+    default = "off";
+    description = ''
+      Experimental permission observer. Observe logs without changing hooks.
+      Notify replaces permission-prompt hooks with cancellable delayed alerts.
+    '';
+  };
 
   config = {
+    assertions = [
+      {
+        assertion = cfg.wmuxHooks.attentionExtension == "off" || cfg.wmuxHooks.enable;
+        message = "wmux attention extension requires codingAgents.copilot.wmuxHooks.enable.";
+      }
+    ];
+
     home.packages = [
       copilotWithDefaults
     ];
@@ -75,11 +104,22 @@ in
               timeoutSec = 2;
             }
             // lib.optionalAttrs (event == "notification") {
-              matcher = "permission_prompt|elicitation_dialog";
+              matcher =
+                if cfg.wmuxHooks.attentionExtension == "notify" then
+                  "elicitation_dialog"
+                else
+                  "permission_prompt|elicitation_dialog";
             }
           )
         ]);
       };
+
     };
+
+    home.file.".copilot/extensions/wmux-attention" =
+      lib.mkIf (cfg.wmuxHooks.attentionExtension != "off") {
+        source = attentionExtension;
+        recursive = true;
+      };
   };
 }

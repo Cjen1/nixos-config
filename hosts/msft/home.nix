@@ -159,6 +159,7 @@ in
   programs.home-manager.enable = true;
 
   codingAgents.copilot.wmuxHooks.enable = true;
+  codingAgents.copilot.wmuxHooks.attentionExtension = "notify";
 
   codingAgents.copilot.instructionsSlug =
     if isRemote then

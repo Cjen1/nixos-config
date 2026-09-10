@@ -41,9 +41,6 @@ def terminal(command, env):
 
 
 def main():
-    env = dict(os.environ, TERM="xterm-256color")
-    for key in ("TMUX", "TMUX_PANE", "WMUX_TTY_PATH"):
-        env.pop(key, None)
     manifest_path = os.environ.get("WMUX_HOOK_MANIFEST")
     if manifest_path:
         manifest = json.loads(Path(manifest_path).read_text())
@@ -70,6 +67,13 @@ def main():
         + b"\x07"
     )
     command = f"printf %s {shlex.quote(payload)} | {command}"
+    check_transport(command, expected)
+
+
+def check_transport(command, expected):
+    env = dict(os.environ, TERM="xterm-256color")
+    for key in ("TMUX", "TMUX_PANE", "WMUX_TTY_PATH"):
+        env.pop(key, None)
     pid, fd = terminal(["bash", "-c", command], env)
     try:
         read_until(fd, expected)
