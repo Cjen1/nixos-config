@@ -119,7 +119,7 @@ in
     extraConfig = ''
       set -g extended-keys on
       set -g extended-keys-format csi-u
-      set -as terminal-features ",xterm-256color:RGB"
+      set -as terminal-features ",xterm-256color:RGB:hyperlinks"
       unbind-key -T root WheelUpPane
       unbind-key -T root MouseDrag1Pane
     '';

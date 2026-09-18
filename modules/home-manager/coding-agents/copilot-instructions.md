@@ -26,7 +26,7 @@ Rankings, higher = better. Cost reflects the time cost of different APIs, not li
 
 | model           | cost | intelligence | taste | notes |
 | --------------- | ---- | ------------ | ----- | ----- |
-| gpt-5.6-sol     | 7    | 8            | 6     |       |
+| gpt-5.6-sol     | 7    | 9            | 6     |       |
 | opus-5          | 2    | 6            | 8     |       |
 | gemini-4.8-flash| 8    | 5            | 7     |       |
 | gpt-6-astra     | 4    | 10           | 8     |       |
@@ -34,6 +34,7 @@ Rankings, higher = better. Cost reflects the time cost of different APIs, not li
 - Use models from this table by default. If the user explicitly requests another model, you may use it.
 - For substantial multi-agent work, load `factory-workflow`. It owns task-specific factory orchestration, model selection, and review.
 - Keep small tasks direct. Do not create a factory merely to parallelize a few tool calls.
+- For proofs, subagent fan-out loses context and expands scope. Instead use low-cost subagents to fill and check disjoint mechanical proofs while the main process continues onto the next objective.
 
 # System prompt version
 
