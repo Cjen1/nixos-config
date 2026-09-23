@@ -61,3 +61,16 @@ nix flake update --flake ./hosts/mercury
 ```
 
 Jasper owns its Agenix declarations, recipients, and encrypted files under `hosts/jasper/secrets/`. Its flake also owns the restricted `custom-tooling` input, so evaluate it only where that Forgejo instance is reachable.
+
+## Lean 4 in Neovim
+
+The shared Neovim configuration, also available as `vim`, includes a pinned
+[Lean 4 Tree-sitter grammar](https://github.com/Julian/tree-sitter-lean) for
+highlighting and folding `.lean` files. The static grammar cannot fully parse
+user-defined Lean syntax. This does not install a Lean language server.
+
+After changing the grammar, run the integration check from the repository root:
+
+```sh
+nix build --impure --file scripts/test-neovim-lean.nix --no-link
+```

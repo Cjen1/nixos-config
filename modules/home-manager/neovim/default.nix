@@ -125,6 +125,8 @@
           vim.opt.foldenable = false
       '';
       }
+
+      (pkgs.neovimUtils.grammarToPlugin (pkgs.callPackage ./lean-grammar.nix {}))
       
       {
         plugin = nvim-treesitter-context;

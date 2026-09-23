@@ -20,9 +20,8 @@ Rankings, higher = better. Cost reflects the time cost of different APIs, not li
 
 | model           | cost | intelligence | taste | notes |
 | --------------- | ---- | ------------ | ----- | ----- |
-| gpt-5.6-sol     | 7    | 9            | 6     |       |
-| opus-5          | 4    | 6            | 9     |       |
-| gemini-4.8-flash| 8    | 5            | 7     |       |
+| gpt-6-sol       | 9    | 9            | 6     |       |
+| opus-5.5        | 4    | 9            | 9     |       |
 | gpt-6-astra     | 2    | 10           | 8     |       |
 
 - Use models from this table by default. If the user explicitly requests another model, you may use it.
