@@ -77,6 +77,8 @@ in
   };
 
   programs.git.settings = {
+    user.name = lib.mkForce "cjen1-msft";
+    user.email = lib.mkForce "chrisjensen@microsoft.com";
     http.sslCAInfo = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     diff.tool = "vscode";
     difftool.vscode.cmd = "code --wait --diff \"$LOCAL\" \"$REMOTE\"";
