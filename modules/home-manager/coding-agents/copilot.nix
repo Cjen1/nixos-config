@@ -14,7 +14,7 @@ let
     postBuild = ''
       wrapProgram "$out/bin/copilot" \
         --unset COPILOT_ALLOW_ALL \
-        --add-flags "--experimental --assisted-approval"
+        --add-flags "--experimental"
     '';
   };
   wmuxHook = pkgs.writeShellApplication {
