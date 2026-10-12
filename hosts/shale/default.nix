@@ -14,7 +14,24 @@
 
   wsl.enable = true;
   wsl.defaultUser = "cjen1";
-  wsl.interop.register = true;
+  # Use WSL's existing registration; WSL 3.0.1 makes binfmt_misc read-only.
+  wsl.interop.register = false;
+
+  # Allow activation and systemd startup to finish before WSL gives up.
+  wsl.wslConf.boot.initTimeout = 60000;
+
+  # WSL's early boot probes run before the normal NixOS PATH is available.
+  wsl.extraBin = [
+    { src = "${pkgs.systemd}/bin/systemctl"; }
+    { src = "${pkgs.gnugrep}/bin/grep"; }
+  ];
+
+  # WSL mounts binfmt_misc itself; an automount on it fails during boot.
+  systemd.units."proc-sys-fs-binfmt_misc.automount".enable = false;
+  systemd.services.systemd-binfmt.enable = false;
+
+  # Manual pages are unused here; avoid building their index at startup.
+  documentation.man.enable = false;
 
   programs.nix-ld = {
     enable = true;
