@@ -60,6 +60,35 @@ Update only one host's dependencies:
 nix flake update --flake ./hosts/mercury
 ```
 
+To update a packaged coding agent, run its `bump.sh` with a version or omit the
+version for `latest`:
+
+```sh
+./modules/home-manager/github-copilot-cli/bump.sh
+./modules/home-manager/codex-cli/bump.sh 0.151.0
+./modules/home-manager/opencode-cli/bump.sh
+./hosts/msft/claude-code/bump.sh
+```
+
+The scripts update the npm manifests and Nix hash without building the package.
+They use Mercury's pinned nixpkgs, reuse matching dependencies from the previous
+Nix cache, and download only missing tarballs. If the previous cache is absent,
+they fetch all dependencies. A lockfile that matches the cached copy retains its
+hash without prefetching.
+
+To also verify the full package build, add `--build`. The build reuses the
+prefetched cache:
+
+```sh
+./modules/home-manager/github-copilot-cli/bump.sh --build
+```
+
+Run the offline bump-script checks with `python3 scripts/test-bump-npm-package.py`.
+Use `--integration` to compare a merged cache against the pinned prefetcher and
+verify the full build. Use `--benchmark <baseline-revision>` to compare repeat
+Codex bumps against an earlier Git revision. These two modes use temporary
+package copies and download dependencies.
+
 Jasper owns its Agenix declarations, recipients, and encrypted files under `hosts/jasper/secrets/`. Its flake also owns the restricted `custom-tooling` input, so evaluate it only where that Forgejo instance is reachable.
 
 ## Lean 4 in Neovim
