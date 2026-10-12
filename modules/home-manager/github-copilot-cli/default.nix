@@ -18,12 +18,12 @@
 
 buildNpmPackage rec {
   pname = "github-copilot-cli";
-  version = "1.0.88";
+  version = "1.0.95";
 
   src = ./.;
   nodejs = nodejs_22;
 
-  npmDepsHash = "sha256-/vymZvBlDL3ycyReS7qzjQZJoDzhYSi7I0OujSkDM0w=";
+  npmDepsHash = "sha256-3zaswKaitXUvw/LIFvwh0aVKUMFvz7LCrR8cfikK9Io=";
 
   dontNpmBuild = true;
 
