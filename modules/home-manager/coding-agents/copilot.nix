@@ -86,6 +86,10 @@ in
       copilotWithDefaults
     ];
 
+    home.activation.setCopilotPermissions = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run ${copilotWithDefaults}/bin/copilot config --global defaultPermissionMode assisted
+    '';
+
     home.file.".copilot/copilot-instructions.md" = {
       force = true;
       text =

@@ -14,34 +14,11 @@ let
          <servicedir>${pkgs.gnome-keyring}/share/dbus-1/services</servicedir>
          <servicedir>${pkgs.gcr}/share/dbus-1/services</servicedir>'
   '';
-  codespaceKeepAliveLoop = pkgs.writeShellScript "codespace-keepalive-loop" ''
-    while true; do
-      if ! ${pkgs.openssh}/bin/ssh \
-        -o BatchMode=yes \
-        -o ConnectTimeout=30 \
-        -o ServerAliveInterval=15 \
-        -o ServerAliveCountMax=3 \
-        ghcs1-raw \
-        'printf "pong %s\n" "$(/bin/date --iso-8601=seconds)"'
-      then
-        printf 'Codespaces keep-alive failed at %s\n' \
-          "$(${pkgs.coreutils}/bin/date --iso-8601=seconds)" >&2
-      fi
-      ${pkgs.coreutils}/bin/sleep 240
-    done
-  '';
-  codespaceKeepAlive = pkgs.writeShellScriptBin "codespace-keepalive" ''
-    session=codespace-keepalive-ghcs1
-    if ! ${pkgs.tmux}/bin/tmux has-session -t "$session" 2>/dev/null; then
-      if ! ${pkgs.tmux}/bin/tmux new-session -d -s "$session" ${codespaceKeepAliveLoop}; then
-        printf 'Failed to start local Codespaces keep-alive session\n' >&2
-      fi
-    fi
-  '';
 in
 {
 
   imports = [
+    ./fleet.nix
     ../../modules/home-manager/manual-source-links.nix
     ../../modules/home-manager/tui.nix
     ../../modules/home-manager/excalidraw.nix
@@ -64,7 +41,6 @@ in
       LC_CTYPE = "en_US.UTF-8";
     };
     packages = lib.optionals (!isRemote) [
-      codespaceKeepAlive
       pkgs.nix
     ];
   };
@@ -170,11 +146,11 @@ in
       ''
         # Host machine
 
-        - This is a remote Azure Linux 3 machine reached over SSH. Nix is installed without an init service because the machine runs `/pause` as PID 1.
+        - This is a remote Azure Linux 3 devcontainer reached over SSH. Nix is installed without an init service.
         - Use `nix shell nixpkgs#<tool>` or `nix run` for one-off tools rather than installing them globally.
         - Do not assume that WSL, `explorer.exe`, `wslpath`, or a local Windows browser is available.
         - The repository is at `/root/nixos-config`.
-        - Link to this workspace with `<a href="vscode://vscode-remote/ssh-remote+20.91.249.202/root/nixos-config">workspace</a>`.
+        - For editor links, use the SSH alias from the active connection; do not assume a fixed hostname or IP.
       ''
     else
       ''

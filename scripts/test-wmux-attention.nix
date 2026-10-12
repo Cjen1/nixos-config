@@ -22,6 +22,12 @@ assert matcher off == "permission_prompt|elicitation_dialog";
 assert matcher observe == matcher off;
 assert matcher notify == "elicitation_dialog";
 assert matcher local == matcher notify;
+assert flake.inputs.nixpkgs.lib.hasInfix
+  "config --global defaultPermissionMode assisted"
+  local.home.activation.setCopilotPermissions.data;
+assert flake.inputs.nixpkgs.lib.hasInfix
+  "config --global defaultPermissionMode assisted"
+  notify.home.activation.setCopilotPermissions.data;
 assert builtins.attrNames (manifest off).hooks == builtins.attrNames (manifest notify).hooks;
 assert !(off.home.file ? ".copilot/extensions/wmux-attention");
 [

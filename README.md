@@ -27,13 +27,88 @@ nix build ./hosts/msft#homeConfigurations.cjen1-msft.activationPackage
 home-manager switch --flake ./hosts/msft
 ```
 
-To initialize the remote Azure Linux host, run:
+## MSFT remote fleet
 
-```sh
-./hosts/msft/bootstrap-remote.sh
+Declare named remote hosts in `hosts/msft/fleet-registry.nix`. The registry starts
+empty. Each entry must contain exactly one connection method:
+
+```nix
+{
+  cs1 = { codespace = "magical-unicorn-workspace"; };
+  server1 = { ssh = "root@example-host"; };
+}
 ```
 
-The script installs Nix without an init service, clones this repository into `/root/nixos-config`, builds `./hosts/msft#homeConfigurations.remote.activationPackage`, and activates it as `root`. Override connection settings with the `MSFT_REMOTE_HOST`, `MSFT_REMOTE_PORT`, and `MSFT_REMOTE_IDENTITY` environment variables.
+Apply the laptop's Home Manager configuration after changing the registry.
+It generates SSH aliases, so `ssh cs1` connects through GitHub CLI and
+`ssh server1` uses ordinary SSH. Codespace aliases use `root`, matching CCF's
+SSH devcontainer. The activation adds a top-level include to `~/.ssh/config`
+without replacing its existing host definitions. If another configuration
+manager owns that file through a symlink, add `Include ~/.ssh/msft-fleet.conf`
+at the top through that manager instead.
+
+`MSFT_FLEET_FILE` points to the generated JSON registry. Authenticate GitHub CLI
+on the laptop with `gh auth login --scopes codespace`. The services use
+those saved credentials, not variables sourced by an interactive shell.
+
+After registering a new CCF SSH Codespace and applying Home Manager, run:
+
+```sh
+bootstrap-codespace-nix-env cs1
+```
+
+The command uses the registered SSH alias, which also starts stopped Codespaces.
+It requires root login and preinstalled Git and curl. It installs Nix only when
+absent, without an init service, and clones `Cjen1/nixos-config` branch `main`
+into `/root/nixos-config`. It builds and activates the remote Home Manager
+configuration, including Copilot's assisted permission default.
+
+Rerunning bootstrap fast-forwards a clean `main` checkout to `origin/main`.
+It refuses dirty checkouts (including untracked files), local-only commits,
+other branches, unexpected repository origins, and non-checkout directories.
+SSH failures and installation, build, or activation failures return nonzero
+with error context; correct the reported problem and rerun. Generic SSH entries
+use the same command but must also provide a root Azure Linux environment.
+
+Codespace rebuilds can erase `/root` and `/nix`; rerun bootstrap after a rebuild.
+This does not restore interrupted Copilot sessions.
+
+Each Codespace gets a laptop-only user service named
+`codespace-keepalive-<alias>.service`. It holds a GitHub CLI SSH command open so
+the CLI sends activity heartbeats, automatically starts stopped Codespaces,
+and retries failed connections after 60 seconds. Ordinary SSH entries get no
+keepalive service. Home Manager starts added services and stops removed ones;
+remove an entry and apply the configuration to end management.
+
+The services require the laptop's Linux environment and user systemd manager
+to remain running. GitHub's 12-hour runtime limit still applies. Reconnection
+does not restore Copilot, tmux sessions, or other interrupted processes.
+Inspect a service with:
+
+```sh
+systemctl --user status codespace-keepalive-cs1.service
+journalctl --user -u codespace-keepalive-cs1.service
+```
+
+Run the registry, SSH integration, bootstrap, and mocked keepalive checks with:
+
+```sh
+nix build --impure --file scripts/test-msft-fleet.nix --no-link
+```
+
+## Copilot permissions
+
+The shared Copilot Nix module sets `defaultPermissionMode` to `assisted` during
+Home Manager activation. Remote bootstrap already runs that activation, so it
+needs no separate settings step. Copilot's settings command preserves other
+user preferences.
+
+This default applies to new interactive sessions, not resumed sessions.
+Assisted approval reviews tool requests and may still ask for permission.
+It does not grant unrestricted access.
+
+Check settings preservation and repeat activation with
+`python3 scripts/test-copilot-settings.py`.
 
 ## Copilot notifications in wmux
 
