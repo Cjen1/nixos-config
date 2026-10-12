@@ -9,12 +9,12 @@
 
 buildNpmPackage rec {
   pname = "codex-cli";
-  version = "0.151.0";
+  version = "0.162.1";
 
   src = ./.;
   nodejs = nodejs_22;
 
-  npmDepsHash = "sha256-k0Gup2SQB/CoZJAFkwZGfCFEz7SKwkj9vbQFBmgtVQE=";
+  npmDepsHash = "sha256-/7dBBZMzlbvChChiJTDZsDOQUC2WMaL4B73qaSYe5Tg=";
 
   dontNpmBuild = true;
 

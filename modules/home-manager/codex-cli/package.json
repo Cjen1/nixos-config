@@ -1,8 +1,8 @@
 {
   "name": "openai-codex-cli-nix",
-  "version": "0.151.0",
+  "version": "0.162.1",
   "private": true,
   "dependencies": {
-    "@openai/codex": "0.151.0"
+    "@openai/codex": "0.162.1"
   }
 }
