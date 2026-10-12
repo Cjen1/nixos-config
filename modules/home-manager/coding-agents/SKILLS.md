@@ -12,11 +12,11 @@ alone do not identify unreleased changes on the default branch.
 
 | Source | Manifest version | Source commit | Vendored subset |
 | --- | --- | --- | --- |
-| [poteto's pstack](https://github.com/cursor/plugins/tree/1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def/pstack) | 0.15.20 | `1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def` | `how`, `why`, `blast-radius`, and the ten principles listed below |
+| [poteto's pstack](https://github.com/cursor/plugins/tree/1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def/pstack) | 0.15.20 | `1b6d44ff26d4e242f4e8f68c391e6d2f7ca16def` | `how`, `why`, `blast-radius`, `benchmark-checklist`, and the eleven principles listed below |
 | [Matt Pocock's skills](https://github.com/mattpocock/skills/tree/49dd158d1076134a641b33efb035946536778336) | 1.3.1, plus unreleased changes at this commit | `49dd158d1076134a641b33efb035946536778336` | `grilling`, `handoff`, including their `agents/openai.yaml` files |
 
 The pstack principles are `build-the-lever`, `encode-lessons-in-structure`,
-`experience-first`, `fix-root-causes`, `laziness-protocol`,
+`experience-first`, `explain-the-number`, `fix-root-causes`, `laziness-protocol`,
 `make-operations-idempotent`, `minimize-reader-load`, `prove-it-works`,
 `sequence-verifiable-units`, and `subtract-before-you-add`. Each directory has
 the `principle-` prefix.
@@ -27,7 +27,8 @@ claims. Upstream license notices are in [`copilot-skills/LICENSE`](./copilot-ski
 
 ## Local adaptations to preserve
 
-- Keep the ten principles, `how`, and `why` model-invokable. Keep `blast-radius`
+- Keep the eleven principles, `benchmark-checklist`, `how`, and `why`
+  model-invokable. Keep `blast-radius`
   and `handoff` user-invoked, and retain Matt's Codex invocation metadata.
 - Use Copilot's `task` arguments, available-tool discovery, and Copilot Spaces
   rather than Cursor model rules, tool arguments, or MCP filesystem paths.
@@ -44,6 +45,9 @@ claims. Upstream license notices are in [`copilot-skills/LICENSE`](./copilot-ski
   removed `unslop` skill.
 - Restore references to `prove-it-works` now that it is included, but keep the
   link to the uninstalled `guard-the-context-window` principle removed.
+- Keep `benchmark-checklist` standalone: replace references to uninstalled
+  PR, performance-investigation, and iterative-optimization playbooks with
+  their relevant guidance.
 
 ## Updating
 
@@ -52,11 +56,6 @@ new snapshot. Review behavioral changes, carry forward the adaptations above,
 and copy required companion files as well as `SKILL.md`. Do not install the
 whole upstream catalog or silently restore removed skills.
 
-Update the versions, commit hashes, date, and subset in this document, then run:
-
-```sh
-python3 scripts/test-agent-skills.py
-```
-
-The offline check covers skill metadata, companion files, relative links,
-invocation settings, removed skills, and the Copilot adaptations.
+Update the versions, commit hashes, date, and subset in this document. Check
+skill metadata, companion files, relative links, invocation settings, removed
+skills, and the Copilot adaptations before committing.
