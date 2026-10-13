@@ -64,6 +64,7 @@ pkgs.runCommand "test-msft-fleet" {
   keepAliveSource = ../hosts/msft/codespace-keepalive.sh;
   bootstrapSource = ../hosts/msft/bootstrap-remote.sh;
   updateSource = ../hosts/msft/update-remote.sh;
+  syncEnvSource = ../hosts/msft/sync-remote-env.sh;
   remoteBootstrap = ../hosts/msft/bootstrap-nix-env.sh;
   fleetFile = local.home.sessionVariables.MSFT_FLEET_FILE;
   installSSHInclude = pkgs.writeShellApplication {

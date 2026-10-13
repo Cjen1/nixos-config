@@ -19,7 +19,15 @@ class BootstrapTests(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.bin = self.root / "bin"
         self.bin.mkdir()
-        self.env = dict(os.environ, PATH=f"{self.bin}:{os.environ['PATH']}")
+        self.home = self.root / "home"
+        self.home.mkdir()
+        self.env = dict(os.environ, PATH=f"{self.bin}:{os.environ['PATH']}", HOME=str(self.home))
+        sync = self.bin / "sync-msft-remote-env"
+        sync.write_text(
+            f"#!{shutil.which('bash')}\n"
+            f"exec bash {shlex.quote(os.environ['syncEnvSource'])} \"$@\"\n"
+        )
+        sync.chmod(0o755)
 
     def executable(self, name, body):
         path = self.bin / name
@@ -89,6 +97,91 @@ class BootstrapTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 1)
             self.assertFalse(call.exists())
+
+    def test_environment_copy(self):
+        call = self.root / "ssh.jsonl"
+        remote = self.root / "remote"
+        remote.mkdir()
+        self.env.update(
+            MSFT_FLEET_FILE=os.environ["fleetFile"],
+            MSFT_BOOTSTRAP_SCRIPT=os.environ["remoteBootstrap"],
+            SSH_CALL=str(call),
+            REMOTE_HOME=str(remote),
+        )
+        self.executable(
+            "ssh",
+            "import json, os, subprocess, sys\nfrom pathlib import Path\n"
+            "data = sys.stdin.read()\n"
+            "alias, command = sys.argv[-2:]\n"
+            "with Path(os.environ['SSH_CALL']).open('a') as f:\n"
+            " f.write(json.dumps({'alias': alias, 'command': command})+'\\n')\n"
+            "if command.startswith('bash -s'):\n"
+            " sys.exit(int(os.environ.get('DEPLOY_EXIT', '0')))\n"
+            "if alias == os.environ.get('FAIL_COPY_ALIAS'): sys.exit(7)\n"
+            "home = Path(os.environ['REMOTE_HOME']) / alias\n"
+            "home.mkdir(exist_ok=True)\n"
+            "command = command.replace('/root/.env', str(home / '.env'))\n"
+            "sys.exit(subprocess.run(['bash', '-c', command], input=data, text=True).returncode)\n",
+        )
+        local_env = self.home / ".env"
+        content = b"GITHUB_TOKEN=synthetic-pat\nOTHER=value with spaces\nNOT_EXECUTED=$(exit 99)\n"
+        for source in ("bootstrapSource", "updateSource"):
+            with self.subTest(source=source):
+                def run(*aliases):
+                    return subprocess.run(
+                        ["bash", os.environ[source], *aliases],
+                        env=self.env, capture_output=True, text=True,
+                    )
+
+                destination = remote / "cs1" / ".env"
+                destination.parent.mkdir(exist_ok=True)
+                destination.write_text("existing")
+                destination.chmod(0o644)
+                local_env.write_bytes(content)
+                for _ in range(2):
+                    result = run("cs1")
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(destination.read_bytes(), content)
+                    self.assertEqual(destination.stat().st_mode & 0o777, 0o600)
+                    self.assertEqual(list(destination.parent.glob(".env.*")), [])
+                    self.assertNotIn("synthetic-pat", result.stdout + result.stderr)
+                local_env.write_bytes(b"")
+                result = run("cs1")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(destination.read_bytes(), b"")
+                local_env.unlink()
+                destination.write_text("keep me")
+                call.unlink()
+                result = run("cs1")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(destination.read_text(), "keep me")
+                self.assertEqual(len(call.read_text().splitlines()), 1)
+                local_env.mkdir()
+                result = run("cs1")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("cannot read local environment file", result.stderr)
+                local_env.rmdir()
+                local_env.write_bytes(content)
+                self.env["DEPLOY_EXIT"] = "9"
+                call.unlink()
+                result = run("cs1")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(len(call.read_text().splitlines()), 1)
+                self.assertEqual(destination.read_text(), "keep me")
+                del self.env["DEPLOY_EXIT"]
+                self.env["FAIL_COPY_ALIAS"] = "cs1"
+                aliases = ("cs1", "cs2") if source == "updateSource" else ("cs1",)
+                result = run(*aliases)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("environment copy failed for cs1 (exit 7)", result.stderr)
+                self.assertNotIn("Bootstrapped cs1", result.stdout)
+                self.assertNotIn("Updated cs1", result.stdout)
+                self.assertEqual(destination.read_text(), "keep me")
+                if source == "updateSource":
+                    self.assertIn("Updated cs2", result.stdout)
+                    self.assertEqual((remote / "cs2" / ".env").read_bytes(), content)
+                del self.env["FAIL_COPY_ALIAS"]
+                local_env.unlink()
 
     def git(self, directory, *args):
         return subprocess.run(

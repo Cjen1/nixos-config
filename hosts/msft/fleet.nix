@@ -76,12 +76,18 @@ let
       ''
       + builtins.readFile ./codespace-keepalive.sh;
   };
+  syncEnvironment = pkgs.writeShellApplication {
+    name = "sync-msft-remote-env";
+    runtimeInputs = [ pkgs.openssh ];
+    text = builtins.readFile ./sync-remote-env.sh;
+  };
   bootstrap = pkgs.writeShellApplication {
     name = "msft-fleet-bootstrap";
     runtimeInputs = [
       pkgs.jq
       pkgs.openssh
       pkgs.gh
+      syncEnvironment
     ];
     text =
       ''
@@ -96,6 +102,7 @@ let
       pkgs.jq
       pkgs.openssh
       pkgs.gh
+      syncEnvironment
     ];
     text =
       ''

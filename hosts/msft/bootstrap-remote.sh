@@ -26,7 +26,8 @@ if ssh \
   -o ServerAliveInterval=30 \
   -o ServerAliveCountMax=3 \
   "$alias" 'bash -s -- https://github.com/Cjen1/nixos-config.git /root/nixos-config' \
-  < "${MSFT_BOOTSTRAP_SCRIPT:?MSFT_BOOTSTRAP_SCRIPT must point to the remote bootstrap script}"; then
+  < "${MSFT_BOOTSTRAP_SCRIPT:?MSFT_BOOTSTRAP_SCRIPT must point to the remote bootstrap script}" &&
+  sync-msft-remote-env "$alias"; then
   echo "Bootstrapped $alias"
 else
   status=$?

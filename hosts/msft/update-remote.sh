@@ -45,7 +45,8 @@ for alias in "${aliases[@]}"; do
     -o ServerAliveInterval=30 \
     -o ServerAliveCountMax=3 \
     "$alias" 'bash -s -- https://github.com/Cjen1/nixos-config.git /root/nixos-config update' \
-    < "${MSFT_BOOTSTRAP_SCRIPT:?MSFT_BOOTSTRAP_SCRIPT must point to the remote deployment script}"; then
+    < "${MSFT_BOOTSTRAP_SCRIPT:?MSFT_BOOTSTRAP_SCRIPT must point to the remote deployment script}" &&
+    sync-msft-remote-env "$alias"; then
     echo "Updated $alias"
   else
     status=$?

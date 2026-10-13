@@ -67,6 +67,12 @@ absent, without an init service, and clones `Cjen1/nixos-config` branch `main`
 into `/root/nixos-config`. It builds and activates the remote Home Manager
 configuration, including Copilot's assisted permission default.
 
+Bootstrap and update copy the laptop's `~/.env`, if present, to `/root/.env`
+after activation. The copy atomically replaces the remote file with mode `0600`;
+new remote shells load its variables, including any PAT. A missing local file
+leaves the remote file untouched. Copy failures fail that host's operation.
+Credentials travel over SSH and are never stored in the Nix store.
+
 Rerunning bootstrap fast-forwards a clean `main` checkout to `origin/main`.
 It refuses dirty checkouts (including untracked files), local-only commits,
 other branches, unexpected repository origins, and non-checkout directories.
