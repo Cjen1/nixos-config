@@ -47,7 +47,11 @@ without replacing its existing host definitions. If another configuration
 manager owns that file through a symlink, add `Include ~/.ssh/msft-fleet.conf`
 at the top through that manager instead.
 
-`MSFT_FLEET_FILE` points to the generated JSON registry. Authenticate GitHub CLI
+`MSFT_FLEET_FILE` points to the generated JSON registry. Entries are tagged
+variants: `{"kind":"codespace","data":{"name":"..."}}` or
+`{"kind":"ssh","data":{"destination":"root@example-host"}}`, with no unused
+transport fields. The Nix registry keeps the shorthand shown above.
+Authenticate GitHub CLI
 on the laptop with `gh auth login --scopes codespace`. The services use
 those saved credentials, not variables sourced by an interactive shell.
 

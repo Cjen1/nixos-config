@@ -11,6 +11,17 @@ import unittest
 
 
 class FleetTests(unittest.TestCase):
+    def test_registry_shape(self):
+        self.assertEqual(
+            json.loads(Path(os.environ["fleetFile"]).read_text()),
+            {
+                "cs1": {"kind": "codespace", "data": {"name": "magical-unicorn-workspace"}},
+                "cs2": {"kind": "codespace", "data": {"name": "second-codespace"}},
+                "aci1": {"kind": "ssh", "data": {"destination": "root@example.invalid"}},
+                "server": {"kind": "ssh", "data": {"destination": "server.example.invalid"}},
+            },
+        )
+
     def test_keepalive(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -72,6 +83,20 @@ class FleetTests(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, 1)
                 self.assertIn("check the fleet registry", result.stderr)
+                self.assertFalse(call.exists())
+            invalid_registry = root / "invalid-registry.json"
+            env["MSFT_FLEET_FILE"] = str(invalid_registry)
+            for entry in (
+                {"kind": "ssh", "data": {"name": "not-a-codespace"}},
+                {"kind": "unknown", "data": {"name": "not-a-codespace"}},
+                {"kind": "codespace", "data": {}},
+            ):
+                invalid_registry.write_text(json.dumps({"cs1": entry}))
+                result = subprocess.run(
+                    ["bash", os.environ["keepAliveSource"], "cs1"],
+                    env=env, capture_output=True, text=True,
+                )
+                self.assertEqual(result.returncode, 1)
                 self.assertFalse(call.exists())
             env["MSFT_FLEET_FILE"] = str(root / "missing-registry.json")
             result = subprocess.run(

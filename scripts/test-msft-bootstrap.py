@@ -75,6 +75,20 @@ class BootstrapTests(unittest.TestCase):
             )
             self.assertNotEqual(result.returncode, 0)
             self.assertFalse(call.exists())
+        invalid_registry = self.root / "invalid-registry.json"
+        self.env["MSFT_FLEET_FILE"] = str(invalid_registry)
+        for entry in (
+            {"kind": "unknown", "data": {"name": "one"}},
+            {"kind": "codespace", "data": {}},
+            {"kind": "ssh", "data": {"name": "wrong-field"}},
+        ):
+            invalid_registry.write_text(json.dumps({"cs1": entry}))
+            result = subprocess.run(
+                ["bash", os.environ["bootstrapSource"], "cs1"],
+                env=self.env, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertFalse(call.exists())
 
     def git(self, directory, *args):
         return subprocess.run(

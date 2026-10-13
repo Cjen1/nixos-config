@@ -8,7 +8,9 @@ fi
 alias="$1"
 if ! codespace="$(
   jq -er --arg alias "$alias" \
-    '.[$alias].codespace // error("no Codespace registered for alias: " + $alias)' \
+    '.[$alias] | if .kind == "codespace" then
+      .data.name // error("missing Codespace name for alias: " + $alias)
+    else error("no Codespace registered for alias: " + $alias) end' \
     "${MSFT_FLEET_FILE:?Missing MSFT_FLEET_FILE}"
 )"; then
   printf 'error: cannot keep Codespace %s alive; check the fleet registry\n' "$alias" >&2

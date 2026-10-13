@@ -7,7 +7,10 @@ if [[ $# -ne 1 ]]; then
 fi
 alias="$1"
 if [[ ! "$alias" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] ||
-  ! jq -e --arg alias "$alias" '.[$alias] | (.codespace != null) or (.ssh != null)' \
+  ! jq -e --arg alias "$alias" '.[$alias] |
+    if .kind == "codespace" then (.data.name | type == "string" and length > 0)
+    elif .kind == "ssh" then (.data.destination | type == "string" and length > 0)
+    else false end' \
     "${MSFT_FLEET_FILE:?MSFT_FLEET_FILE must point to the fleet registry}" >/dev/null; then
   echo "error: unknown fleet alias '$alias'; check the fleet registry" >&2
   exit 1

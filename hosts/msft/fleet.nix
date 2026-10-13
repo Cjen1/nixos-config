@@ -8,7 +8,23 @@
 let
   fleet = config.msft.fleet;
   codespaces = lib.filterAttrs (_: entry: entry.codespace != null) fleet;
-  fleetFile = pkgs.writeText "msft-fleet.json" (builtins.toJSON fleet);
+  fleetFile = pkgs.writeText "msft-fleet.json" (
+    builtins.toJSON (
+      lib.mapAttrs (
+        _: entry:
+        if entry.codespace != null then
+          {
+            kind = "codespace";
+            data.name = entry.codespace;
+          }
+        else
+          {
+            kind = "ssh";
+            data.destination = entry.ssh;
+          }
+      ) fleet
+    )
+  );
   sshTarget = target: builtins.match "(([^[:space:]@]+)@)?([^[:space:]@]+)" target;
   sshConfig = lib.concatStringsSep "\n" (
     lib.mapAttrsToList (
