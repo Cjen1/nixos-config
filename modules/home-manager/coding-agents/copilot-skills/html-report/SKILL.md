@@ -31,6 +31,20 @@ Do not just one-shot the entire report.
 
 # Getting the report to the user
 
-Host a small web server over localhost serving the file, eg: `cd /path/to/parent/folder/ && python3 -m http.server <port>`
-Then if on WSL you can open this via `explorer.exe "http://localhost:<port>/relative_path_to_file.html"`, otherwise just output a plain URL (as formatting isn't generally preserved for clickable links).
-Finally to validate that the webpage was opened successfully, check the server logs.
+Serve only the report directory, bound to loopback, e.g.:
+`python3 -m http.server <port> --bind 127.0.0.1 --directory /path/to/reports`.
+Keep the server running as a persistent background process while the report is needed.
+
+On a remote fleet node with `msft-report-forward`, run
+`msft-report-forward <port>` as another persistent background process. It prints
+`http://localhost:<allocated-host-port>`; append the report's relative path and
+give that plain URL to the user. Verify the page through the allocated host
+port if possible, as well as the remote server. Multiple nodes and helpers can
+run concurrently without choosing host ports. A disconnected helper exits
+nonzero; rerun it and give the user its new URL. If the relay is unavailable,
+report the failure rather than making the report public.
+
+On local WSL, open `explorer.exe "http://localhost:<port>/relative_path_to_file.html"`.
+Elsewhere without a relay, provide the server URL and explain any required
+forwarding. Stop the forwarding helper and HTTP server when no longer needed.
+Server logs show requests, not proof that the user opened or read the page.

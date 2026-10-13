@@ -103,8 +103,8 @@ unresponsive peers through SSH keepalives; builds have no overall time limit.
 Each Codespace gets a laptop-only user service named
 `codespace-keepalive-<alias>.service`. It holds a GitHub CLI SSH command open so
 the CLI sends activity heartbeats, automatically starts stopped Codespaces,
-and retries failed connections after 60 seconds. Ordinary SSH entries get no
-keepalive service. Home Manager starts added services and stops removed ones;
+and retries failed connections after 60 seconds. Ordinary SSH entries get a
+`fleet-report-tunnel-<alias>.service` instead. Home Manager starts added services and stops removed ones;
 remove an entry and apply the configuration to end management.
 The service runs `msft-fleet-keepalive <alias>`; there is no need to launch a
 separate keepalive process manually.
@@ -119,11 +119,65 @@ systemctl --user status codespace-keepalive-cs1.service
 journalctl --user -u codespace-keepalive-cs1.service
 ```
 
-Run the registry, SSH integration, bootstrap/update, and mocked keepalive checks with:
+### Remote HTML reports
+
+With a nonempty fleet, Home Manager also runs `msft-report-relay.service`: an
+unprivileged SSH server bound only to `127.0.0.1:2222`. Each managed fleet
+connection forwards the node's `127.0.0.1:5588` back to that server. Interactive
+SSH connections do not own or duplicate these tunnels. Both ports must be free
+on their respective machines; forwarding failures are logged and retried.
+
+On a bootstrapped remote, start an HTTP server serving only the report directory,
+then start the forwarding helper in another terminal or persistent background
+process:
+
+```sh
+python3 -m http.server 8765 --bind 127.0.0.1 --directory /path/to/reports
+msft-report-forward 8765
+```
+
+The helper prints `http://localhost:<allocated-host-port>`. Append the report's
+relative path and open the URL in the host's browser. One server can serve many
+reports; multiple nodes or helpers get distinct host ports automatically.
+Keep both processes running while viewing, and stop them afterward. If a
+managed connection disconnects, its report helpers exit nonzero; rerun them
+after reconnection and use their new URLs. Without a running host user manager,
+the relay is unavailable.
+
+Every managed connection generates a fresh Ed25519 client key and delivers it
+and the pinned relay host key over the existing authenticated fleet SSH
+connection. Remote credentials are installed with mode `0600` under
+`~/.config/msft-report-relay`. The host deletes its temporary private key after
+preparing the credential payload. Authorization checks the supervising process's
+PID and Linux start time, so leftover keys are rejected after a crash or PID
+reuse. Keys permit only loopback reverse forwarding: no shell, commands, local
+forwarding, agent forwarding, or public listeners. No personal SSH keys are
+copied or agents forwarded.
+
+The stable relay host key lives in `~/.local/state/msft-report-relay`, not the
+Nix store. Applying Home Manager does not rotate it. Removing a fleet entry
+stops its managed connection and invalidates its session key. This is not a
+security boundary against a compromised remote's own administrator, who can
+read that node's live relay credential and use its permitted forwarding.
+The host must provide a root-owned `/usr/bin/env`; OpenSSH uses it to launch
+the pinned Nix authorization helper because it rejects command paths through
+the group-writable Nix store.
+
+Inspect the relay with `journalctl --user -u msft-report-relay.service`.
+Run the registry, bootstrap/update, mocked keepalive, and ephemeral-key checks:
 
 ```sh
 nix build --impure --file tests/test-msft-fleet.nix --no-link
 ```
+
+Exercise real concurrent nested SSH forwarding and denied access on the host:
+
+```sh
+nix-shell tests/test-msft-fleet.nix --run 'python3 tests/test-msft-report-relay.py'
+```
+
+These live checks run outside the build sandbox because its `nixbld` account
+has no login shell. They use temporary SSH servers and keys, not fleet nodes.
 
 ## Copilot permissions
 

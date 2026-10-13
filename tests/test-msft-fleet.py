@@ -4,6 +4,7 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -37,6 +38,9 @@ class FleetTests(unittest.TestCase):
                 "sys.exit(int(os.environ['GH_EXIT']))\n"
             )
             gh.chmod(0o755)
+            session = root / "msft-report-relay-session"
+            session.write_text(f'#!{shutil.which("bash")}\nexec "$@"\n')
+            session.chmod(0o755)
             call = root / "call.json"
             env = dict(
                 os.environ,
@@ -59,15 +63,28 @@ class FleetTests(unittest.TestCase):
                     invocation = json.loads(call.read_text())
                     self.assertEqual(invocation["prompt"], "1")
                     self.assertEqual(
-                        invocation["args"],
+                        invocation["args"][:-1],
                         [
                             "codespace", "ssh", "--codespace", codespace, "--",
-                            "-T", "-i", str(Path(env["HOME"]) / ".ssh/codespaces.auto"),
-                            "-o", "BatchMode=yes", "-o", "ConnectTimeout=30",
+                            "-i", str(Path(env["HOME"]) / ".ssh/codespaces.auto"),
+                            "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=30",
                             "-o", "ServerAliveInterval=30",
-                            "-o", "ServerAliveCountMax=3", "exec sleep infinity",
+                            "-o", "ServerAliveCountMax=3",
+                            "-o", "ExitOnForwardFailure=yes",
+                            "-R", "127.0.0.1:5588:127.0.0.1:2222",
                         ],
                     )
+                    self.assertIn("tar -xf -", invocation["args"][-1])
+                    self.assertIn("exec cat >/dev/null", invocation["args"][-1])
+            (root / "ssh").symlink_to(gh)
+            result = subprocess.run(
+                ["bash", os.environ["keepAliveSource"], "aci1"],
+                env=env, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 7, result.stderr)
+            invocation = json.loads(call.read_text())
+            self.assertEqual(invocation["args"][-2], "aci1")
+            self.assertIn("127.0.0.1:5588:127.0.0.1:2222", invocation["args"])
             env["GH_EXIT"] = "0"
             result = subprocess.run(
                 ["bash", os.environ["keepAliveSource"], "cs1"],
@@ -76,7 +93,7 @@ class FleetTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1, result.stderr)
             self.assertIn("ended unexpectedly", result.stderr)
             call.unlink()
-            for alias in ("aci1", "missing"):
+            for alias in ("missing",):
                 result = subprocess.run(
                     ["bash", os.environ["keepAliveSource"], alias],
                     env=env, capture_output=True, text=True,
