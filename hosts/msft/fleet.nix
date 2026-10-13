@@ -63,7 +63,7 @@ let
     text = builtins.readFile ./install-fleet-ssh.sh;
   };
   keepAlive = pkgs.writeShellApplication {
-    name = "codespace-keepalive";
+    name = "msft-fleet-keepalive";
     runtimeInputs = [
       pkgs.coreutils
       pkgs.gh
@@ -77,7 +77,7 @@ let
       + builtins.readFile ./codespace-keepalive.sh;
   };
   bootstrap = pkgs.writeShellApplication {
-    name = "bootstrap-codespace-nix-env";
+    name = "msft-fleet-bootstrap";
     runtimeInputs = [
       pkgs.jq
       pkgs.openssh
@@ -89,6 +89,20 @@ let
         export MSFT_BOOTSTRAP_SCRIPT=${pkgs.writeText "bootstrap-nix-env.sh" (builtins.readFile ./bootstrap-nix-env.sh)}
       ''
       + builtins.readFile ./bootstrap-remote.sh;
+  };
+  update = pkgs.writeShellApplication {
+    name = "msft-fleet-update";
+    runtimeInputs = [
+      pkgs.jq
+      pkgs.openssh
+      pkgs.gh
+    ];
+    text =
+      ''
+        export MSFT_FLEET_FILE=${lib.escapeShellArg "${fleetFile}"}
+        export MSFT_BOOTSTRAP_SCRIPT=${pkgs.writeText "bootstrap-nix-env.sh" (builtins.readFile ./bootstrap-nix-env.sh)}
+      ''
+      + builtins.readFile ./update-remote.sh;
   };
 in
 {
@@ -129,6 +143,7 @@ in
     home.sessionVariables.MSFT_FLEET_FILE = "${fleetFile}";
     home.packages = [
       bootstrap
+      update
       keepAlive
       pkgs.gh
       pkgs.openssh
@@ -146,7 +161,7 @@ in
           StartLimitIntervalSec = 0;
         };
         Service = {
-          ExecStart = "${keepAlive}/bin/codespace-keepalive ${name}";
+          ExecStart = "${keepAlive}/bin/msft-fleet-keepalive ${name}";
           Restart = "always";
           RestartSec = "60s";
           RuntimeMaxSec = "12h";

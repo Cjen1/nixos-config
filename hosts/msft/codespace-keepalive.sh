@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
-  printf 'Usage: codespace-keepalive <fleet-alias>\n' >&2
+  printf 'Usage: msft-fleet-keepalive <fleet-alias>\n' >&2
   exit 64
 fi
 alias="$1"

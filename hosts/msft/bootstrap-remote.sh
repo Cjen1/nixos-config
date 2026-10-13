@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: bootstrap-codespace-nix-env <fleet-alias>" >&2
+  echo "Usage: msft-fleet-bootstrap <fleet-alias>" >&2
   exit 64
 fi
 alias="$1"

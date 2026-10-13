@@ -109,11 +109,11 @@ class FleetTests(unittest.TestCase):
 
     def test_packaged_keepalive_usage(self):
         result = subprocess.run(
-            [str(Path(os.environ["keepAlive"]) / "bin/codespace-keepalive")],
+            [str(Path(os.environ["keepAlive"]) / "bin/msft-fleet-keepalive")],
             capture_output=True, text=True,
         )
         self.assertEqual(result.returncode, 64)
-        self.assertIn("Usage: codespace-keepalive", result.stderr)
+        self.assertIn("Usage: msft-fleet-keepalive", result.stderr)
 
     def test_ssh_aliases(self):
         expected = {

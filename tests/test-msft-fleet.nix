@@ -28,8 +28,9 @@ let
   remote = configuration true sample;
   invalid = fleet: !(builtins.tryEval (configuration false fleet).home.homeDirectory).success;
   sshConfig = pkgs.writeText "fleet-ssh-config" local.home.file.".ssh/msft-fleet.conf".text;
-  keepAlive = lib.findFirst (package: package.name == "codespace-keepalive") null local.home.packages;
-  bootstrap = lib.findFirst (package: package.name == "bootstrap-codespace-nix-env") null local.home.packages;
+  keepAlive = lib.findFirst (package: package.name == "msft-fleet-keepalive") null local.home.packages;
+  bootstrap = lib.findFirst (package: package.name == "msft-fleet-bootstrap") null local.home.packages;
+  update = lib.findFirst (package: package.name == "msft-fleet-update") null local.home.packages;
 in
 assert !(remote.home.sessionVariables ? MSFT_FLEET_FILE);
 assert !(remote.home.file ? ".ssh/msft-fleet.conf");
@@ -59,9 +60,10 @@ pkgs.runCommand "test-msft-fleet" {
     pkgs.git
     pkgs.shellcheck
   ];
-  inherit sshConfig keepAlive bootstrap;
+  inherit sshConfig keepAlive bootstrap update;
   keepAliveSource = ../hosts/msft/codespace-keepalive.sh;
   bootstrapSource = ../hosts/msft/bootstrap-remote.sh;
+  updateSource = ../hosts/msft/update-remote.sh;
   remoteBootstrap = ../hosts/msft/bootstrap-nix-env.sh;
   fleetFile = local.home.sessionVariables.MSFT_FLEET_FILE;
   installSSHInclude = pkgs.writeShellApplication {

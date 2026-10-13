@@ -3,6 +3,7 @@ set -Eeuo pipefail
 
 repo_url="$1"
 repo_dir="$2"
+operation="${3:-bootstrap}"
 stage="checking remote prerequisites"
 report_error() {
   local status=$?
@@ -16,8 +17,13 @@ fail() {
   exit 1
 }
 
+[[ "$operation" == bootstrap || "$operation" == update ]] || fail "unknown operation: $operation"
 [[ "$(id -u)" == 0 ]] || fail "remote Home Manager requires root; configure the SSH alias to log in as root"
-for tool in git curl; do
+tools=(git)
+if [[ "$operation" == bootstrap ]]; then
+  tools+=(curl)
+fi
+for tool in "${tools[@]}"; do
   command -v "$tool" >/dev/null || fail "install $tool in the devcontainer before bootstrapping"
 done
 
@@ -31,9 +37,11 @@ load_nix() {
   fi
 }
 
-stage="installing Nix"
+stage="loading Nix"
 load_nix
 if ! command -v nix >/dev/null 2>&1; then
+  [[ "$operation" == bootstrap ]] || fail "Nix is unavailable; run msft-fleet-bootstrap first"
+  stage="installing Nix"
   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix |
     sh -s -- install linux --init none --no-confirm
   load_nix
@@ -57,6 +65,7 @@ if [[ -e "$repo_dir" || -L "$repo_dir" ]]; then
     fail "$repo_dir has commits that are not on origin/main"
   git -C "$repo_dir" merge --ff-only origin/main
 else
+  [[ "$operation" == bootstrap ]] || fail "$repo_dir is missing; run msft-fleet-bootstrap first"
   git clone --branch main --single-branch "$repo_url" "$repo_dir"
 fi
 

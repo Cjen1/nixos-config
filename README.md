@@ -58,7 +58,7 @@ those saved credentials, not variables sourced by an interactive shell.
 After registering a new CCF SSH Codespace and applying Home Manager, run:
 
 ```sh
-bootstrap-codespace-nix-env cs1
+msft-fleet-bootstrap cs1
 ```
 
 The command uses the registered SSH alias, which also starts stopped Codespaces.
@@ -77,12 +77,31 @@ use the same command but must also provide a root Azure Linux environment.
 Codespace rebuilds can erase `/root` and `/nix`; rerun bootstrap after a rebuild.
 This does not restore interrupted Copilot sessions.
 
+Home Manager installs `msft-fleet-bootstrap`, `msft-fleet-update`, and
+`msft-fleet-keepalive` in the laptop's `PATH`. Update all registered hosts, or
+select aliases:
+
+```sh
+msft-fleet-update
+msft-fleet-update cs1 server1
+```
+
+Update assumes bootstrap is complete: it never installs Nix or clones a missing
+checkout. It fast-forwards and activates `origin/main` with the same checkout
+protections as bootstrap. Stopped Codespaces start through the SSH proxy.
+Updates run sequentially and continue after host failures, then return nonzero
+with the failed aliases. Invalid aliases are rejected before any host is updated.
+Empty fleets are a no-op. Connections use a 30-second connect timeout and detect
+unresponsive peers through SSH keepalives; builds have no overall time limit.
+
 Each Codespace gets a laptop-only user service named
 `codespace-keepalive-<alias>.service`. It holds a GitHub CLI SSH command open so
 the CLI sends activity heartbeats, automatically starts stopped Codespaces,
 and retries failed connections after 60 seconds. Ordinary SSH entries get no
 keepalive service. Home Manager starts added services and stops removed ones;
 remove an entry and apply the configuration to end management.
+The service runs `msft-fleet-keepalive <alias>`; there is no need to launch a
+separate keepalive process manually.
 
 The services require the laptop's Linux environment and user systemd manager
 to remain running. GitHub's 12-hour runtime limit still applies. Reconnection
@@ -94,10 +113,10 @@ systemctl --user status codespace-keepalive-cs1.service
 journalctl --user -u codespace-keepalive-cs1.service
 ```
 
-Run the registry, SSH integration, bootstrap, and mocked keepalive checks with:
+Run the registry, SSH integration, bootstrap/update, and mocked keepalive checks with:
 
 ```sh
-nix build --impure --file scripts/test-msft-fleet.nix --no-link
+nix build --impure --file tests/test-msft-fleet.nix --no-link
 ```
 
 ## Copilot permissions
@@ -112,7 +131,7 @@ Assisted approval reviews tool requests and may still ask for permission.
 It does not grant unrestricted access.
 
 Check settings preservation and repeat activation with
-`python3 scripts/test-copilot-settings.py`.
+`python3 tests/test-copilot-settings.py`.
 
 ## Copilot notifications in wmux
 
@@ -162,7 +181,7 @@ prefetched cache:
 ./modules/home-manager/github-copilot-cli/bump.sh --build
 ```
 
-Run the offline bump-script checks with `python3 scripts/test-bump-npm-package.py`.
+Run the offline bump-script checks with `python3 tests/test-bump-npm-package.py`.
 Use `--integration` to compare a merged cache against the pinned prefetcher and
 verify the full build. Use `--benchmark <baseline-revision>` to compare repeat
 Codex bumps against an earlier Git revision. These two modes use temporary
@@ -180,5 +199,5 @@ user-defined Lean syntax. This does not install a Lean language server.
 After changing the grammar, run the integration check from the repository root:
 
 ```sh
-nix build --impure --file scripts/test-neovim-lean.nix --no-link
+nix build --impure --file tests/test-neovim-lean.nix --no-link
 ```
