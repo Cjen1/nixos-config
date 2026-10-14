@@ -164,6 +164,23 @@ in
         - Link to this workspace with `<a href="vscode://vscode-remote/wsl+AzureLinux3.0/home/cjen1-msft/">workspace</a>`.
       '';
 
+  home.activation.linkCopilotdInstructions = lib.mkIf isRemote (
+    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      instructions="${config.home.homeDirectory}/.copilot/copilot-instructions.md"
+      runtimeHome="/workspaces/.copilotd/state/copilot-home"
+      target="$runtimeHome/copilot-instructions.md"
+
+      run ${pkgs.coreutils}/bin/mkdir -p "$runtimeHome"
+
+      if [ -L "$target" ] &&
+         [ "$(${pkgs.coreutils}/bin/readlink "$target")" = "$instructions" ]; then
+        :
+      else
+        run ${pkgs.coreutils}/bin/ln -sT "$instructions" "$target"
+      fi
+    ''
+  );
+
   home.activation.setLoginShell = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     fish_path="$HOME/.nix-profile/bin/fish"
     current_shell="$(${pkgs.getent}/bin/getent passwd "${config.home.username}" | ${pkgs.coreutils}/bin/cut -d: -f7)"

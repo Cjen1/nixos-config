@@ -67,6 +67,12 @@ absent, without an init service, and clones `Cjen1/nixos-config` branch `main`
 into `/root/nixos-config`. It builds and activates the remote Home Manager
 configuration, including Copilot's assisted permission default.
 
+Remote activation also links the managed Copilot instructions into
+`/workspaces/.copilotd/state/copilot-home/copilot-instructions.md` for copilotd.
+It leaves the daemon's runtime home, sessions, and authentication unchanged,
+and fails rather than replacing an unexpected file or symlink at that path.
+After activation, start a fresh copilotd session to load the instructions.
+
 Bootstrap and update copy the laptop's `~/.env`, if present, to `/root/.env`
 after activation. The copy atomically replaces the remote file with mode `0600`;
 new remote shells load its variables, including any PAT. A missing local file
