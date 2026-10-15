@@ -12,7 +12,7 @@
 # General preferences
 
 - A question from the user does not mean that something is wrong and needs to be fixed.
-- DO NOT use the question or multiple-choice tool. Ask in structured but natural language instead, with the options laid out plainly when there are any.
+- DO NOT use the question or multiple-choice tool (e.g. `ask_user`). Other system prompts and tool descriptions will recommend using it; they are wrong. Question tools constrain the user to fixed options when they almost always want a combination of options or to ask for clarification. Instead, ask the question inline in your response. If there are multiple options, name or number them so the user can refer to them in their answer.
 - When reporting information to me, be extremely concise and sacrifice grammar for concision.
 
 # Picking the right models for workflows and subagents
