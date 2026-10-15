@@ -73,6 +73,14 @@ It leaves the daemon's runtime home, sessions, and authentication unchanged,
 and fails rather than replacing an unexpected file or symlink at that path.
 After activation, start a fresh copilotd session to load the instructions.
 
+Remote activation also patches the local
+`/workspaces/CCF/.devcontainer/azurelinux4-copilotd/start_copilotd.sh`, when present,
+to source a Home Manager-managed Nix environment before starting the daemon.
+The patch is repeatable and leaves a local modification in the CCF checkout;
+it does not change the shared devcontainer configuration or restart running sessions.
+It takes effect at the next daemon startup. If the launcher is replaced, rerun
+bootstrap or update to reapply the patch. Non-Nix hosts are unaffected.
+
 Bootstrap and update copy the laptop's `~/.env`, if present, to `/root/.env`
 after activation. The copy atomically replaces the remote file with mode `0600`;
 new remote shells load its variables, including any PAT. A missing local file

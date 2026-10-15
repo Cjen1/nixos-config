@@ -164,6 +164,22 @@ in
         - Link to this workspace with `<a href="vscode://vscode-remote/wsl+AzureLinux3.0/home/cjen1-msft/">workspace</a>`.
       '';
 
+  xdg.configFile."msft/copilotd-env.sh" = lib.mkIf isRemote {
+    text = ''
+      . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
+      export SHELL="${config.home.profileDirectory}/bin/fish"
+    '';
+  };
+
+  home.activation.patchCopilotdStartup = lib.mkIf isRemote (
+    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      run ${pkgs.python3}/bin/python3 ${./patch-copilotd-startup.py} \
+        /workspaces/CCF/.devcontainer/azurelinux4-copilotd/start_copilotd.sh \
+        "${config.xdg.configHome}/msft/copilotd-env.sh"
+    ''
+  );
+
   home.activation.linkCopilotdInstructions = lib.mkIf isRemote (
     lib.hm.dag.entryAfter [ "linkGeneration" ] ''
       instructions="${config.home.homeDirectory}/.copilot/copilot-instructions.md"
