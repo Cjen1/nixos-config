@@ -12,6 +12,8 @@ let
     ListenAddress 127.0.0.1
     Port 2222
     HostKey ${relayState}/host-key
+    # Azure Linux 4's OpenSSH 10.0p2 client fails mlkem768x25519 KEX against this sshd.
+    KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
     AuthorizedKeysFile none
     # OpenSSH rejects command paths through the group-writable Nix store.
     AuthorizedKeysCommand /usr/bin/env ${pkgs.python3}/bin/python3 ${./report-relay}/authorize.py ${relayState}/sessions
