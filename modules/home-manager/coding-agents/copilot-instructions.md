@@ -6,6 +6,7 @@
 # Code style
 
 - Follow YAGNI. Build what the current task needs, not what it might need later, but highlight substantial tradeoffs.
+- Use variable shadowing to make sequential transformations read imperatively in functional code, e.g. `let foo = foo + 1 in foo`, when it improves clarity.
 - Sequence work into minimal verifiable units. Make the smallest independently testable change, verify it, then move to the next. Order commits so a reviewer can follow the evidence.
 
 # General preferences

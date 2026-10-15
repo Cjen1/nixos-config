@@ -180,20 +180,21 @@ in
     ''
   );
 
-  home.activation.linkCopilotdInstructions = lib.mkIf isRemote (
+  home.activation.linkCopilotdResources = lib.mkIf isRemote (
     lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-      instructions="${config.home.homeDirectory}/.copilot/copilot-instructions.md"
       runtimeHome="/workspaces/.copilotd/state/copilot-home"
-      target="$runtimeHome/copilot-instructions.md"
-
       run ${pkgs.coreutils}/bin/mkdir -p "$runtimeHome"
 
-      if [ -L "$target" ] &&
-         [ "$(${pkgs.coreutils}/bin/readlink "$target")" = "$instructions" ]; then
-        :
-      else
-        run ${pkgs.coreutils}/bin/ln -sT "$instructions" "$target"
-      fi
+      for resource in copilot-instructions.md skills; do
+        managed="${config.home.homeDirectory}/.copilot/$resource"
+        target="$runtimeHome/$resource"
+        if [ -L "$target" ] &&
+           [ "$(${pkgs.coreutils}/bin/readlink "$target")" = "$managed" ]; then
+          :
+        else
+          run ${pkgs.coreutils}/bin/ln -sT "$managed" "$target"
+        fi
+      done
     ''
   );
 

@@ -67,11 +67,11 @@ absent, without an init service, and clones `Cjen1/nixos-config` branch `main`
 into `/root/nixos-config`. It builds and activates the remote Home Manager
 configuration, including Copilot's assisted permission default.
 
-Remote activation also links the managed Copilot instructions into
-`/workspaces/.copilotd/state/copilot-home/copilot-instructions.md` for copilotd.
+Remote activation also links the managed Copilot instructions and skills into
+`/workspaces/.copilotd/state/copilot-home/` for copilotd.
 It leaves the daemon's runtime home, sessions, and authentication unchanged,
 and fails rather than replacing an unexpected file or symlink at that path.
-After activation, start a fresh copilotd session to load the instructions.
+After activation, start a fresh copilotd session to load the instructions and skills.
 
 Remote activation also patches the local
 `/workspaces/CCF/.devcontainer/azurelinux4-copilotd/start_copilotd.sh`, when present,
