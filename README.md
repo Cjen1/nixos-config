@@ -154,9 +154,19 @@ The helper prints `http://localhost:<allocated-host-port>`. Append the report's
 relative path and open the URL in the host's browser. One server can serve many
 reports; multiple nodes or helpers get distinct host ports automatically.
 Keep both processes running while viewing, and stop them afterward. If a
-managed connection disconnects, its report helpers exit nonzero; rerun them
-after reconnection and use their new URLs. Without a running host user manager,
-the relay is unavailable.
+managed connection disconnects, the helper logs the failure and retries every
+five seconds, reading the current relay credentials on each attempt. Once the
+fleet connection returns, the helper reclaims its original host port so the
+same browser URL works again. If that port is occupied, it keeps retrying rather
+than silently changing the URL. Retry and recovery messages go to stderr; stdout
+contains only the initial URL. Initial connection failures are retried too.
+Without a running host user manager, the relay is unavailable.
+
+Leave the helper running during an outage; do not wrap it in another retry loop.
+Stop it with Ctrl-C or SIGTERM, which also stops its SSH child. Reconnection
+cannot survive the remote process itself being stopped, for example by a
+Codespace restart. In that case restart both the HTTP server and helper and use
+the helper's newly allocated URL.
 
 Every managed connection generates a fresh Ed25519 client key and delivers it
 and the pinned relay host key over the existing authenticated fleet SSH

@@ -152,6 +152,7 @@ in
         - The repository is at `/root/nixos-config`.
         - For editor links, use the SSH alias from the active connection; do not assume a fixed hostname or IP.
         - To view an HTML report on the host, serve only its report directory on loopback, then run `msft-report-forward <app-port>` as a persistent background process. It prints a host-browser URL with an automatically allocated port; append the report's relative path and give that URL to the user.
+        - The forwarding helper automatically retries failed connections every five seconds, reloads relay credentials, and restores the same URL. Leave it running during outages; do not start duplicate helpers or wrap it in a retry loop. If the remote restarts and kills these processes, restart the server and helper and give the user the new URL.
         - Keep both the HTTP server and forwarding helper running while the report is needed, and stop them afterward. Multiple helpers can run concurrently. If the relay is unavailable, report the error; do not make the report public.
       ''
     else

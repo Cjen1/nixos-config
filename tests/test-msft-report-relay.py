@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise real nested SSH forwarding and ephemeral relay authorization."""
 
+import http.client
 import http.server
 import io
 import json
@@ -128,13 +129,7 @@ class RelayTests(unittest.TestCase):
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
         )
         self.addCleanup(self.stop, process)
-        readable, _, _ = select.select([process.stdout], [], [], 15)
-        self.assertTrue(readable, "forward helper did not return a URL")
-        url = process.stdout.readline().strip()
-        if not url:
-            self.fail(process.stderr.read())
-        self.assertRegex(url, r"^http://localhost:[0-9]+$")
-        return process, url
+        return process
 
     def ssh(self, directory):
         return [
@@ -246,14 +241,15 @@ PermitRootLogin prohibit-password
 StrictModes no
 PidFile none
 """)
-        results = []
-        for index in range(2):
-            home = self.root / f"remote-{index}"
+        def connect(home, return_port):
             credentials = home / ".config/msft-report-relay"
-            credentials.mkdir(parents=True)
-            return_port = free_port()
+            credentials.mkdir(parents=True, exist_ok=True)
+            previous = (credentials / "identity").read_bytes() if (credentials / "identity").exists() else None
+            ready = credentials / "ready"
+            ready.unlink(missing_ok=True)
             remote_command = f"""bash -c {shlex.quote(
-                f'umask 077; tar -xf - -C {shlex.quote(str(credentials))}; exec cat >/dev/null'
+                f'set -e; umask 077; tar -xf - -C {shlex.quote(str(credentials))}; '
+                f'touch {shlex.quote(str(ready))}; exec cat >/dev/null'
             )}"""
             outer = subprocess.Popen(
                 [
@@ -268,7 +264,10 @@ PidFile none
             )
             self.addCleanup(self.stop, outer)
             deadline = time.monotonic() + 10
-            while not (credentials / "config").exists():
+            while (
+                not ready.exists()
+                or (credentials / "identity").read_bytes() == previous
+            ):
                 if outer.poll() is not None:
                     self.fail(f"{outer.stderr.read()}\n{(self.root / 'remote.log').read_text()}")
                 self.assertLess(time.monotonic(), deadline)
@@ -279,8 +278,14 @@ PidFile none
             (credentials / "config").write_text(config)
             known_hosts = (credentials / "known_hosts").read_text().replace(":5588", f":{return_port}")
             (credentials / "known_hosts").write_text(known_hosts)
+            return outer, credentials
+
+        results = []
+        for index in range(2):
+            home = self.root / f"remote-{index}"
+            return_port = free_port()
             report_dir = home / "reports"
-            report_dir.mkdir()
+            report_dir.mkdir(parents=True)
             for name in ("first", "second"):
                 (report_dir / f"{name}.html").write_text(f"node {index}: {name}")
             handler = lambda *args, directory=str(report_dir), **kwargs: http.server.SimpleHTTPRequestHandler(
@@ -290,22 +295,70 @@ PidFile none
             self.addCleanup(server.server_close)
             self.addCleanup(server.shutdown)
             threading.Thread(target=server.serve_forever, daemon=True).start()
-            helper, url = self.helper(server.server_port, home)
-            results.append((helper, outer, credentials, url))
+            helper = self.helper(server.server_port, home)
+            time.sleep(0.3)
+            self.assertIsNone(helper.poll(), "report helper exited while waiting for credentials")
+            outer, credentials = connect(home, return_port)
+            readable, _, _ = select.select([helper.stdout], [], [], 15)
+            self.assertTrue(readable, "forward helper did not return a URL")
+            url = helper.stdout.readline().strip()
+            if not url:
+                self.fail(helper.stderr.read())
+            self.assertRegex(url, r"^http://localhost:[0-9]+$")
+            results.append((helper, outer, credentials, url, return_port))
         self.assertNotEqual(results[0][3], results[1][3])
         self.assertNotEqual(
             results[0][2].joinpath("identity").read_bytes(),
             results[1][2].joinpath("identity").read_bytes(),
         )
-        for index, (_, _, _, url) in enumerate(results):
+        for index, (_, _, _, url, _) in enumerate(results):
             for name in ("first", "second"):
                 with urllib.request.urlopen(f"{url}/{name}.html", timeout=5) as response:
                     self.assertEqual(response.read().decode(), f"node {index}: {name}")
-        helper, outer, _, _ = results[0]
-        self.stop(outer)
-        self.assertEqual(helper.wait(timeout=10), 1)
+        helper, outer, credentials, url, return_port = results[0]
+        for attempt in range(2):
+            previous = (credentials / "identity").read_bytes()
+            self.stop(outer)
+            time.sleep(0.3)
+            self.assertIsNone(helper.poll(), "report helper exited instead of reconnecting")
+            blocker = None
+            if attempt == 0:
+                blocker = socket.socket()
+                self.addCleanup(blocker.close)
+                blocker.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                blocker.bind(("127.0.0.1", int(url.rsplit(":", 1)[1])))
+                blocker.listen()
+            outer, credentials = connect(credentials.parent.parent, return_port)
+            self.assertNotEqual((credentials / "identity").read_bytes(), previous)
+            if blocker is not None:
+                errors = b""
+                deadline = time.monotonic() + 15
+                while b"cannot forward report" not in errors:
+                    self.assertIsNone(helper.poll(), "report helper exited when its port was occupied")
+                    remaining = deadline - time.monotonic()
+                    self.assertGreater(remaining, 0, errors.decode())
+                    readable, _, _ = select.select([helper.stderr], [], [], remaining)
+                    self.assertTrue(readable, errors.decode())
+                    errors += os.read(helper.stderr.fileno(), 4096)
+                blocker.close()
+            deadline = time.monotonic() + 20
+            while True:
+                self.assertIsNone(helper.poll(), "report helper exited during credential rotation")
+                try:
+                    with urllib.request.urlopen(f"{url}/first.html", timeout=1) as response:
+                        self.assertEqual(response.read().decode(), "node 0: first")
+                    break
+                except (urllib.error.URLError, http.client.RemoteDisconnected, ConnectionResetError, TimeoutError):
+                    self.assertLess(time.monotonic(), deadline, "original report URL was not restored")
+                    time.sleep(0.1)
         with urllib.request.urlopen(f"{results[1][3]}/first.html", timeout=5) as response:
             self.assertEqual(response.read().decode(), "node 1: first")
+        self.stop(outer)
+        time.sleep(0.3)
+        self.assertIsNone(helper.poll(), "report helper exited instead of waiting to reconnect")
+        helper.terminate()
+        self.assertEqual(helper.wait(timeout=5), 143)
+        self.assertEqual(helper.stdout.read(), "", "reconnection should preserve the original URL")
         self.stop(results[1][0])
         self.assertEqual(results[1][0].returncode, 143)
         with self.assertRaises(urllib.error.URLError):
