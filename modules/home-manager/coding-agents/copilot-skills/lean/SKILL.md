@@ -5,26 +5,27 @@ description: Use when setting up, building, or writing proofs in a Lean 4 projec
 
 ## Use the global mathlib
 
-A full mathlib checkout costs about 8GB per project, so share the copy in the
-Nix store instead.
+Home Manager roots one prebuilt mathlib and its dependencies in the Nix store.
+Nix downloads cached binaries or builds once; matching projects share them.
 
-- Take nixpkgs from the `lean-nixpkgs` flake registry entry
-  (`inputs.nixpkgs.url = "lean-nixpkgs";`). Home Manager pins it to one
-  revision, so every project uses the same mathlib store path.
-- Take Lean and mathlib from that revision's `leanPackages` (`lean4`,
-  `mathlib`), not from elan. Match `lean-toolchain` and the mathlib `rev` in
-  the lakefile to those versions.
-- Point Lake at the store copy with `.lake/package-overrides.json`, as
-  `buildLakePackage` does, rather than cloning mathlib. Working example:
-  `~/repos/msfp/flake.nix`. Copy its `packageOverrides` and `shellHook`.
-- Do not run `lake update` or `lake exe cache get`: they ignore the overrides,
-  clone mathlib, and fill `.lake/packages`. To bump, edit mathlib's `rev` and
-  `inputRev` in `lake-manifest.json` by hand. Get the commit with
-  `git ls-remote https://github.com/leanprover-community/mathlib4 <tag>`.
-- Check it worked: after `lake build`, `.lake/packages` should not exist and
-  `.lake` should be a few MB.
-- Fall back to `lake exe cache get` only if the project cannot use the
-  pinned versions, and tell the user why.
+- Run `lean-share /path/to/project` before building. It validates the exact Lean,
+  mathlib and transitive dependency revisions, then links `.lake/packages` entries
+  and `.lake/package-overrides.json` to the shared immutable packages.
+- For existing dependency clones, use `lean-share --replace /path/to/project`.
+  It removes only clean matching dependency checkouts, preserves project sources
+  and `.lake/build`, and refuses active builds, local dependency edits, version
+  mismatches and custom package overrides. `--dry-run` performs checks only.
+- Use the Home Manager-provided `lean` and `lake`, not an elan toolchain.
+  Projects using other versions must stay separate; do not silently change
+  their toolchain, dependency pins or proof sources to force compatibility.
+- Do not run `lake update` or `lake exe cache get` on shared projects: they can
+  clone dependencies again. Keep `lake-manifest.json` pinned.
+- After `lake build`, shared `.lake/packages` entries must remain symlinks into
+  `/nix/store`; only the project's own build outputs should be local.
+- Nix-based projects can use `inputs.nixpkgs.url = "lean-nixpkgs";` to select
+  the same pinned packages. A per-project flake is not required for `lean-share`.
+- Fall back to a project-local dependency cache only if it cannot use the
+  shared versions, and tell the user why.
 
 ## Proofs
 

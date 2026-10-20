@@ -27,6 +27,45 @@ nix build ./hosts/msft#homeConfigurations.cjen1-msft.activationPackage
 home-manager switch --flake ./hosts/msft
 ```
 
+## Shared Lean packages
+
+MSFT Home Manager installs Lean 4.35.0 and roots one mathlib 4.35.0 package,
+including its transitive dependencies, under `~/.local/share/lean-shared`.
+Nix substitutes the compressed mathlib archive from `cache.nixos.org` when
+available and materializes it once per store; otherwise it builds it once.
+Projects do not need their own Nix flake.
+
+```sh
+lean-share /path/to/lean-project
+lean-share --replace /path/to/existing-project
+```
+
+The command checks `lean-toolchain` and every shared dependency's exact revision
+in `lake-manifest.json`. It symlinks `.lake/packages/<name>` to the immutable
+Nix package and `.lake/package-overrides.json` to the shared Lake overrides.
+Unrelated dependencies, project source edits and local `.lake/build` outputs
+are preserved. Existing custom overrides or incompatible versions are errors.
+Use the installed Nix `lean` and `lake`; these take precedence over elan's
+switcher commands. Other toolchains remain available explicitly through elan.
+
+`--replace` reclaims existing clean matching Git dependency checkouts, after
+checking that no running build uses the project or old dependency directories.
+It refuses local dependency edits. Interrupted replacements can be rerun with
+the same arguments. `--dry-run` performs all preflight checks without changing
+files. Already-shared directories remain shared; their old clean dependency
+copies are replaced only once.
+
+Do not run `lake update` or `lake exe cache get` on linked projects: they can
+repopulate the old caches. Keep manifests pinned. When changing the shared
+version, update the `lean-nixpkgs` lock and mathlib Git revision/version guard
+in `modules/home-manager/lean.nix`, then run
+`scripts/check-lean-nixpkgs-cache.sh`. Sharing never upgrades project pins.
+
+Run the migration safety checks with
+`nix build --impure --file tests/test-lean-share.nix --no-link`.
+The real import check is
+`python3 tests/test-lean-share-live.py --shared ~/.local/share/lean-shared --lake "$(command -v lake)"`.
+
 ## MSFT remote fleet
 
 Declare named remote hosts in `hosts/msft/fleet-registry.nix`. The registry starts
