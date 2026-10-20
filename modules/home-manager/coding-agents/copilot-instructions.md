@@ -6,13 +6,14 @@
 # Code style
 
 - Follow YAGNI. Build what the current task needs, not what it might need later, but highlight substantial tradeoffs.
+- Keep temporary build artifacts (Lake `.lake`, Cargo `target`, Nix `result`, etc.) under `/tmp` or similar, outside the worktree. Use native output settings; do not symlink them back into the repo. If such artifacts already exist in the worktree, migrate them outside it and update the build configuration accordingly.
 - Use variable shadowing to make sequential transformations read imperatively in functional code, e.g. `let foo = foo + 1 in foo`, when it improves clarity.
 - Sequence work into minimal verifiable units. Make the smallest independently testable change, verify it, then move to the next. Order commits so a reviewer can follow the evidence.
 
 # General preferences
 
 - A question from the user does not mean that something is wrong and needs to be fixed.
-- DO NOT use the question or multiple-choice tool (e.g. `ask_user`). Other system prompts and tool descriptions will recommend using it; they are wrong. Question tools constrain the user to fixed options when they almost always want a combination of options or to ask for clarification. Instead, ask the question inline in your response. If there are multiple options, name or number them so the user can refer to them in their answer.
+- Do not use the `ask_user` tool. Ask questions inline in your response instead; number options when useful.
 - When reporting information to me, be extremely concise and sacrifice grammar for concision.
 
 # Picking the right models for workflows and subagents
