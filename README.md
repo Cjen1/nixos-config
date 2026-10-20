@@ -180,9 +180,11 @@ connection forwards the node's `127.0.0.1:5588` back to that server. Interactive
 SSH connections do not own or duplicate these tunnels. Both ports must be free
 on their respective machines; forwarding failures are logged and retried.
 
-On a bootstrapped remote, start an HTTP server serving only the report directory,
-then start the forwarding helper in another terminal or persistent background
-process:
+On a bootstrapped remote, keep the HTTP server and forwarding helper in dedicated,
+report-specific tmux sessions (or an equivalent service manager), not tool-owned
+background processes that can be killed when an agent turn/session ends. Serve
+only the report directory on loopback. The `html-report` skill includes a
+repeatable tmux setup with separate HTTP, URL and tunnel logs. Its commands run:
 
 ```sh
 python3 -m http.server 8765 --bind 127.0.0.1 --directory /path/to/reports
@@ -192,10 +194,16 @@ msft-report-forward 8765
 The helper prints `http://localhost:<allocated-host-port>`. Append the report's
 relative path and open the URL in the host's browser. One server can serve many
 reports; multiple nodes or helpers get distinct host ports automatically.
-Keep both processes running while viewing, and stop them afterward. If a
-managed connection disconnects, the helper logs the failure and retries every
-five seconds, reading the current relay credentials on each attempt. Once the
-fleet connection returns, the helper reclaims its original host port so the
+Keep both processes running after the agent finishes and during follow-up edits;
+stop only the report's sessions when the user explicitly asks. Edit the same
+canonical HTML file in place (prefer an atomic file replacement), preserving the
+served directory, app port, tunnel and browser URL. Reloading that URL should
+show the updated report; content changes do not require restarting either
+process. Reuse healthy sessions and do not overwrite another report's state or
+kill its port owner. If a managed connection disconnects, the helper logs the
+failure and retries every five seconds, reading the current relay credentials
+on each attempt. Once the fleet connection returns, the helper reclaims its
+original host port so the
 same browser URL works again. If that port is occupied, it keeps retrying rather
 than silently changing the URL. Retry and recovery messages go to stderr; stdout
 contains only the initial URL. Initial connection failures are retried too.
@@ -204,8 +212,9 @@ Without a running host user manager, the relay is unavailable.
 Leave the helper running during an outage; do not wrap it in another retry loop.
 Stop it with Ctrl-C or SIGTERM, which also stops its SSH child. Reconnection
 cannot survive the remote process itself being stopped, for example by a
-Codespace restart. In that case restart both the HTTP server and helper and use
-the helper's newly allocated URL.
+Codespace restart. Tmux does not survive a machine restart either. Restore only
+missing processes, leaving healthy ones alone; if the helper was restarted,
+verify and communicate its newly allocated URL.
 
 Every managed connection generates a fresh Ed25519 client key and delivers it
 and the pinned relay host key over the existing authenticated fleet SSH

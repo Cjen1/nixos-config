@@ -151,9 +151,10 @@ in
         - Do not assume that WSL, `explorer.exe`, `wslpath`, or a local Windows browser is available.
         - The repository is at `/root/nixos-config`.
         - For editor links, use the SSH alias from the active connection; do not assume a fixed hostname or IP.
-        - To view an HTML report on the host, serve only its report directory on loopback, then run `msft-report-forward <app-port>` as a persistent background process. It prints a host-browser URL with an automatically allocated port; append the report's relative path and give that URL to the user.
-        - The forwarding helper automatically retries failed connections every five seconds, reloads relay credentials, and restores the same URL. Leave it running during outages; do not start duplicate helpers or wrap it in a retry loop. If the remote restarts and kills these processes, restart the server and helper and give the user the new URL.
-        - Keep both the HTTP server and forwarding helper running while the report is needed, and stop them afterward. Multiple helpers can run concurrently. If the relay is unavailable, report the error; do not make the report public.
+        - To view an HTML report on the host, use the html-report skill: serve only its report directory on loopback, with the HTTP server and `msft-report-forward <app-port>` in dedicated report-specific tmux sessions, not tool-owned background commands. The helper prints a host-browser URL with an automatically allocated port; append the report's relative path and give that URL to the user.
+        - Update reports in place at their existing file path and URL, so browser reloads show edits. Reuse healthy servers/tunnels and preserve their session names, ports and logs. Do not kill processes or restart serving for content changes, overwrite another report's state, or stop serving at the end of an agent turn.
+        - The forwarding helper automatically retries failed connections every five seconds, reloads relay credentials, and restores the same URL. Leave it running during outages; do not start duplicate helpers, overwrite relay credentials or wrap it in a retry loop. Tmux does not survive a machine restart: restore only missing processes and verify the URL; a restarted helper may allocate a new one.
+        - Stop only this report's serving sessions when the user explicitly asks. Multiple helpers can run concurrently. If the relay is unavailable, report the error; do not make the report public.
       ''
     else
       ''
