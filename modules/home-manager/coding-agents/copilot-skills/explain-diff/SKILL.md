@@ -1,8 +1,7 @@
 ---
 name: explain-diff
-description: "Explain a PR or a set of changes as a guided, step-by-step walkthrough: an HTML page with the diff on the left and comments on the right, ordered the way an engineer would implement the change from scratch. Invoke manually, e.g. '/explain-diff https://github.com/org/repo/pull/123' or '/explain-diff main..my-branch'."
+description: "Use when the user asks to explain a PR or diff as a guided, step-by-step HTML walkthrough, with the diff on the left and comments on the right, ordered as an engineer would implement the change from scratch."
 argument-hint: "PR URL/number, or a BASE..HEAD range"
-disable-model-invocation: true
 ---
 
 # Explain diff
@@ -11,7 +10,7 @@ Turn a diff into a guided walkthrough the user can step through. The tool in thi
 
 The reader should finish able to re-implement the change themselves. Not just "what changed in each file", but what the change is for, what it introduces, and how each edit follows from that.
 
-The user invoked this deliberately and expects the finished page, not a conversation. Don't ask what they want: the argument tells you which changes, and this file tells you how to explain them. If there's no argument, explain the current branch against its upstream merge-base and say so. Do the whole job, render, host, and hand back the URL.
+The user expects the finished page, not a conversation. Use the user's request or skill argument to identify the changes. If neither specifies a range, explain the current branch against its upstream merge-base and say so. Do the whole job, render, host, and hand back the URL.
 
 ## 1. Pin the range
 

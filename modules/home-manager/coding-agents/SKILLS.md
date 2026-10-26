@@ -27,9 +27,9 @@ claims. Upstream license notices are in [`copilot-skills/LICENSE`](./copilot-ski
 
 ## Local adaptations to preserve
 
-- Keep the eleven principles, `benchmark-checklist`, `how`, and `why`
-  model-invokable. Keep `blast-radius`
-  and `handoff` user-invoked, and retain Matt's Codex invocation metadata.
+- Keep skills model-invokable. For `blast-radius`, `handoff`, and `explain-diff`,
+  use descriptions beginning "Use when the user asks to" rather than manual-only
+  invocation constraints, including in Codex metadata.
 - Use Copilot's `task` arguments, available-tool discovery, and Copilot Spaces
   rather than Cursor model rules, tool arguments, or MCP filesystem paths.
   Model selection follows current user preferences or configured defaults,

@@ -171,6 +171,7 @@ in
       . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
       . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
       export SHELL="${config.home.profileDirectory}/bin/fish"
+      export COPILOTD_POLICY_EXCLUDED_TOOLS=builtin:ask_user
     '';
   };
 
