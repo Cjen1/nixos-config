@@ -1,4 +1,10 @@
-{ pkgs, ... }: {
+{ lib, pkgs, leanNixpkgs ? null, ... }:
+let
+  lean4 =
+    if leanNixpkgs == null then pkgs.lean4
+    else leanNixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.leanPackages.lean4;
+in
+{
   imports = [
     ./git.nix
     ./neovim
@@ -11,7 +17,8 @@
 
   home.packages = with pkgs; [
     atuin
-    elan
+    (lib.lowPrio elan)
+    lean4
     gnumake
     tmux
     unzip

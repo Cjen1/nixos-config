@@ -78,8 +78,17 @@ in
         . "$HOME/.env"
         set +a
       fi
+      export PATH="${config.home.profileDirectory}/bin:$PATH"
     '';
   };
+
+  home.file.".bash_profile".source = lib.mkForce (
+    pkgs.writeText "msft-bash-profile" ''
+      [[ -f ~/.profile ]] && . ~/.profile
+      [[ -f ~/.bashrc ]] && . ~/.bashrc
+      export PATH="${config.home.profileDirectory}/bin:$PATH"
+    ''
+  );
 
   programs.fish.shellInit = lib.mkBefore ''
     fish_add_path --prepend "$HOME/.nix-profile/bin"

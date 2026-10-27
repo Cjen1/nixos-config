@@ -35,6 +35,10 @@ Nix substitutes the compressed mathlib archive from `cache.nixos.org` when
 available and materializes it once per store; otherwise it builds it once.
 Projects do not need their own Nix flake.
 
+The shared TUI profile installs Lean and Lake, with elan as a lower-priority
+fallback. MSFT shells use the same pinned Lean as the shared mathlib packages;
+new Bash and Fish shells on cs1/cs2 resolve the Home Manager toolchain first.
+
 ```sh
 lean-share /path/to/lean-project
 lean-share --replace /path/to/existing-project
