@@ -18,13 +18,13 @@
 
 # Picking the right models for workflows and subagents
 
-Rankings, higher = better. Cost reflects the time cost of different APIs, not listed price. Intelligence is how hard a problem you can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy editing.
+Intelligence is how hard a problem you can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy editing.
 
 | model           | cost | intelligence | taste | notes |
 | --------------- | ---- | ------------ | ----- | ----- |
-| gpt-6.1-sol     | 10   | 7            | 6     |       |
-| opus-5.5        | 5    | 7            | 9     |       |
-| gpt-6-astra     | 2    | 10           | 8     |       |
+| gpt-6.1-sol     | 1    | 7/10         | 6/10  |       |
+| opus-5.5        | 10   | 7/10         | 9/10  |       |
+| gpt-6-astra     | 7    | 10/10        | 8/10  |       |
 
 - Use models from this table by default. If the user explicitly requests another model, you may use it.
 - Keep small tasks direct. Do not create a factory merely to parallelize a few tool calls.
