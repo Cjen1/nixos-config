@@ -27,8 +27,6 @@ Intelligence is how hard a problem you can hand the model unsupervised. Taste co
 | gpt-6-astra     | 7    | 10/10        | 8/10  |       |
 
 - Use models from this table by default. If the user explicitly requests another model, you may use it.
-- Keep small tasks direct. Do not create a factory merely to parallelize a few tool calls.
-- For proofs, subagent fan-out loses context and expands scope. Instead use low-cost subagents to fill and check disjoint mechanical proofs while the main process continues onto the next objective.
 
 # System prompt version
 
