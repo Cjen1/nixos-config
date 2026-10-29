@@ -282,15 +282,15 @@ TEMPLATE = """<!doctype html>
 <title>{{TITLE}}</title>
 <style>
 :root{--border:#d3dce6;--ink:#192b3b;--muted:#526578}
-*{box-sizing:border-box}body{margin:0;background:#f5f7fa;color:var(--ink);font:15px/1.55 system-ui,sans-serif}
-header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--border);padding:12px 22px;box-shadow:0 2px 8px #1020300a}
+*{box-sizing:border-box}body{margin:0;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr);background:#f5f7fa;color:var(--ink);font:15px/1.55 system-ui,sans-serif}
+header{z-index:5;background:#fff;border-bottom:1px solid var(--border);padding:12px 22px;box-shadow:0 2px 8px #1020300a}
 .bar{display:flex;gap:14px;align-items:center;flex-wrap:wrap}h1{font-size:17px;margin:0;margin-right:auto}
 .range{color:var(--muted);font:12px ui-monospace,monospace;margin-top:4px}
 label{font-size:13px;font-weight:650}select{padding:6px;border:1px solid #a5b5c4;border-radius:5px;background:#fff;color:var(--ink);max-width:min(60vw,560px)}
 .buttons{display:flex;gap:8px}button.nav{background:#eaf1f9;border:1px solid #a5b5c4;border-radius:5px;padding:6px 14px;color:var(--ink);cursor:pointer}
 button.nav:disabled{opacity:.4;cursor:default}
-main{padding:0 16px 60vh}.file{margin:22px 0;border:1px solid var(--border);background:#fff;border-radius:7px;overflow:clip;scroll-margin-top:110px}
-h2{font:600 14px/1.5 ui-monospace,monospace;padding:12px 16px;margin:0;background:#e9eef4;overflow-wrap:anywhere}
+main{overflow:auto;padding:0 16px 60vh}.file{margin:22px 0;border:1px solid var(--border);background:#fff;border-radius:7px;overflow:clip}
+h2{position:sticky;top:0;z-index:4;font:600 14px/1.5 ui-monospace,monospace;padding:12px 16px;margin:0;background:#e9eef4;overflow-wrap:anywhere}
 .chunk{display:grid;grid-template-columns:minmax(0,64fr) minmax(260px,36fr);scroll-margin-top:110px}
 .chunk.has-note{border-top:1px solid #e3e9ef}
 .code{overflow-x:auto;min-width:0}table{border-collapse:collapse;width:100%;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
@@ -345,7 +345,7 @@ document.getElementById('file').addEventListener('change',e=>document.getElement
 document.addEventListener('keydown',e=>{if(e.target.tagName==='SELECT')return;
  if(e.key==='ArrowRight')show(current+1);if(e.key==='ArrowLeft')show(current-1);});
 document.querySelectorAll('.note').forEach(n=>n.addEventListener('click',()=>show(Number(n.dataset.step))));
-if(steps.length){show(0);window.scrollTo(0,0);}
+if(steps.length){show(0);document.querySelector('main').scrollTop=0;}
 </script></body></html>"""
 
 

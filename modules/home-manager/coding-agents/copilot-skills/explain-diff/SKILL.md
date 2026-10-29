@@ -115,6 +115,7 @@ uv run ~/.copilot/skills/explain-diff/walkthrough.py "$base" "$head" comments.js
 The page has the diff on the left and comments on the right. It also includes:
 
 - a step selector and **Previous**/**Next** buttons, plus arrow-key navigation;
+- sticky file-path headers that remain visible while scrolling, including over folded context;
 - the enclosing namespace, class, function, and test-case lines around each hunk;
 - grey `... N lines` folds you can click to expand.
 
