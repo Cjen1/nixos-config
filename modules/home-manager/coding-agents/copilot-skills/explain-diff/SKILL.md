@@ -33,7 +33,7 @@ Read the whole diff and the PR description. Read enough surrounding code to know
 - **The key idea.** The one structural move everything else follows from: a new data structure, an inverted lookup, a new invariant, a moved responsibility.
 - **What stays the same.** The behaviour the change must preserve. This is what tests are protecting.
 
-If you can't answer these, you can't order the walkthrough. Use the `how` skill for unfamiliar subsystems.
+If you can't answer these, you can't order the walkthrough. Read unfamiliar subsystems before you write.
 
 ## 3. Order the steps by implementation, not by file
 
