@@ -48,7 +48,7 @@ Use the newest GPT Sol model (currently `gpt-6.1-sol`) unless the user names
 one. Do not substitute another model; if no Sol model is available, report
 the blocker.
 
-Start one reviewer subagent with the round 1 brief. Do not edit scoped files
+Start one reviewer as a background subagent with the round 1 brief. Do not edit scoped files
 while review runs. A timeout, error, or missing reply is not approval. If the
 reviewer fails, start a fresh one with the round 1 brief and the ledger.
 

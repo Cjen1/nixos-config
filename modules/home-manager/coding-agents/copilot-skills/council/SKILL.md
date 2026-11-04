@@ -29,7 +29,7 @@ another's.
 
 ## Running a round
 
-Run the three councilors in parallel. Give each the request and the context
+Run the three councilors as parallel background subagents. Give each the request and the context
 it needs: repo path, base, diff command, intent, what is out of scope, and
 check results. For review or feedback, keep them read-only. A timeout, error,
 or missing reply is not approval.
