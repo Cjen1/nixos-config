@@ -14,9 +14,9 @@ implementation and explore new ideas, skip fixes to code being replaced.
 
 | Councilor | `model` | `reasoning_effort` |
 | --- | --- | --- |
-| Opus 5.5 | `claude-opus-5.5` | `high` |
-| GPT-6.1 Sol | `gpt-6.1-sol` | `max` |
 | GPT-6.1 Terra | `gpt-6.1-terra` | `max` |
+| GPT-6.1 Sol | `gpt-6.1-sol` | `max` |
+| Opus 5.5 | `claude-opus-5.5` | `high` |
 
 If the user names other councilors, use those. If a councilor is unavailable,
 report it instead of substituting.
@@ -43,9 +43,7 @@ pass as one round. A fresh review after fixes starts a new round: send the
 same councilors what you fixed, what you declined and why, and the change
 since the last round.
 
-If the work has an open PR, put the results in its description, above the
-model and harness line at the end. Edit the description; do not post a
-comment. Otherwise put the same results in the final reply only.
+Put the results in the final reply only.
 
 ```markdown
 ## Council review
