@@ -44,17 +44,12 @@ missing or already-failing checks in the brief.
 
 ## 2. Start Sol
 
-Use the newest `gpt-*-sol` model in the `task` tool's model list (currently
-`gpt-6.1-sol`) unless the user names one. Do not substitute another model; if
-no Sol model is available, report the blocker. Set `reasoning_effort` only if
-the user asks for one.
+Use the newest GPT Sol model (currently `gpt-6.1-sol`) unless the user names
+one. Do not substitute another model; if no Sol model is available, report
+the blocker.
 
-Start the reviewer with `task`: `agent_type: "general-purpose"`,
-`mode: "background"`, `model`, and the round 1 brief. Save its `agent_id`.
-
-Do not edit scoped files while review runs. Wait for the completion
-notification, then read the reply once with `read_agent`. Do not poll or start
-a second reviewer. A timeout, error, or missing reply is not approval. If the
+Start one reviewer subagent with the round 1 brief. Do not edit scoped files
+while review runs. A timeout, error, or missing reply is not approval. If the
 reviewer fails, start a fresh one with the round 1 brief and the ledger.
 
 Round 1 brief:
@@ -91,11 +86,10 @@ review grew the diff, cut first. Do not agree just to end the loop.
 
 Start one only if budget remains and a blocker or should is open, behavior code
 changed, or approval does not cover the current behavior diff. Send it to the
-same reviewer with `write_agent`: the ledger (`fixed:` / `disagree:` /
-`declined:` + evidence), the same base diff command, and the change since last
-round. Tell Sol: open ids and changed code only. Mark each old id `resolved`
-or `still open: <reason>`. Read the reply with `read_agent` using
-`since_turn`.
+same reviewer: the ledger (`fixed:` / `disagree:` / `declined:` + evidence),
+the same base diff command, and the change since last round. Tell Sol: open
+ids and changed code only. Mark each old id `resolved` or
+`still open: <reason>`.
 
 ## 5. Stop and ship
 
