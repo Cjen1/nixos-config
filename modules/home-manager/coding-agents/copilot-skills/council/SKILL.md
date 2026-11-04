@@ -29,27 +29,19 @@ another's.
 
 ## Running a round
 
-Start all three councilors in one response with the `task` tool:
-`agent_type: "general-purpose"`, `mode: "background"`, and the `model` and
-`reasoning_effort` above. Save each `agent_id`. Wait for the completion
-notifications, then read each reply once with `read_agent`. Do not poll. A
-timeout, error, or missing reply is not approval.
-
-Give each councilor the request and the context it needs: repo path, base,
-diff command, intent, what is out of scope, and check results. For review or
-feedback, tell them: "Review only. Do not edit, commit, push, comment on PRs,
-or start subagents."
+Run the three councilors in parallel. Give each the request and the context
+it needs: repo path, base, diff command, intent, what is out of scope, and
+check results. For review or feedback, keep them read-only. A timeout, error,
+or missing reply is not approval.
 
 Summarize the useful findings, disagreements, and recommended next steps.
 
 ## Code review
 
-Ask each councilor for a score out of 10 for each goal. Count each full review pass as one
-round. A fresh review after fixes starts a new round: send it to the same
-councilors with `write_agent`, with what you fixed, what you declined and why,
-and the change since the last round. Read the new reply with `read_agent`
-using `since_turn`. If a councilor has failed or been cancelled, start a fresh
-one for that seat and give it the ledger.
+Ask each councilor for a score out of 10 for each goal. Count each full review
+pass as one round. A fresh review after fixes starts a new round: send the
+same councilors what you fixed, what you declined and why, and the change
+since the last round.
 
 If the work has an open PR, put the results in its description, above the
 model and harness line at the end. Edit the description; do not post a
