@@ -22,8 +22,9 @@ Intelligence is how hard a problem you can hand the model unsupervised. Taste co
 
 | model           | cost | intelligence | taste | notes |
 | --------------- | ---- | ------------ | ----- | ----- |
-| gpt-6.1-sol     | 1    | 7/10         | 6/10  |       |
-| opus-5.5        | 10   | 7/10         | 9/10  |       |
+| gpt-6.1-sol     | 3    | 7/10         | 6/10  |       |
+| gpt-6.1-terra   | 0    | 5/10         | 5/10  |       |
+| opus-5.5        | 10   | 10/10        | 9/10  |       |
 | gpt-6-astra     | 7    | 10/10        | 8/10  |       |
 
 - Use models from this table by default. If the user explicitly requests another model, you may use it.
