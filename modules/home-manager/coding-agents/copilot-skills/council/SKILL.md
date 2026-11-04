@@ -1,6 +1,6 @@
 ---
 name: council
-description: Use when the user says "council". Gets review or feedback from three models and loops until they agree.
+description: Use when the user asks for a "council".
 ---
 
 # Council
@@ -21,12 +21,11 @@ implementation and explore new ideas, skip fixes to code being replaced.
 If the user names other councilors, use those. If a councilor is unavailable,
 report it instead of substituting.
 
-## One council per goal
+## Separate scores per goal
 
-Each distinct goal gets its own council of three fresh councilors. Never send
-a different goal to an existing councilor. If the request has several
-independent goals, run a separate council for each. Later rounds on the same
-goal go to that goal's councilors.
+Use one council for the request. If it has several goals, ask each councilor
+to review and score each goal separately, so one goal's findings do not hide
+another's.
 
 ## Running a round
 
@@ -45,7 +44,7 @@ Summarize the useful findings, disagreements, and recommended next steps.
 
 ## Code review
 
-Ask each councilor for a score out of 10. Count each full review pass as one
+Ask each councilor for a score out of 10 for each goal. Count each full review pass as one
 round. A fresh review after fixes starts a new round: send it to the same
 councilors with `write_agent`, with what you fixed, what you declined and why,
 and the change since the last round. Read the new reply with `read_agent`
@@ -61,12 +60,17 @@ comment. Otherwise put the same results in the final reply only.
 
 Rounds: 2
 
-| Councilor | Round 1 | Round 2 |
-| --- | --- | --- |
-| Opus 5.5 | 7/10 | 9/10 |
-| GPT-6.1 Sol | 8/10 | 10/10 |
-| GPT-6.1 Terra | 7/10 | 9/10 |
+| Goal | Councilor | Round 1 | Round 2 |
+| --- | --- | --- | --- |
+| Fix the crash | Opus 5.5 | 7/10 | 9/10 |
+| Fix the crash | GPT-6.1 Sol | 8/10 | 10/10 |
+| Fix the crash | GPT-6.1 Terra | 7/10 | 9/10 |
+| Keep the API stable | Opus 5.5 | 6/10 | 9/10 |
+| Keep the API stable | GPT-6.1 Sol | 8/10 | 9/10 |
+| Keep the API stable | GPT-6.1 Terra | 7/10 | 8/10 |
 ```
+
+With a single goal, drop the Goal column.
 
 If a councilor gives no score, write `no score`. Do not invent one.
 

@@ -22,10 +22,10 @@ whole climb so the scores stay comparable between rounds.
 
 ## 2. Score
 
-For each objective, run a separate council (see the `council` skill) to review
-the current state against that objective only. Ask each councilor to score
-every dimension out of 10. For each score, they give the evidence and the
-change that would raise it most.
+Run one council (see the `council` skill) to review the current state. Ask
+each councilor to score each objective separately, on every one of its
+dimensions, out of 10. For each score, they give the evidence and the change
+that would raise it most.
 
 ## 3. Climb
 
@@ -33,12 +33,12 @@ Make the changes that raise the scores most, smallest first. Prove each
 change. Do not trade one objective for another; if a change would lower
 another objective's score, find a different change or ask.
 
-Send the next round to the same councils. Keep a table of scores per
+Send the next round to the same council. Keep a table of scores per
 objective, dimension, councilor, and round.
 
 ## 4. Stop
 
-Stop when every council is satisfied, or when scores stop rising for a round.
+Stop when every councilor is satisfied, or when scores stop rising for a round.
 Report the score table, what changed, and the remaining gaps per objective.
 
 Keep scope to the goal. Reviewers will suggest more; decline what the goal
