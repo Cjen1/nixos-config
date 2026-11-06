@@ -15,6 +15,8 @@
     ./audiobookshelf.nix
     ./immich.nix
     ./audiomuse-ai.nix
+    ./navidrome.nix
+    ./home-assistant.nix
     ./forgejo.nix
     ./dex.nix
     ./ps-todos.nix
@@ -69,6 +71,9 @@
 
   time.timeZone = "Europe/London";
 
+  # Restart 10 seconds after a kernel panic.
+  boot.kernel.sysctl."kernel.panic" = 10;
+
   # ZFS
   boot.supportedFilesystems = [ "zfs" ];
   #boot.kernelPackages = pkgs.zfs.linuxPackages;
@@ -107,6 +112,7 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    beets
     vim
     networkmanager
     pavucontrol
@@ -156,7 +162,7 @@
     enable = true;
     package = unstable.caddy.withPlugins {
       plugins = [ "github.com/caddy-dns/cloudflare@v0.2.4" ];
-      hash = "sha256-hEHgAG0F0ozHRAPuxEqLyTATBrE+pajeXDiSNwniorg=";
+      hash = "sha256-tubXIDCJnO2mvdnPlZclwDhNGaeeYLSt7lnni3+pXDo=";
     };
     dataDir = "/data/caddy/data";
     logDir = "/data/caddy/log";
@@ -171,11 +177,15 @@
     resolveLocalQueries = false;
     settings = {
       interface = "tailscale0";
-      bind-interfaces = true;
+      # tailscale0 may not exist yet when dnsmasq starts during boot.
+      # Keep listening for it instead of failing the service permanently.
+      bind-dynamic = true;
       no-resolv = true;
       address = "/ts.jentek.dev/100.96.252.111";
     };
   };
+
+  systemd.services.dnsmasq.after = [ "tailscaled.service" ];
 
   # Jellyfin - remainder is configured as in jellyfin.nix
   services.caddy.virtualHosts = {
@@ -200,60 +210,77 @@
         resolvers 1.1.1.1 8.8.8.8
       }
 
-      @notTailnet not remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
-      respond @notTailnet 403
+      route {
+        @notTailnet not remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
+        respond @notTailnet 403
 
-      @jellyseerr host jellyseerr.ts.jentek.dev
-      handle @jellyseerr {
-        reverse_proxy 127.0.0.1:5055
+        @t3code host t3.ts.jentek.dev
+        handle @t3code {
+          reverse_proxy 127.0.0.1:3773
+        }
+
+        @jellyseerr host jellyseerr.ts.jentek.dev
+        handle @jellyseerr {
+          reverse_proxy 127.0.0.1:5055
+        }
+
+        @radarr host radarr.ts.jentek.dev
+        handle @radarr {
+          reverse_proxy 127.0.0.1:7878
+        }
+
+        @sonarr host sonarr.ts.jentek.dev
+        handle @sonarr {
+          reverse_proxy 127.0.0.1:8989
+        }
+
+        @jackett host jackett.ts.jentek.dev
+        handle @jackett {
+          reverse_proxy 127.0.0.1:9117
+        }
+
+        @transmission host transmission.ts.jentek.dev
+        handle @transmission {
+          reverse_proxy 127.0.0.1:9091
+        }
+
+        @immich host immich.ts.jentek.dev
+        handle @immich {
+          reverse_proxy 127.0.0.1:2283
+        }
+
+        @audiomuse host audiomuse.ts.jentek.dev
+        handle @audiomuse {
+          reverse_proxy 127.0.0.1:8000
+        }
+
+        @navidrome host navidrome.ts.jentek.dev
+        handle @navidrome {
+          reverse_proxy 127.0.0.1:4533
+        }
+
+        @homeAssistant host home-assistant.ts.jentek.dev
+        handle @homeAssistant {
+          reverse_proxy 127.0.0.1:8123
+        }
+
+        @forgejo host forgejo.ts.jentek.dev
+        handle @forgejo {
+          reverse_proxy 127.0.0.1:3000
+        }
+
+        @customToolingSync host sync.ts.jentek.dev
+        handle @customToolingSync {
+          reverse_proxy 127.0.0.1:5070
+        }
+
+        @voiceNotes host voice-notes.ts.jentek.dev
+        handle @voiceNotes {
+          reverse_proxy 127.0.0.1:5080
+        }
+
+        respond 404
       }
-
-      @radarr host radarr.ts.jentek.dev
-      handle @radarr {
-        reverse_proxy 127.0.0.1:7878
-      }
-
-      @sonarr host sonarr.ts.jentek.dev
-      handle @sonarr {
-        reverse_proxy 127.0.0.1:8989
-      }
-
-      @jackett host jackett.ts.jentek.dev
-      handle @jackett {
-        reverse_proxy 127.0.0.1:9117
-      }
-
-      @transmission host transmission.ts.jentek.dev
-      handle @transmission {
-        reverse_proxy 127.0.0.1:9091
-      }
-
-      @immich host immich.ts.jentek.dev
-      handle @immich {
-        reverse_proxy 127.0.0.1:2283
-      }
-
-      @audiomuse host audiomuse.ts.jentek.dev
-      handle @audiomuse {
-        reverse_proxy 127.0.0.1:8000
-      }
-
-      @forgejo host forgejo.ts.jentek.dev
-      handle @forgejo {
-        reverse_proxy 127.0.0.1:3000
-      }
-
-      @customToolingSync host sync.ts.jentek.dev
-      handle @customToolingSync {
-        reverse_proxy 127.0.0.1:5070
-      }
-
-      @voiceNotes host voice-notes.ts.jentek.dev
-      handle @voiceNotes {
-        reverse_proxy 127.0.0.1:5080
-      }
-
-      respond 404
     '';
   };
 

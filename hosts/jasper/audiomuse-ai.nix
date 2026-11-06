@@ -31,7 +31,7 @@
     };
 
     services."audiomuse-flask".service = {
-      image = "ghcr.io/neptunehub/audiomuse-ai:latest";
+      image = "ghcr.io/neptunehub/audiomuse-ai:3.1.1";
       restart = "unless-stopped";
       env_file = [ config.age.secrets."audiomuse-jellyfin-token".path ];
       environment = {
@@ -51,6 +51,7 @@
       };
       volumes = [
         "/data/audiomuse-ai/temp-audio-flask:/app/temp_audio"
+        "/data/audiomuse-ai/plugins-flask:/app/plugin/installed"
       ];
       extra_hosts = ["host.docker.internal:host-gateway"];
       ports = ["127.0.0.1:8000:8000"];
@@ -58,7 +59,7 @@
     };
 
     services."audiomuse-worker".service = {
-      image = "ghcr.io/neptunehub/audiomuse-ai:latest";
+      image = "ghcr.io/neptunehub/audiomuse-ai:3.1.1";
       restart = "unless-stopped";
       env_file = [ config.age.secrets."audiomuse-jellyfin-token".path ];
       environment = {
@@ -78,6 +79,7 @@
       };
       volumes = [
         "/data/audiomuse-ai/temp-audio-worker:/app/temp_audio"
+        "/data/audiomuse-ai/plugins-worker:/app/plugin/installed"
       ];
       extra_hosts = ["host.docker.internal:host-gateway"];
       depends_on = ["audiomuse-redis" "audiomuse-postgres"];

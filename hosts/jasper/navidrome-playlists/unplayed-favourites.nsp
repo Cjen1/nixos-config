@@ -1,0 +1,9 @@
+{
+  "name": "Unplayed Favourites",
+  "all": [
+    { "is": { "loved": true } },
+    { "isMissing": { "lastPlayed": true } }
+  ],
+  "sort": "artist,title",
+  "limit": 500
+}

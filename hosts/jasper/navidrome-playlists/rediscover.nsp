@@ -1,0 +1,9 @@
+{
+  "name": "Rediscover",
+  "all": [
+    { "gt": { "playCount": 0 } },
+    { "notInTheLast": { "lastPlayed": 180 } }
+  ],
+  "sort": "random",
+  "limit": 100
+}

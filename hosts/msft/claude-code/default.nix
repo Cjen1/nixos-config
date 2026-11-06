@@ -16,12 +16,12 @@
 
 buildNpmPackage rec {
   pname = "claude-code";
-  version = "2.1.220";
+  version = "2.1.310";
 
   src = ./.;
   nodejs = nodejs_22;
 
-  npmDepsHash = "sha256-8nN99T615uUmbp/arNDYm2HNmr9LmiOgSiFyrKHh4Ko=";
+  npmDepsHash = "sha256-xZSh+If7kPGP3nuDm/I3ew9LQeTRT2gkVXFRRMP1vM0=";
 
   dontNpmBuild = true;
   dontStrip = true;

@@ -10,12 +10,12 @@
 
 buildNpmPackage rec {
   pname = "opencode-cli";
-  version = "1.18.4";
+  version = "1.19.4";
 
   src = ./.;
   nodejs = nodejs_22;
 
-  npmDepsHash = "sha256-R8zWbybPkl0l6m0vQuq/0lh2M9wA8cEsRF+EyuKAGsg=";
+  npmDepsHash = "sha256-m5P5v1VvhYWDH2YX2KyW/ZyMps14BcahvRrw5zWaK+0=";
 
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];

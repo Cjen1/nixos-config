@@ -1,0 +1,6 @@
+{
+  "name": "Recently Played",
+  "all": [{ "inTheLast": { "lastPlayed": 30 } }],
+  "sort": "-lastPlayed",
+  "limit": 100
+}
