@@ -1,4 +1,4 @@
-{ ... }:
+{ unstable, ... }:
 {
   imports = [
     ../../modules/home-manager/tui.nix
@@ -14,6 +14,7 @@
     username = "cjen1";
     homeDirectory = "/home/cjen1";
     stateVersion = "23.11";
+    packages = [ unstable.t3code ];
   };
 
   programs.home-manager.enable = true;

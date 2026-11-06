@@ -135,6 +135,7 @@
     ]; # Enable ‘sudo’ for the user.
   };
 
+  home-manager.extraSpecialArgs = { inherit unstable; };
   home-manager.users.cjen1 = import ./home.nix;
   xdg.portal = {
     enable = true;

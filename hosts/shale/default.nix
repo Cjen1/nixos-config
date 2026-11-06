@@ -71,6 +71,7 @@
     extraGroups = [ "wheel" "audio" "video" "pulse-access" "docker" "adbusers" ]; # Enable ‘sudo’ for the user.
   };
 
+  home-manager.extraSpecialArgs.unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system};
   home-manager.users.cjen1 = import ./home.nix;
 
   security.polkit.enable = true;
