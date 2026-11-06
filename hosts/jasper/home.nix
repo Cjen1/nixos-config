@@ -21,7 +21,7 @@
 
   programs.home-manager.enable = true;
 
-  # Temporary T3 service for remote configuration cleanup.
+  # Keep T3 available at boot through the lingering user manager.
   systemd.user.services.t3code = {
     Unit.Description = "T3 Code server";
     Service = {

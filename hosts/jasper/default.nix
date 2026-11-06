@@ -131,6 +131,7 @@
   users.users.cjen1 = {
     shell = pkgs.fish;
     isNormalUser = true;
+    linger = true;
     extraGroups = [
       "wheel"
       "audio"
