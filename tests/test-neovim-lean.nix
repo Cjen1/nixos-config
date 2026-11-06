@@ -3,7 +3,10 @@ let
   pkgs = flake.inputs.nixpkgs.legacyPackages.x86_64-linux;
   config = (flake.inputs.home-manager.lib.homeManagerConfiguration {
     inherit pkgs;
-    extraSpecialArgs.isRemote = false;
+    extraSpecialArgs = {
+      isRemote = false;
+      leanNixpkgs = flake.inputs.lean-nixpkgs;
+    };
     modules = [ ../hosts/msft/home.nix ];
   }).config;
 in

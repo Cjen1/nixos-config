@@ -4,7 +4,10 @@ let
     mode: remote:
     (flake.inputs.home-manager.lib.homeManagerConfiguration {
       pkgs = flake.inputs.nixpkgs.legacyPackages.x86_64-linux;
-      extraSpecialArgs.isRemote = remote;
+      extraSpecialArgs = {
+        isRemote = remote;
+        leanNixpkgs = flake.inputs.lean-nixpkgs;
+      };
       modules = [
         ../hosts/msft/home.nix
         { codingAgents.copilot.wmuxHooks.attentionExtension = flake.inputs.nixpkgs.lib.mkForce mode; }
