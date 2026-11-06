@@ -119,6 +119,9 @@ After activation, start a fresh copilotd session to load the instructions and sk
 Remote activation also patches the local
 `/workspaces/CCF/.devcontainer/azurelinux4-copilotd/start_copilotd.sh`, when present,
 to source a Home Manager-managed Nix environment before starting the daemon.
+It also patches the legacy `/root/.local/state/copilotd-restart/start.sh` launcher when present.
+Both launchers register using the fleet alias (`cs1`, `cs2`, `cs3`), resolved from `fleet-registry.nix` at daemon startup.
+The real `CODESPACE_NAME` and environment identity are unchanged; unregistered Codespaces retain their original names.
 The patch is repeatable and leaves a local modification in the CCF checkout;
 it does not change the shared devcontainer configuration or restart running sessions.
 It takes effect at the next daemon startup. If the launcher is replaced, rerun

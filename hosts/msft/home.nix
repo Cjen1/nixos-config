@@ -181,6 +181,17 @@ in
       . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
       export SHELL="${config.home.profileDirectory}/bin/fish"
       export COPILOTD_POLICY_EXCLUDED_TOOLS=builtin:ask_user
+      msft_copilotd_environment_name() {
+        case "$1" in
+        ${lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (
+            name: entry:
+            "${lib.escapeShellArg entry.codespace}) printf '%s\\n' ${lib.escapeShellArg name} ;;"
+          ) (lib.filterAttrs (_: entry: entry.codespace != null) config.msft.fleet)
+        )}
+        *) printf '%s\n' "$1" ;;
+        esac
+      }
     '';
   };
 
@@ -188,6 +199,9 @@ in
     lib.hm.dag.entryAfter [ "linkGeneration" ] ''
       run ${pkgs.python3}/bin/python3 ${./patch-copilotd-startup.py} \
         /workspaces/CCF/.devcontainer/azurelinux4-copilotd/start_copilotd.sh \
+        "${config.xdg.configHome}/msft/copilotd-env.sh"
+      run ${pkgs.python3}/bin/python3 ${./patch-copilotd-startup.py} \
+        "${config.home.homeDirectory}/.local/state/copilotd-restart/start.sh" \
         "${config.xdg.configHome}/msft/copilotd-env.sh"
     ''
   );

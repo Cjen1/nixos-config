@@ -58,6 +58,8 @@ assert fullLocal.home.activationPackage.drvPath != "";
 assert fullRemote.home.activationPackage.drvPath != "";
 assert lib.any (package: package.name == "msft-report-forward") fullRemote.home.packages;
 assert lib.hasInfix "msft-report-forward" fullRemote.codingAgents.copilot.instructionsSlug;
+assert lib.hasInfix "magical-unicorn-workspace) printf '%s\\n' cs1" fullRemote.xdg.configFile."msft/copilotd-env.sh".text;
+assert lib.hasInfix "second-codespace) printf '%s\\n' cs2" fullRemote.xdg.configFile."msft/copilotd-env.sh".text;
 assert !(remote.home.sessionVariables ? MSFT_FLEET_FILE);
 assert !(remote.home.file ? ".ssh/msft-fleet.conf");
 assert remote.systemd.user.services == { };
@@ -122,6 +124,7 @@ pkgs.runCommand "test-msft-fleet"
     updateSource = ../hosts/msft/update-remote.sh;
     syncEnvSource = ../hosts/msft/sync-remote-env.sh;
     remoteBootstrap = ../hosts/msft/bootstrap-nix-env.sh;
+    startupPatcher = ../hosts/msft/patch-copilotd-startup.py;
     fleetFile = local.home.sessionVariables.MSFT_FLEET_FILE;
     installSSHInclude = pkgs.writeShellApplication {
       name = "install-msft-fleet-ssh-test";
@@ -134,6 +137,7 @@ pkgs.runCommand "test-msft-fleet"
     shellcheck ${../hosts/msft/setup-report-relay.sh} ${../hosts/msft/codespace-keepalive.sh}
     python3 ${./test-msft-fleet.py}
     python3 ${./test-msft-bootstrap.py}
+    python3 ${./test-copilotd-startup.py}
     python3 ${./test-msft-report-relay.py} SessionTests
     touch "$out"
   ''
