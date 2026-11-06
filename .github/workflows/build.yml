@@ -22,18 +22,18 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y tmux
       - name: Test permission tracking and hook transport
         run: |
-          node --test scripts/test-wmux-attention.mjs
-          python3 scripts/test-wmux-copilot-hooks.py
+          node --test tests/test-wmux-attention.mjs
+          python3 tests/test-wmux-copilot-hooks.py
       - name: Build and check notification modes
         run: |
           nix build --impure --no-link --print-out-paths \
-            --file scripts/test-wmux-attention.nix > "$RUNNER_TEMP/wmux-attention-builds"
+            --file tests/test-wmux-attention.nix > "$RUNNER_TEMP/wmux-attention-builds"
       - name: Test built extension transport
         run: |
           tested=false
           while IFS= read -r build; do
             if [ -f "$build/config.mjs" ] && grep -qx 'export const dryRun = false;' "$build/config.mjs"; then
-              python3 scripts/test-wmux-attention-transport.py "$build"
+              python3 tests/test-wmux-attention-transport.py "$build"
               tested=true
             fi
           done < "$RUNNER_TEMP/wmux-attention-builds"

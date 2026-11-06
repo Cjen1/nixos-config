@@ -1,0 +1,473 @@
+#!/usr/bin/env python3
+"""Exercise bootstrap transport and remote deployment without a live machine."""
+
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+
+class BootstrapTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.bin = self.root / "bin"
+        self.bin.mkdir()
+        self.home = self.root / "home"
+        self.home.mkdir()
+        self.env = dict(os.environ, PATH=f"{self.bin}:{os.environ['PATH']}", HOME=str(self.home))
+        sync = self.bin / "sync-msft-remote-env"
+        sync.write_text(
+            f"#!{shutil.which('bash')}\n"
+            f"exec bash {shlex.quote(os.environ['syncEnvSource'])} \"$@\"\n"
+        )
+        sync.chmod(0o755)
+
+    def executable(self, name, body):
+        path = self.bin / name
+        path.write_text(f"#!{sys.executable}\n" + body)
+        path.chmod(0o755)
+        return path
+
+    def test_transport(self):
+        call = self.root / "ssh.json"
+        self.env.update(
+            MSFT_FLEET_FILE=os.environ["fleetFile"],
+            MSFT_BOOTSTRAP_SCRIPT=os.environ["remoteBootstrap"],
+            SSH_CALL=str(call),
+        )
+        self.executable(
+            "ssh",
+            "import json, os, sys\n"
+            "from pathlib import Path\n"
+            "Path(os.environ['SSH_CALL']).write_text(json.dumps({"
+            "'args':sys.argv[1:], 'script':sys.stdin.read(), "
+            "'prompt':os.environ.get('GH_PROMPT_DISABLED')}))\n"
+            "sys.exit(int(os.environ.get('SSH_EXIT', '0')))\n",
+        )
+        for alias in ("cs1", "cs2", "aci1"):
+            result = subprocess.run(
+                ["bash", os.environ["bootstrapSource"], alias],
+                env=self.env, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            invocation = json.loads(call.read_text())
+            self.assertEqual(invocation["args"], [
+                "-T", "-o", "BatchMode=yes", "-o", "ConnectionAttempts=1",
+                "-o", "ConnectTimeout=30", "-o", "ServerAliveInterval=30",
+                "-o", "ServerAliveCountMax=3", alias,
+                "bash -s -- https://github.com/Cjen1/nixos-config.git /root/nixos-config",
+            ])
+            self.assertEqual(invocation["prompt"], "1")
+            self.assertEqual(
+                invocation["script"], Path(os.environ["remoteBootstrap"]).read_text(),
+            )
+        self.env["SSH_EXIT"] = "255"
+        result = subprocess.run(
+            ["bash", os.environ["bootstrapSource"], "cs1"],
+            env=self.env, capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 255)
+        self.assertIn("bootstrap failed for cs1", result.stderr)
+        call.unlink()
+        for args in ([], ["missing"], ["-bad"], ["cs1;touch nope"], ["cs1", "cs2"]):
+            result = subprocess.run(
+                ["bash", os.environ["bootstrapSource"], *args],
+                env=self.env, capture_output=True, text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse(call.exists())
+        invalid_registry = self.root / "invalid-registry.json"
+        self.env["MSFT_FLEET_FILE"] = str(invalid_registry)
+        for entry in (
+            {"kind": "unknown", "data": {"name": "one"}},
+            {"kind": "codespace", "data": {}},
+            {"kind": "ssh", "data": {"name": "wrong-field"}},
+        ):
+            invalid_registry.write_text(json.dumps({"cs1": entry}))
+            result = subprocess.run(
+                ["bash", os.environ["bootstrapSource"], "cs1"],
+                env=self.env, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertFalse(call.exists())
+
+    def test_environment_copy(self):
+        call = self.root / "ssh.jsonl"
+        remote = self.root / "remote"
+        remote.mkdir()
+        self.env.update(
+            MSFT_FLEET_FILE=os.environ["fleetFile"],
+            MSFT_BOOTSTRAP_SCRIPT=os.environ["remoteBootstrap"],
+            SSH_CALL=str(call),
+            REMOTE_HOME=str(remote),
+        )
+        self.executable(
+            "ssh",
+            "import json, os, subprocess, sys\nfrom pathlib import Path\n"
+            "data = sys.stdin.read()\n"
+            "alias, command = sys.argv[-2:]\n"
+            "with Path(os.environ['SSH_CALL']).open('a') as f:\n"
+            " f.write(json.dumps({'alias': alias, 'command': command})+'\\n')\n"
+            "if command.startswith('bash -s'):\n"
+            " sys.exit(int(os.environ.get('DEPLOY_EXIT', '0')))\n"
+            "if alias == os.environ.get('FAIL_COPY_ALIAS'): sys.exit(7)\n"
+            "home = Path(os.environ['REMOTE_HOME']) / alias\n"
+            "home.mkdir(exist_ok=True)\n"
+            "command = command.replace('/root/.env', str(home / '.env'))\n"
+            "sys.exit(subprocess.run(['bash', '-c', command], input=data, text=True).returncode)\n",
+        )
+        local_env = self.home / ".env"
+        content = b"GITHUB_TOKEN=synthetic-pat\nOTHER=value with spaces\nNOT_EXECUTED=$(exit 99)\n"
+        for source in ("bootstrapSource", "updateSource"):
+            with self.subTest(source=source):
+                def run(*aliases):
+                    return subprocess.run(
+                        ["bash", os.environ[source], *aliases],
+                        env=self.env, capture_output=True, text=True,
+                    )
+
+                destination = remote / "cs1" / ".env"
+                destination.parent.mkdir(exist_ok=True)
+                destination.write_text("existing")
+                destination.chmod(0o644)
+                local_env.write_bytes(content)
+                for _ in range(2):
+                    result = run("cs1")
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(destination.read_bytes(), content)
+                    self.assertEqual(destination.stat().st_mode & 0o777, 0o600)
+                    self.assertEqual(list(destination.parent.glob(".env.*")), [])
+                    self.assertNotIn("synthetic-pat", result.stdout + result.stderr)
+                local_env.write_bytes(b"")
+                result = run("cs1")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(destination.read_bytes(), b"")
+                local_env.unlink()
+                destination.write_text("keep me")
+                call.unlink()
+                result = run("cs1")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(destination.read_text(), "keep me")
+                self.assertEqual(len(call.read_text().splitlines()), 1)
+                local_env.mkdir()
+                result = run("cs1")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("cannot read local environment file", result.stderr)
+                local_env.rmdir()
+                local_env.write_bytes(content)
+                self.env["DEPLOY_EXIT"] = "9"
+                call.unlink()
+                result = run("cs1")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(len(call.read_text().splitlines()), 1)
+                self.assertEqual(destination.read_text(), "keep me")
+                del self.env["DEPLOY_EXIT"]
+                self.env["FAIL_COPY_ALIAS"] = "cs1"
+                aliases = ("cs1", "cs2") if source == "updateSource" else ("cs1",)
+                result = run(*aliases)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("environment copy failed for cs1 (exit 7)", result.stderr)
+                self.assertNotIn("Bootstrapped cs1", result.stdout)
+                self.assertNotIn("Updated cs1", result.stdout)
+                self.assertEqual(destination.read_text(), "keep me")
+                if source == "updateSource":
+                    self.assertIn("Updated cs2", result.stdout)
+                    self.assertEqual((remote / "cs2" / ".env").read_bytes(), content)
+                del self.env["FAIL_COPY_ALIAS"]
+                local_env.unlink()
+
+    def git(self, directory, *args):
+        return subprocess.run(
+            ["git", "-C", str(directory), *args], env=self.env,
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+
+    def prepare_remote(self):
+        self.origin = self.root / "origin"
+        self.origin.mkdir()
+        self.git(self.origin, "init", "-b", "main")
+        self.env.update(
+            GIT_AUTHOR_NAME="Fixture", GIT_COMMITTER_NAME="Fixture",
+            GIT_AUTHOR_EMAIL="fixture@example.invalid",
+            GIT_COMMITTER_EMAIL="fixture@example.invalid",
+            GIT_CONFIG_GLOBAL="/dev/null", GIT_CONFIG_SYSTEM="/dev/null",
+        )
+        (self.origin / "tracked").write_text("one")
+        self.git(self.origin, "add", ".")
+        self.git(self.origin, "commit", "-m", "initial")
+        self.checkout = self.root / "checkout"
+        self.activation = self.root / "activation"
+        self.activation.mkdir()
+        activate = self.activation / "activate"
+        activate.write_text(
+            f"#!{sys.executable}\n"
+            "import os, sys\nfrom pathlib import Path\n"
+            "with Path(os.environ['ACTIVATIONS']).open('a') as f: f.write('activated\\n')\n"
+            "sys.exit(int(os.environ.get('ACTIVATE_EXIT', '0')))\n"
+        )
+        activate.chmod(0o755)
+        self.env.update(
+            ACTIVATIONS=str(self.root / "activations"),
+            ACTIVATION=str(self.activation), NIX_CALL=str(self.root / "nix.json"),
+        )
+        self.executable("id", "import os\nprint(os.environ.get('REMOTE_UID', '0'))\n")
+        self.executable(
+            "nix",
+            "import json, os, sys\nfrom pathlib import Path\n"
+            "Path(os.environ['NIX_CALL']).write_text(json.dumps(sys.argv[1:]))\n"
+            "print(os.environ['ACTIVATION'])\n"
+            "sys.exit(int(os.environ.get('NIX_EXIT', '0')))\n",
+        )
+        self.executable("curl", "raise RuntimeError('Nix already installed: must not download')\n")
+
+    def run_remote(self, status=0, message=None, operation="bootstrap"):
+        result = subprocess.run(
+            ["bash", os.environ["remoteBootstrap"], str(self.origin), str(self.checkout), operation],
+            env=self.env, capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, status, result.stdout + result.stderr)
+        if message:
+            self.assertIn(message, result.stderr)
+        return result
+
+    def test_clone_repeat_and_fast_forward(self):
+        self.prepare_remote()
+        self.run_remote()
+        self.run_remote()
+        (self.origin / "tracked").write_text("two")
+        self.git(self.origin, "commit", "-am", "update")
+        self.run_remote()
+        self.assertEqual((self.checkout / "tracked").read_text(), "two")
+        self.assertEqual(
+            self.git(self.checkout, "rev-parse", "HEAD"),
+            self.git(self.origin, "rev-parse", "main"),
+        )
+        self.assertEqual((self.root / "activations").read_text(), "activated\n" * 3)
+        args = json.loads((self.root / "nix.json").read_text())
+        self.assertEqual(args[:4], [
+            "--extra-experimental-features", "nix-command flakes", "build",
+            "./hosts/msft#homeConfigurations.remote.activationPackage",
+        ])
+        self.assertIn("--no-write-lock-file", args)
+
+    def test_checkout_guards(self):
+        self.prepare_remote()
+        self.run_remote()
+        (self.checkout / "untracked").touch()
+        self.run_remote(1, "dirty checkout")
+        (self.checkout / "untracked").unlink()
+        (self.checkout / "tracked").write_text("local")
+        self.run_remote(1, "dirty checkout")
+        self.git(self.checkout, "commit", "-am", "local-only")
+        self.run_remote(1, "not on origin/main")
+        self.git(self.checkout, "checkout", "-b", "other")
+        self.run_remote(1, "must be on branch main")
+        self.git(self.checkout, "remote", "set-url", "origin", "unexpected")
+        self.run_remote(1, "unexpected origin")
+        self.assertEqual((self.root / "activations").read_text(), "activated\n")
+
+    def test_prerequisites_and_failures(self):
+        self.prepare_remote()
+        self.env["REMOTE_UID"] = "1000"
+        self.run_remote(1, "requires root")
+        self.assertFalse(self.checkout.exists())
+        self.env["REMOTE_UID"] = "0"
+        self.checkout.mkdir()
+        self.run_remote(1, "not a Git checkout")
+        self.checkout.rmdir()
+        self.env["NIX_EXIT"] = "9"
+        self.run_remote(9, "building remote Home Manager failed")
+        self.assertFalse((self.root / "activations").exists())
+        self.env["NIX_EXIT"] = "0"
+        self.env["ACTIVATE_EXIT"] = "8"
+        self.run_remote(8, "activating remote Home Manager failed")
+        self.env["ACTIVATE_EXIT"] = "0"
+        self.run_remote()
+
+    def test_install_failure(self):
+        self.prepare_remote()
+        # Isolate PATH so no host Nix binary can mask the first-install path.
+        bash = shutil.which("bash")
+        for tool in ("git", "sh", "nproc"):
+            (self.bin / tool).symlink_to(shutil.which(tool))
+        (self.bin / "nix").unlink()
+        self.env["PATH"] = str(self.bin)
+        self.executable("curl", "import sys\nsys.exit(6)\n")
+        result = subprocess.run(
+            [bash, os.environ["remoteBootstrap"], str(self.origin), str(self.checkout)],
+            env=self.env, capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 6, result.stderr)
+        self.assertIn("installing Nix failed", result.stderr)
+        self.assertFalse(self.checkout.exists())
+
+    def test_first_install_and_repeat(self):
+        self.prepare_remote()
+        bash = shutil.which("bash")
+        for tool in ("git", "sh", "nproc"):
+            (self.bin / tool).symlink_to(shutil.which(tool))
+        template = self.root / "nix-template"
+        (self.bin / "nix").rename(template)
+        self.env["PATH"] = str(self.bin)
+        installer = self.root / "installer.py"
+        installer.write_text(
+            "import os, shutil, sys\nfrom pathlib import Path\n"
+            f"shutil.copyfile({str(template)!r}, {str(self.bin / 'nix')!r})\n"
+            f"Path({str(self.bin / 'nix')!r}).chmod(0o755)\n"
+            f"Path({str(self.root / 'installer-args')!r}).write_text(repr(sys.argv[1:]))\n"
+        )
+        install_command = (
+            f"exec {shlex.quote(sys.executable)} {shlex.quote(str(installer))} \"$@\""
+        )
+        self.executable("curl", f"print({install_command!r})\n")
+        for _ in range(2):
+            result = subprocess.run(
+                [bash, os.environ["remoteBootstrap"], str(self.origin), str(self.checkout)],
+                env=self.env, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            (self.root / "installer-args").read_text(),
+            repr(["install", "linux", "--init", "none", "--no-confirm"]),
+        )
+        self.assertEqual((self.root / "activations").read_text(), "activated\n" * 2)
+
+    def test_packaged_usage(self):
+        result = subprocess.run(
+            [str(Path(os.environ["bootstrap"]) / "bin/msft-fleet-bootstrap")],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 64)
+        self.assertIn("Usage: msft-fleet-bootstrap", result.stderr)
+
+    def test_update_requires_bootstrap(self):
+        self.prepare_remote()
+        self.run_remote(1, "run msft-fleet-bootstrap first", operation="update")
+        self.assertFalse(self.checkout.exists())
+        self.run_remote()
+        bash = shutil.which("bash")
+        for tool in ("git", "sh", "nproc"):
+            (self.bin / tool).symlink_to(shutil.which(tool))
+        (self.bin / "nix").unlink()
+        self.env["PATH"] = str(self.bin)
+        result = subprocess.run(
+            [bash, os.environ["remoteBootstrap"], str(self.origin), str(self.checkout), "update"],
+            env=self.env, capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("Nix is unavailable; run msft-fleet-bootstrap first", result.stderr)
+        self.assertNotIn("must not download", result.stderr)
+
+    def test_update_fast_forward_and_guards(self):
+        self.prepare_remote()
+        self.run_remote()
+        (self.origin / "tracked").write_text("updated")
+        self.git(self.origin, "commit", "-am", "upstream")
+        self.run_remote(operation="update")
+        self.assertEqual((self.checkout / "tracked").read_text(), "updated")
+        self.assertEqual(
+            self.git(self.checkout, "rev-parse", "HEAD"),
+            self.git(self.origin, "rev-parse", "main"),
+        )
+        self.run_remote(operation="update")
+        (self.checkout / "untracked").touch()
+        self.run_remote(1, "dirty checkout", operation="update")
+        (self.checkout / "untracked").unlink()
+        (self.checkout / "tracked").write_text("local")
+        self.git(self.checkout, "commit", "-am", "local-only")
+        self.run_remote(1, "not on origin/main", operation="update")
+        self.assertEqual((self.root / "activations").read_text(), "activated\n" * 3)
+
+    def test_update_failure_stages(self):
+        self.prepare_remote()
+        self.run_remote()
+        self.env["NIX_EXIT"] = "9"
+        self.run_remote(9, "building remote Home Manager failed", operation="update")
+        self.env["NIX_EXIT"] = "0"
+        self.env["ACTIVATE_EXIT"] = "8"
+        self.run_remote(8, "activating remote Home Manager failed", operation="update")
+        self.env["ACTIVATE_EXIT"] = "0"
+        self.origin.rename(self.root / "unavailable-origin")
+        self.run_remote(128, "synchronizing", operation="update")
+
+    def test_update_transport_and_partial_failure(self):
+        call = self.root / "ssh.jsonl"
+        self.env.update(
+            MSFT_FLEET_FILE=os.environ["fleetFile"],
+            MSFT_BOOTSTRAP_SCRIPT=os.environ["remoteBootstrap"],
+            SSH_CALL=str(call),
+        )
+        self.executable(
+            "ssh",
+            "import json, os, sys\nfrom pathlib import Path\n"
+            "with Path(os.environ['SSH_CALL']).open('a') as f:\n"
+            " f.write(json.dumps({'args':sys.argv[1:], 'script':sys.stdin.read(), "
+            "'prompt':os.environ.get('GH_PROMPT_DISABLED')})+'\\n')\n"
+            "sys.exit(255 if sys.argv[-2] == os.environ.get('FAIL_ALIAS') else 0)\n",
+        )
+        def run(*aliases):
+            return subprocess.run(
+                ["bash", os.environ["updateSource"], *aliases],
+                env=self.env, capture_output=True, text=True,
+            )
+
+        result = run()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = [json.loads(line) for line in call.read_text().splitlines()]
+        self.assertEqual([c["args"][-2] for c in calls], ["aci1", "cs1", "cs2", "server"])
+        for invocation in calls:
+            self.assertEqual(invocation["prompt"], "1")
+            self.assertEqual(invocation["script"], Path(os.environ["remoteBootstrap"]).read_text())
+            self.assertEqual(invocation["args"][:-2], [
+                "-T", "-o", "BatchMode=yes", "-o", "ConnectionAttempts=1",
+                "-o", "ConnectTimeout=30", "-o", "ServerAliveInterval=30",
+                "-o", "ServerAliveCountMax=3",
+            ])
+            self.assertEqual(invocation["args"][-1],
+                "bash -s -- https://github.com/Cjen1/nixos-config.git /root/nixos-config update")
+        call.unlink()
+        self.env["FAIL_ALIAS"] = "cs1"
+        result = run("cs1", "cs2")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("update failed for cs1 (exit 255)", result.stderr)
+        self.assertIn("Updated cs2", result.stdout)
+        self.assertEqual(
+            [json.loads(line)["args"][-2] for line in call.read_text().splitlines()],
+            ["cs1", "cs2"],
+        )
+        call.unlink()
+        for aliases in (("cs2", "missing"), ("-bad",), ("cs1;echo nope",)):
+            result = run(*aliases)
+            self.assertEqual(result.returncode, 1)
+            self.assertFalse(call.exists())
+        registry = self.root / "registry.json"
+        self.env["MSFT_FLEET_FILE"] = str(registry)
+        registry.write_text("{}")
+        result = run()
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("No hosts registered", result.stdout)
+        self.assertFalse(call.exists())
+        for text in ("not-json", "[]", '{"cs1":{"kind":"unknown"}}'):
+            registry.write_text(text)
+            result = run()
+            self.assertEqual(result.returncode, 1)
+            self.assertFalse(call.exists())
+
+    def test_packaged_update_help(self):
+        result = subprocess.run(
+            [str(Path(os.environ["update"]) / "bin/msft-fleet-update"), "--help"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Usage: msft-fleet-update", result.stdout)
+
+
+if __name__ == "__main__":
+    unittest.main()

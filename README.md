@@ -27,6 +27,49 @@ nix build ./hosts/msft#homeConfigurations.cjen1-msft.activationPackage
 home-manager switch --flake ./hosts/msft
 ```
 
+## Shared Lean packages
+
+MSFT Home Manager installs Lean 4.35.0 and roots one mathlib 4.35.0 package,
+including its transitive dependencies, under `~/.local/share/lean-shared`.
+Nix substitutes the compressed mathlib archive from `cache.nixos.org` when
+available and materializes it once per store; otherwise it builds it once.
+Projects do not need their own Nix flake.
+
+The shared TUI profile installs Lean and Lake, with elan as a lower-priority
+fallback. MSFT shells use the same pinned Lean as the shared mathlib packages;
+new Bash and Fish shells on cs1/cs2 resolve the Home Manager toolchain first.
+
+```sh
+lean-share /path/to/lean-project
+lean-share --replace /path/to/existing-project
+```
+
+The command checks `lean-toolchain` and every shared dependency's exact revision
+in `lake-manifest.json`. It symlinks `.lake/packages/<name>` to the immutable
+Nix package and `.lake/package-overrides.json` to the shared Lake overrides.
+Unrelated dependencies, project source edits and local `.lake/build` outputs
+are preserved. Existing custom overrides or incompatible versions are errors.
+Use the installed Nix `lean` and `lake`; these take precedence over elan's
+switcher commands. Other toolchains remain available explicitly through elan.
+
+`--replace` reclaims existing clean matching Git dependency checkouts, after
+checking that no running build uses the project or old dependency directories.
+It refuses local dependency edits. Interrupted replacements can be rerun with
+the same arguments. `--dry-run` performs all preflight checks without changing
+files. Already-shared directories remain shared; their old clean dependency
+copies are replaced only once.
+
+Do not run `lake update` or `lake exe cache get` on linked projects: they can
+repopulate the old caches. Keep manifests pinned. When changing the shared
+version, update the `lean-nixpkgs` lock and mathlib Git revision/version guard
+in `modules/home-manager/lean.nix`, then run
+`scripts/check-lean-nixpkgs-cache.sh`. Sharing never upgrades project pins.
+
+Run the migration safety checks with
+`nix build --impure --file tests/test-lean-share.nix --no-link`.
+The real import check is
+`python3 tests/test-lean-share-live.py --shared ~/.local/share/lean-shared --lake "$(command -v lake)"`.
+
 ## MSFT remote fleet
 
 Declare named remote hosts in `hosts/msft/fleet-registry.nix`. The registry starts
@@ -47,14 +90,18 @@ without replacing its existing host definitions. If another configuration
 manager owns that file through a symlink, add `Include ~/.ssh/msft-fleet.conf`
 at the top through that manager instead.
 
-`MSFT_FLEET_FILE` points to the generated JSON registry. Authenticate GitHub CLI
+`MSFT_FLEET_FILE` points to the generated JSON registry. Entries are tagged
+variants: `{"kind":"codespace","data":{"name":"..."}}` or
+`{"kind":"ssh","data":{"destination":"root@example-host"}}`, with no unused
+transport fields. The Nix registry keeps the shorthand shown above.
+Authenticate GitHub CLI
 on the laptop with `gh auth login --scopes codespace`. The services use
 those saved credentials, not variables sourced by an interactive shell.
 
 After registering a new CCF SSH Codespace and applying Home Manager, run:
 
 ```sh
-bootstrap-codespace-nix-env cs1
+msft-fleet-bootstrap cs1
 ```
 
 The command uses the registered SSH alias, which also starts stopped Codespaces.
@@ -62,6 +109,29 @@ It requires root login and preinstalled Git and curl. It installs Nix only when
 absent, without an init service, and clones `Cjen1/nixos-config` branch `main`
 into `/root/nixos-config`. It builds and activates the remote Home Manager
 configuration, including Copilot's assisted permission default.
+
+Remote activation also links the managed Copilot instructions and skills into
+`/workspaces/.copilotd/state/copilot-home/` for copilotd.
+It leaves the daemon's runtime home, sessions, and authentication unchanged,
+and fails rather than replacing an unexpected file or symlink at that path.
+After activation, start a fresh copilotd session to load the instructions and skills.
+
+Remote activation also patches the local
+`/workspaces/CCF/.devcontainer/azurelinux4-copilotd/start_copilotd.sh`, when present,
+to source a Home Manager-managed Nix environment before starting the daemon.
+It also patches the legacy `/root/.local/state/copilotd-restart/start.sh` launcher when present.
+Both launchers register using the fleet alias (`cs1`, `cs2`, `cs3`), resolved from `fleet-registry.nix` at daemon startup.
+The real `CODESPACE_NAME` and environment identity are unchanged; unregistered Codespaces retain their original names.
+The patch is repeatable and leaves a local modification in the CCF checkout;
+it does not change the shared devcontainer configuration or restart running sessions.
+It takes effect at the next daemon startup. If the launcher is replaced, rerun
+bootstrap or update to reapply the patch. Non-Nix hosts are unaffected.
+
+Bootstrap and update copy the laptop's `~/.env`, if present, to `/root/.env`
+after activation. The copy atomically replaces the remote file with mode `0600`;
+new remote shells load its variables, including any PAT. A missing local file
+leaves the remote file untouched. Copy failures fail that host's operation.
+Credentials travel over SSH and are never stored in the Nix store.
 
 Rerunning bootstrap fast-forwards a clean `main` checkout to `origin/main`.
 It refuses dirty checkouts (including untracked files), local-only commits,
@@ -73,12 +143,31 @@ use the same command but must also provide a root Azure Linux environment.
 Codespace rebuilds can erase `/root` and `/nix`; rerun bootstrap after a rebuild.
 This does not restore interrupted Copilot sessions.
 
+Home Manager installs `msft-fleet-bootstrap`, `msft-fleet-update`, and
+`msft-fleet-keepalive` in the laptop's `PATH`. Update all registered hosts, or
+select aliases:
+
+```sh
+msft-fleet-update
+msft-fleet-update cs1 server1
+```
+
+Update assumes bootstrap is complete: it never installs Nix or clones a missing
+checkout. It fast-forwards and activates `origin/main` with the same checkout
+protections as bootstrap. Stopped Codespaces start through the SSH proxy.
+Updates run sequentially and continue after host failures, then return nonzero
+with the failed aliases. Invalid aliases are rejected before any host is updated.
+Empty fleets are a no-op. Connections use a 30-second connect timeout and detect
+unresponsive peers through SSH keepalives; builds have no overall time limit.
+
 Each Codespace gets a laptop-only user service named
 `codespace-keepalive-<alias>.service`. It holds a GitHub CLI SSH command open so
 the CLI sends activity heartbeats, automatically starts stopped Codespaces,
-and retries failed connections after 60 seconds. Ordinary SSH entries get no
-keepalive service. Home Manager starts added services and stops removed ones;
+and retries failed connections after 60 seconds. Ordinary SSH entries get a
+`fleet-report-tunnel-<alias>.service` instead. Home Manager starts added services and stops removed ones;
 remove an entry and apply the configuration to end management.
+The service runs `msft-fleet-keepalive <alias>`; there is no need to launch a
+separate keepalive process manually.
 
 The services require the laptop's Linux environment and user systemd manager
 to remain running. GitHub's 12-hour runtime limit still applies. Reconnection
@@ -90,11 +179,84 @@ systemctl --user status codespace-keepalive-cs1.service
 journalctl --user -u codespace-keepalive-cs1.service
 ```
 
-Run the registry, SSH integration, bootstrap, and mocked keepalive checks with:
+### Remote HTML reports
+
+With a nonempty fleet, Home Manager also runs `msft-report-relay.service`: an
+unprivileged SSH server bound only to `127.0.0.1:2222`. Each managed fleet
+connection forwards the node's `127.0.0.1:5588` back to that server. Interactive
+SSH connections do not own or duplicate these tunnels. Both ports must be free
+on their respective machines; forwarding failures are logged and retried.
+
+On a bootstrapped remote, keep the HTTP server and forwarding helper in dedicated,
+report-specific tmux sessions (or an equivalent service manager), not tool-owned
+background processes that can be killed when an agent turn/session ends. Serve
+only the report directory on loopback. The `html-report` skill includes a
+repeatable tmux setup with separate HTTP, URL and tunnel logs. Its commands run:
 
 ```sh
-nix build --impure --file scripts/test-msft-fleet.nix --no-link
+python3 -m http.server 8765 --bind 127.0.0.1 --directory /path/to/reports
+msft-report-forward 8765
 ```
+
+The helper prints `http://localhost:<allocated-host-port>`. Append the report's
+relative path and open the URL in the host's browser. One server can serve many
+reports; multiple nodes or helpers get distinct host ports automatically.
+Keep both processes running after the agent finishes and during follow-up edits;
+stop only the report's sessions when the user explicitly asks. Edit the same
+canonical HTML file in place (prefer an atomic file replacement), preserving the
+served directory, app port, tunnel and browser URL. Reloading that URL should
+show the updated report; content changes do not require restarting either
+process. Reuse healthy sessions and do not overwrite another report's state or
+kill its port owner. If a managed connection disconnects, the helper logs the
+failure and retries every five seconds, reading the current relay credentials
+on each attempt. Once the fleet connection returns, the helper reclaims its
+original host port so the
+same browser URL works again. If that port is occupied, it keeps retrying rather
+than silently changing the URL. Retry and recovery messages go to stderr; stdout
+contains only the initial URL. Initial connection failures are retried too.
+Without a running host user manager, the relay is unavailable.
+
+Leave the helper running during an outage; do not wrap it in another retry loop.
+Stop it with Ctrl-C or SIGTERM, which also stops its SSH child. Reconnection
+cannot survive the remote process itself being stopped, for example by a
+Codespace restart. Tmux does not survive a machine restart either. Restore only
+missing processes, leaving healthy ones alone; if the helper was restarted,
+verify and communicate its newly allocated URL.
+
+Every managed connection generates a fresh Ed25519 client key and delivers it
+and the pinned relay host key over the existing authenticated fleet SSH
+connection. Remote credentials are installed with mode `0600` under
+`~/.config/msft-report-relay`. The host deletes its temporary private key after
+preparing the credential payload. Authorization checks the supervising process's
+PID and Linux start time, so leftover keys are rejected after a crash or PID
+reuse. Keys permit only loopback reverse forwarding: no shell, commands, local
+forwarding, agent forwarding, or public listeners. No personal SSH keys are
+copied or agents forwarded.
+
+The stable relay host key lives in `~/.local/state/msft-report-relay`, not the
+Nix store. Applying Home Manager does not rotate it. Removing a fleet entry
+stops its managed connection and invalidates its session key. This is not a
+security boundary against a compromised remote's own administrator, who can
+read that node's live relay credential and use its permitted forwarding.
+The host must provide a root-owned `/usr/bin/env`; OpenSSH uses it to launch
+the pinned Nix authorization helper because it rejects command paths through
+the group-writable Nix store.
+
+Inspect the relay with `journalctl --user -u msft-report-relay.service`.
+Run the registry, bootstrap/update, mocked keepalive, and ephemeral-key checks:
+
+```sh
+nix build --impure --file tests/test-msft-fleet.nix --no-link
+```
+
+Exercise real concurrent nested SSH forwarding and denied access on the host:
+
+```sh
+nix-shell tests/test-msft-fleet.nix --run 'python3 tests/test-msft-report-relay.py'
+```
+
+These live checks run outside the build sandbox because its `nixbld` account
+has no login shell. They use temporary SSH servers and keys, not fleet nodes.
 
 ## Copilot permissions
 
@@ -108,7 +270,7 @@ Assisted approval reviews tool requests and may still ask for permission.
 It does not grant unrestricted access.
 
 Check settings preservation and repeat activation with
-`python3 scripts/test-copilot-settings.py`.
+`python3 tests/test-copilot-settings.py`.
 
 ## Copilot notifications in wmux
 
@@ -158,7 +320,7 @@ prefetched cache:
 ./modules/home-manager/github-copilot-cli/bump.sh --build
 ```
 
-Run the offline bump-script checks with `python3 scripts/test-bump-npm-package.py`.
+Run the offline bump-script checks with `python3 tests/test-bump-npm-package.py`.
 Use `--integration` to compare a merged cache against the pinned prefetcher and
 verify the full build. Use `--benchmark <baseline-revision>` to compare repeat
 Codex bumps against an earlier Git revision. These two modes use temporary
@@ -176,5 +338,5 @@ user-defined Lean syntax. This does not install a Lean language server.
 After changing the grammar, run the integration check from the repository root:
 
 ```sh
-nix build --impure --file scripts/test-neovim-lean.nix --no-link
+nix build --impure --file tests/test-neovim-lean.nix --no-link
 ```

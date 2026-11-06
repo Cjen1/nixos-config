@@ -2,12 +2,15 @@
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: bootstrap-codespace-nix-env <fleet-alias>" >&2
+  echo "Usage: msft-fleet-bootstrap <fleet-alias>" >&2
   exit 64
 fi
 alias="$1"
 if [[ ! "$alias" =~ ^[A-Za-z0-9][A-Za-z0-9_-]*$ ]] ||
-  ! jq -e --arg alias "$alias" '.[$alias] | (.codespace != null) or (.ssh != null)' \
+  ! jq -e --arg alias "$alias" '.[$alias] |
+    if .kind == "codespace" then (.data.name | type == "string" and length > 0)
+    elif .kind == "ssh" then (.data.destination | type == "string" and length > 0)
+    else false end' \
     "${MSFT_FLEET_FILE:?MSFT_FLEET_FILE must point to the fleet registry}" >/dev/null; then
   echo "error: unknown fleet alias '$alias'; check the fleet registry" >&2
   exit 1
@@ -23,7 +26,8 @@ if ssh \
   -o ServerAliveInterval=30 \
   -o ServerAliveCountMax=3 \
   "$alias" 'bash -s -- https://github.com/Cjen1/nixos-config.git /root/nixos-config' \
-  < "${MSFT_BOOTSTRAP_SCRIPT:?MSFT_BOOTSTRAP_SCRIPT must point to the remote bootstrap script}"; then
+  < "${MSFT_BOOTSTRAP_SCRIPT:?MSFT_BOOTSTRAP_SCRIPT must point to the remote bootstrap script}" &&
+  sync-msft-remote-env "$alias"; then
   echo "Bootstrapped $alias"
 else
   status=$?

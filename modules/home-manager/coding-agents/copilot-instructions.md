@@ -6,27 +6,28 @@
 # Code style
 
 - Follow YAGNI. Build what the current task needs, not what it might need later, but highlight substantial tradeoffs.
+- Keep temporary build artifacts (Lake `.lake`, Cargo `target`, Nix `result`, etc.) under `/tmp` or similar, outside the worktree. Use native output settings; do not symlink them back into the repo. If such artifacts already exist in the worktree, migrate them outside it and update the build configuration accordingly.
+- Use variable shadowing to make sequential transformations read imperatively in functional code, e.g. `let foo = foo + 1 in foo`, when it improves clarity.
 - Sequence work into minimal verifiable units. Make the smallest independently testable change, verify it, then move to the next. Order commits so a reviewer can follow the evidence.
 
 # General preferences
 
 - A question from the user does not mean that something is wrong and needs to be fixed.
-- DO NOT use the question or multiple-choice tool. Ask in structured but natural language instead, with the options laid out plainly when there are any.
+- Do not use the `ask_user` tool. Ask questions inline in your response instead; number options when useful.
 - When reporting information to me, be extremely concise and sacrifice grammar for concision.
 
 # Picking the right models for workflows and subagents
 
-Rankings, higher = better. Cost reflects the time cost of different APIs, not listed price. Intelligence is how hard a problem you can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy editing.
+Intelligence is how hard a problem you can hand the model unsupervised. Taste covers UI/UX, code quality, API design, and copy editing.
 
 | model           | cost | intelligence | taste | notes |
 | --------------- | ---- | ------------ | ----- | ----- |
-| gpt-6-sol       | 9    | 9            | 6     |       |
-| opus-5.5        | 4    | 9            | 9     |       |
-| gpt-6-astra     | 2    | 10           | 8     |       |
+| gpt-6.1-terra   | 0    | 5/10         | 5/10  |       |
+| gpt-6.1-sol     | 3    | 7/10         | 6/10  |       |
+| gpt-6-astra     | 7    | 10/10        | 8/10  |       |
+| opus-5.5        | 10   | 10/10        | 9/10  |       |
 
 - Use models from this table by default. If the user explicitly requests another model, you may use it.
-- Keep small tasks direct. Do not create a factory merely to parallelize a few tool calls.
-- For proofs, subagent fan-out loses context and expands scope. Instead use low-cost subagents to fill and check disjoint mechanical proofs while the main process continues onto the next objective.
 
 # System prompt version
 

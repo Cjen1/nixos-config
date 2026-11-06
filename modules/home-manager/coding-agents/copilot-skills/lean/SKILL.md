@@ -5,19 +5,22 @@ description: Use when setting up, building, or writing proofs in a Lean 4 projec
 
 ## Use the global mathlib
 
-A full mathlib checkout costs about 8GB per project, so share the copy in the
-Nix store instead.
+Home Manager roots one prebuilt mathlib and its dependencies in the Nix store.
+Nix downloads cached binaries or builds once; matching projects share them.
 
-- Take nixpkgs from the `lean-nixpkgs` flake registry entry
-  (`inputs.nixpkgs.url = "lean-nixpkgs";`). Home Manager pins it to one
-  revision, so every project uses the same mathlib store path.
-- Take Lean and mathlib from that revision's `leanPackages` (`lean4`,
-  `mathlib`), not from elan. Match `lean-toolchain` and the mathlib `rev` in
-  the lakefile to those versions.
-- Point Lake at the store copy with `.lake/package-overrides.json`, as
-  `buildLakePackage` does, rather than cloning mathlib.
-- Fall back to `lake exe cache get` only if the project cannot use the
-  pinned versions, and tell the user why.
+- Reuse the matching shared packages at `~/.local/share/lean-shared`, keeping
+  Lake build/dependency trees outside the worktree per the global build-artifact
+  policy. Do not run `lean-share` in a watched worktree: it creates in-tree
+  dependency symlinks. Use supported external paths; report any blocker.
+- Use the Home Manager-provided `lean` and `lake`, not an elan toolchain.
+  Projects using other versions must stay separate; do not silently change
+  their toolchain, dependency pins or proof sources to force compatibility.
+- Do not run `lake update` or `lake exe cache get` on shared projects: they can
+  clone dependencies again. Keep `lake-manifest.json` pinned.
+- Nix-based projects can use `inputs.nixpkgs.url = "lean-nixpkgs";` to select
+  the same pinned packages. A per-project flake is not required for `lean-share`.
+- If the project cannot use the shared versions, keep its separate dependency
+  cache outside the worktree and tell the user why.
 
 ## Proofs
 
