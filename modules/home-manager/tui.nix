@@ -1,5 +1,7 @@
-{ lib, pkgs, leanNixpkgs ? null, ... }:
+args@{ lib, pkgs, ... }:
 let
+  # Module arguments are resolved before function defaults can apply.
+  leanNixpkgs = args.leanNixpkgs or null;
   lean4 =
     if leanNixpkgs == null then pkgs.lean4
     else leanNixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.leanPackages.lean4;
