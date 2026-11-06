@@ -181,7 +181,11 @@
       # Keep listening for it instead of failing the service permanently.
       bind-dynamic = true;
       no-resolv = true;
-      address = "/ts.jentek.dev/100.96.252.111";
+      local = "/ts.jentek.dev/";
+      address = [
+        "/ts.jentek.dev/100.96.252.111"
+        "/ts.jentek.dev/fd7a:115c:a1e0::bb35:fc70"
+      ];
     };
   };
 
