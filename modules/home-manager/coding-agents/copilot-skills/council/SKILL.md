@@ -14,8 +14,8 @@ implementation and explore new ideas, skip fixes to code being replaced.
 
 | Councilor | `model` | `reasoning_effort` |
 | --- | --- | --- |
-| GPT-6.1 Terra | `gpt-6.1-terra` | `max` |
-| GPT-6.1 Sol | `gpt-6.1-sol` | `max` |
+| GPT-6.1 Sol A | `gpt-6.1-sol` | `max` |
+| GPT-6.1 Sol B | `gpt-6.1-sol` | `max` |
 | Opus 5.5 | `claude-opus-5.5` | `high` |
 
 If the user names other councilors, use those. If a councilor is unavailable,
@@ -33,6 +33,7 @@ Run the three councilors as parallel background subagents. Give each the request
 it needs: repo path, base, diff command, intent, what is out of scope, and
 check results. For review or feedback, keep them read-only. A timeout, error,
 or missing reply is not approval.
+Sol A and Sol B are separate, independent reviewers; keep their findings and scores distinct.
 
 Summarize the useful findings, disagreements, and recommended next steps.
 
@@ -53,11 +54,11 @@ Rounds: 2
 | Goal | Councilor | Round 1 | Round 2 |
 | --- | --- | --- | --- |
 | Fix the crash | Opus 5.5 | 7/10 | 9/10 |
-| Fix the crash | GPT-6.1 Sol | 8/10 | 10/10 |
-| Fix the crash | GPT-6.1 Terra | 7/10 | 9/10 |
+| Fix the crash | GPT-6.1 Sol A | 8/10 | 10/10 |
+| Fix the crash | GPT-6.1 Sol B | 7/10 | 9/10 |
 | Keep the API stable | Opus 5.5 | 6/10 | 9/10 |
-| Keep the API stable | GPT-6.1 Sol | 8/10 | 9/10 |
-| Keep the API stable | GPT-6.1 Terra | 7/10 | 8/10 |
+| Keep the API stable | GPT-6.1 Sol A | 8/10 | 9/10 |
+| Keep the API stable | GPT-6.1 Sol B | 7/10 | 8/10 |
 ```
 
 With a single goal, drop the Goal column.

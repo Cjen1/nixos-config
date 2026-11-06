@@ -21,7 +21,8 @@ An explicit "full stop" request lets you, for this task only:
   includes running the app or a dev server, browser automation, and
   screenshots. Rules about *how* to test still apply.
 
-Never push, open a PR, comment on GitHub, merge, or touch the default branch.
+Do not push, open a PR, or comment on GitHub unless the user separately asks.
+Never merge or touch the default branch.
 The grant does not cover anything under "Asking", and it does not bypass a
 harness approval prompt.
 
@@ -32,6 +33,10 @@ harness approval prompt.
    default branch, create a branch first.
 2. **Prove it.** Get proof for every change. See "Proof".
 3. **Review.** Use the `sol-loop` skill. Prove each fix it leads to.
+   Run `user-story-review` on any text added or changed, including docs,
+   comments, and user-facing copy. If a PR already exists, review its
+   description too. If separately asked to open a draft PR, review its
+   description before opening it.
 4. **Check readiness.** All of these hold on the final commit:
    - Proof covers the whole diff against the default branch.
    - The checks the repo's CI runs pass locally, or you say which cannot run.
@@ -42,7 +47,7 @@ harness approval prompt.
 5. **Hand off.** Report the branch, `git log --oneline <base>..HEAD`, the
    diffstat, your proof, the sol-loop outcome, each decision you made, and
    remaining risks. Include a draft PR title and description; use the `to-pr`
-   skill for their format.
+   skill for their format, then run `user-story-review` on the draft text.
 
 ## Proof
 
