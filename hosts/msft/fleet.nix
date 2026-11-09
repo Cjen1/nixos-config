@@ -182,6 +182,11 @@ in
             default = null;
             description = "OpenSSH destination in [user@]hostname form.";
           };
+          reverseSocksPort = lib.mkOption {
+            type = lib.types.nullOr (lib.types.ints.between 1 65535);
+            default = null;
+            description = "Remote loopback SOCKS port whose connections originate on this host.";
+          };
         };
       }
     );
@@ -258,7 +263,49 @@ in
               };
               Install.WantedBy = [ "default.target" ];
             }
-        ) fleet;
+        ) fleet
+        // lib.mapAttrs' (
+          name: entry:
+          lib.nameValuePair "fleet-socks-${name}" {
+            Unit = {
+              Description = "Route ${name} SOCKS connections through this host";
+              After = [ "gnome-keyring.service" ];
+              StartLimitIntervalSec = 0;
+            };
+            Service = {
+              ExecStart = lib.escapeShellArgs [
+                "${pkgs.openssh}/bin/ssh"
+                "-NT"
+                "-o"
+                "BatchMode=yes"
+                "-o"
+                "ConnectTimeout=30"
+                "-o"
+                "ServerAliveInterval=30"
+                "-o"
+                "ServerAliveCountMax=3"
+                "-o"
+                "ExitOnForwardFailure=yes"
+                "-o"
+                "ForwardAgent=no"
+                "-o"
+                "ControlPath=none"
+                "-R"
+                "127.0.0.1:${toString entry.reverseSocksPort}"
+                name
+              ];
+              UnsetEnvironment = [
+                "GH_TOKEN"
+                "GITHUB_TOKEN"
+              ];
+              Restart = "always";
+              RestartSec = "60s";
+              TimeoutStopSec = "15s";
+              KillMode = "control-group";
+            };
+            Install.WantedBy = [ "default.target" ];
+          }
+        ) (lib.filterAttrs (_: entry: entry.reverseSocksPort != null) fleet);
     })
   ];
 }

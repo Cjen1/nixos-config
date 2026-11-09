@@ -4,6 +4,7 @@
 import json
 import os
 from pathlib import Path
+import shlex
 import shutil
 import subprocess
 import sys
@@ -157,6 +158,23 @@ class FleetTests(unittest.TestCase):
                     self.assertEqual(options["stricthostkeychecking"], "false")
                 else:
                     self.assertNotIn("proxycommand", options)
+
+    def test_reverse_socks(self):
+        command = shlex.split(os.environ["socksCommand"])
+        self.assertEqual(command[-3:], ["-R", "127.0.0.1:1080", "cs2"])
+        result = subprocess.run(
+            [command[0], "-G", "-F", os.environ["sshConfig"], *command[1:]],
+            capture_output=True, text=True, check=True,
+        )
+        options = dict(line.split(" ", 1) for line in result.stdout.splitlines())
+        self.assertEqual(options["exitonforwardfailure"], "yes")
+        self.assertEqual(options["forwardagent"], "no")
+        self.assertEqual(
+            options["remoteforward"].replace("[", "").replace("]", "").split(),
+            ["127.0.0.1:1080", "socks:0"],
+        )
+        self.assertEqual(options["serveraliveinterval"], "30")
+        self.assertEqual(options["serveralivecountmax"], "3")
 
     def test_install_include(self):
         installer = (

@@ -19,7 +19,10 @@ let
     }).config;
   sample = {
     cs1.codespace = "magical-unicorn-workspace";
-    cs2.codespace = "second-codespace";
+    cs2 = {
+      codespace = "second-codespace";
+      reverseSocksPort = 1080;
+    };
     aci1.ssh = "root@example.invalid";
     server.ssh = "server.example.invalid";
   };
@@ -71,6 +74,7 @@ assert
     "codespace-keepalive-cs2"
     "fleet-report-tunnel-aci1"
     "fleet-report-tunnel-server"
+    "fleet-socks-cs2"
     "msft-report-relay"
   ];
 assert
@@ -81,6 +85,13 @@ assert local.systemd.user.services.codespace-keepalive-cs1.Service.Restart == "a
 assert local.systemd.user.services.codespace-keepalive-cs1.Service.RestartSec == "60s";
 assert local.systemd.user.services.codespace-keepalive-cs1.Unit.StartLimitIntervalSec == 0;
 assert local.systemd.user.services.codespace-keepalive-cs1.Install.WantedBy == [ "default.target" ];
+assert local.systemd.user.services.fleet-socks-cs2.Service.Restart == "always";
+assert local.systemd.user.services.fleet-socks-cs2.Service.RestartSec == "60s";
+assert local.systemd.user.services.fleet-socks-cs2.Service.UnsetEnvironment == [
+  "GH_TOKEN"
+  "GITHUB_TOKEN"
+];
+assert local.systemd.user.services.fleet-socks-cs2.Install.WantedBy == [ "default.target" ];
 assert lib.hasSuffix " cs1" (
   builtins.head local.systemd.user.services.codespace-keepalive-cs1.Service.ExecStart
 );
@@ -126,6 +137,7 @@ pkgs.runCommand "test-msft-fleet"
     remoteBootstrap = ../hosts/msft/bootstrap-nix-env.sh;
     startupPatcher = ../hosts/msft/patch-copilotd-startup.py;
     fleetFile = local.home.sessionVariables.MSFT_FLEET_FILE;
+    socksCommand = builtins.head local.systemd.user.services.fleet-socks-cs2.Service.ExecStart;
     installSSHInclude = pkgs.writeShellApplication {
       name = "install-msft-fleet-ssh-test";
       runtimeInputs = [ pkgs.coreutils ];

@@ -179,6 +179,33 @@ systemctl --user status codespace-keepalive-cs1.service
 journalctl --user -u codespace-keepalive-cs1.service
 ```
 
+### SSH from cs2 through this host
+
+cs2 has `reverseSocksPort = 1080` in the fleet registry. The laptop-only
+`fleet-socks-cs2.service` maintains a separate reverse SSH SOCKS tunnel:
+cs2's `127.0.0.1:1080` routes TCP connections through this host's network.
+It reconnects after failures and does not depend on the report relay.
+No inbound SSH server, copied private keys, or forwarded SSH agent is needed.
+Only processes on cs2 can reach the proxy; this gives them access to networks
+reachable from the laptop while the tunnel is running.
+
+On cs2, use its own destination credentials and a SOCKS-capable netcat:
+
+```sh
+nix shell nixpkgs#netcat-openbsd --command \
+  ssh -o 'ProxyCommand=nc -X 5 -x 127.0.0.1:1080 %h %p' user@destination
+```
+
+The laptop's Linux environment and user systemd manager must remain running.
+Inspect or stop the tunnel with
+`systemctl --user status fleet-socks-cs2.service` or
+`systemctl --user stop fleet-socks-cs2.service`. Remove `reverseSocksPort`
+and apply Home Manager to disable it persistently. Other nodes have no SOCKS
+proxy unless explicitly configured.
+
+Verify loopback binding and real traffic back to this host with
+`python3 tests/check-fleet-socks.py cs2`.
+
 ### Remote HTML reports
 
 With a nonempty fleet, Home Manager also runs `msft-report-relay.service`: an
