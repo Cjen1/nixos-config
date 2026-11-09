@@ -14,6 +14,7 @@
 
 - A question from the user does not mean that something is wrong and needs to be fixed.
 - Do not use the `ask_user` tool. Ask questions inline in your response instead; number options when useful.
+- During long-running sessions, give short progress updates whenever you make a meaningful discovery or change scope or direction. State what changed and what comes next; skip routine tool narration.
 - When reporting information to me, be extremely concise and sacrifice grammar for concision.
 
 # Picking the right models for workflows and subagents
