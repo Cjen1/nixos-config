@@ -28,6 +28,21 @@ The overall format should be:
 
 ? sections can be omitted
 
+Keep the change, impact, key results, and important caveats visible at a glance.
+Put supporting evidence and longer explanations in collapsed HTML
+`<details>` blocks with descriptive `<summary>` labels. Logs, detailed test
+output, and extended rationale should stay below the fold so they do not
+interrupt normal reading; interested reviewers can expand them.
+
+```markdown
+<details>
+<summary>Evidence and detailed rationale</summary>
+
+Supporting evidence and longer explanations go here.
+
+</details>
+```
+
 # Checklist
 
 - Title and description match existing
