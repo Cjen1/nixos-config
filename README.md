@@ -331,7 +331,7 @@ version for `latest`:
 ./modules/home-manager/github-copilot-cli/bump.sh
 ./modules/home-manager/codex-cli/bump.sh 0.151.0
 ./modules/home-manager/opencode-cli/bump.sh
-./hosts/msft/claude-code/bump.sh
+./modules/home-manager/claude-code/bump.sh
 ```
 
 The scripts update the npm manifests and Nix hash without building the package.

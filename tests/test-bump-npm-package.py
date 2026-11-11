@@ -19,7 +19,7 @@ PACKAGES = {
     "modules/home-manager/codex-cli": "@openai/codex",
     "modules/home-manager/github-copilot-cli": "@github/copilot",
     "modules/home-manager/opencode-cli": "opencode-ai",
-    "hosts/msft/claude-code": "@anthropic-ai/claude-code",
+    "modules/home-manager/claude-code": "@anthropic-ai/claude-code",
 }
 HASH = "sha256-" + base64.b64encode(bytes(range(32))).decode()
 STUB = r"""#!/usr/bin/env python3

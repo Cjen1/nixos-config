@@ -5,6 +5,7 @@
     ../../modules/home-manager/coding-agents/opencode.nix
     ../../modules/home-manager/coding-agents/codex.nix
     ../../modules/home-manager/coding-agents/copilot.nix
+    ../../modules/home-manager/coding-agents/claude.nix
 #    ../../modules/home-manager/gui.nix
   ];
 

@@ -1,7 +1,7 @@
 # Shared agent skills
 
 Home Manager vendors the files in [`copilot-skills/`](./copilot-skills) to the
-enabled Copilot, Codex, and OpenCode skill directories through
+enabled Copilot, Codex, OpenCode, and Claude Code skill directories through
 [`install-skills.nix`](./install-skills.nix). These are editable snapshots, not
 automatically updated plugins. Apply Home Manager to deploy a source update.
 
@@ -15,6 +15,12 @@ Codex also receives the shared `copilot-instructions.md` as
 `~/.codex/AGENTS.md`. Its host-specific prefix defaults to
 `codingAgents.copilot.instructionsSlug` when that option exists; it can be
 overridden with `codingAgents.codex.instructionsSlug`.
+
+Claude Code uses per-skill directory symlinks in `~/.claude/skills` and receives
+the same shared instructions as `~/.claude/CLAUDE.md`. Its host-specific prefix
+defaults to `codingAgents.copilot.instructionsSlug` and can be overridden with
+`codingAgents.claude.instructionsSlug`. Jasper imports the shared Claude module;
+the pinned CLI package and bump script live in `modules/home-manager/claude-code`.
 
 ## Upstream snapshots
 
