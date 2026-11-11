@@ -14,11 +14,9 @@ implementation and explore new ideas, skip fixes to code being replaced.
 
 | Councilor | `model` | `reasoning_effort` |
 | --- | --- | --- |
-| Gemini 4 Carbon | `gemini-4-carbon` | `high` |
+| Gemini 4 Carbon | `gemini-4-carbon` | `medium` |
 | GPT-6.1 Sol | `gpt-6.1-sol` | `xhigh` |
 | Opus 5.5 | `claude-opus-5.5` | `xhigh` |
-
-Use `high` for Carbon; this runtime does not advertise `xhigh` or `max`.
 
 If the user names other councilors, use those. If a councilor is unavailable,
 report it instead of substituting.
