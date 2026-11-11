@@ -14,9 +14,11 @@ implementation and explore new ideas, skip fixes to code being replaced.
 
 | Councilor | `model` | `reasoning_effort` |
 | --- | --- | --- |
-| GPT-6 Astra | `gpt-6-astra` | `xhigh` |
+| Gemini 4 Carbon | `gemini-4-carbon` | `high` |
 | GPT-6.1 Sol | `gpt-6.1-sol` | `xhigh` |
 | Opus 5.5 | `claude-opus-5.5` | `xhigh` |
+
+Use `high` for Carbon; this runtime does not advertise `xhigh` or `max`.
 
 If the user names other councilors, use those. If a councilor is unavailable,
 report it instead of substituting.
@@ -54,10 +56,10 @@ Rounds: 2
 | Goal | Councilor | Round 1 | Round 2 |
 | --- | --- | --- | --- |
 | Fix the crash | Opus 5.5 | 7/10 | 9/10 |
-| Fix the crash | GPT-6 Astra | 8/10 | 10/10 |
+| Fix the crash | Gemini 4 Carbon | 8/10 | 10/10 |
 | Fix the crash | GPT-6.1 Sol | 7/10 | 9/10 |
 | Keep the API stable | Opus 5.5 | 6/10 | 9/10 |
-| Keep the API stable | GPT-6 Astra | 8/10 | 9/10 |
+| Keep the API stable | Gemini 4 Carbon | 8/10 | 9/10 |
 | Keep the API stable | GPT-6.1 Sol | 7/10 | 8/10 |
 ```
 
