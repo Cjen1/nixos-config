@@ -302,7 +302,8 @@
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-navidrome": "nixpkgs-navidrome",
         "nixpkgs-unstable": "nixpkgs-unstable",
-        "ps-todos": "ps-todos"
+        "ps-todos": "ps-todos",
+        "web-nightjar": "web-nightjar"
       }
     },
     "systems": {
@@ -348,6 +349,23 @@
         "owner": "nix-systems",
         "repo": "default",
         "type": "github"
+      }
+    },
+    "web-nightjar": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794093326,
+        "narHash": "sha256-AP69FKpHOUhAMbQrmPH/K8rPmyfhW8Z53o+WidKy9SU=",
+        "ref": "refs/heads/main",
+        "rev": "3c55a123199d3192ddc934680bb0f5560ebe24b7",
+        "revCount": 15,
+        "type": "git",
+        "url": "ssh://git@github.com/Cjen1/web-nightjar"
+      },
+      "original": {
+        "rev": "3c55a123199d3192ddc934680bb0f5560ebe24b7",
+        "type": "git",
+        "url": "ssh://git@github.com/Cjen1/web-nightjar"
       }
     }
   },

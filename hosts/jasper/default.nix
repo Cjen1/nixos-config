@@ -20,6 +20,7 @@
     ./forgejo.nix
     ./dex.nix
     ./ps-todos.nix
+    ./web-nightjar.nix
   ];
 
   services.custom-tooling.automerge-server = {
@@ -218,6 +219,15 @@
       route {
         @notTailnet not remote_ip 100.64.0.0/10 fd7a:115c:a1e0::/48
         respond @notTailnet 403
+
+        @nightjar host nightjar.ts.jentek.dev
+        handle @nightjar {
+          root * /srv/nightjar-ipa
+          @downloadRoot path /
+          rewrite @downloadRoot /TheNightjar.ipa
+          header Content-Disposition "attachment; filename=TheNightjar.ipa"
+          file_server
+        }
 
         @t3code host t3.ts.jentek.dev
         handle @t3code {
