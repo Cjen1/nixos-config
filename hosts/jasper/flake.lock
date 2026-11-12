@@ -354,16 +354,16 @@
     "web-nightjar": {
       "flake": false,
       "locked": {
-        "lastModified": 1794093326,
-        "narHash": "sha256-AP69FKpHOUhAMbQrmPH/K8rPmyfhW8Z53o+WidKy9SU=",
+        "lastModified": 1794442998,
+        "narHash": "sha256-mW2TRclx5Lx4VyC3bT5/YaM/sszUP6IEpP+fQ3Rq0wc=",
         "ref": "refs/heads/main",
-        "rev": "3c55a123199d3192ddc934680bb0f5560ebe24b7",
-        "revCount": 15,
+        "rev": "66732926204af7ee939f657b79494b55a582b102",
+        "revCount": 16,
         "type": "git",
         "url": "ssh://git@github.com/Cjen1/web-nightjar"
       },
       "original": {
-        "rev": "3c55a123199d3192ddc934680bb0f5560ebe24b7",
+        "rev": "66732926204af7ee939f657b79494b55a582b102",
         "type": "git",
         "url": "ssh://git@github.com/Cjen1/web-nightjar"
       }

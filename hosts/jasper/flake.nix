@@ -15,7 +15,7 @@
     custom-tooling.url = "git+https://forgejo.ts.jentek.dev/cjen1/custom-tooling";
     ps-todos.url = "github:Cjen1/ps-todos/nix-flake-systemd-service";
     web-nightjar = {
-      url = "git+ssh://git@github.com/Cjen1/web-nightjar?rev=3c55a123199d3192ddc934680bb0f5560ebe24b7";
+      url = "git+ssh://git@github.com/Cjen1/web-nightjar?rev=66732926204af7ee939f657b79494b55a582b102";
       flake = false;
     };
   };
