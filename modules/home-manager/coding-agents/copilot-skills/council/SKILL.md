@@ -14,8 +14,8 @@ implementation and explore new ideas, skip fixes to code being replaced.
 
 | Councilor | `model` | `reasoning_effort` |
 | --- | --- | --- |
-| Gemini 4 Carbon | `gemini-4-carbon` | `medium` |
-| GPT-6.1 Sol | `gpt-6.1-sol` | `xhigh` |
+| GPT-6.2 Astra | `gpt-6.2-astra` | `xhigh` |
+| GPT-6.2 Sol | `gpt-6.2-sol` | `xhigh` |
 | Opus 5.5 | `claude-opus-5.5` | `xhigh` |
 
 If the user names other councilors, use those. If a councilor is unavailable,
@@ -54,11 +54,11 @@ Rounds: 2
 | Goal | Councilor | Round 1 | Round 2 |
 | --- | --- | --- | --- |
 | Fix the crash | Opus 5.5 | 7/10 | 9/10 |
-| Fix the crash | Gemini 4 Carbon | 8/10 | 10/10 |
-| Fix the crash | GPT-6.1 Sol | 7/10 | 9/10 |
+| Fix the crash | GPT-6.2 Astra | 8/10 | 10/10 |
+| Fix the crash | GPT-6.2 Sol | 7/10 | 9/10 |
 | Keep the API stable | Opus 5.5 | 6/10 | 9/10 |
-| Keep the API stable | Gemini 4 Carbon | 8/10 | 9/10 |
-| Keep the API stable | GPT-6.1 Sol | 7/10 | 8/10 |
+| Keep the API stable | GPT-6.2 Astra | 8/10 | 9/10 |
+| Keep the API stable | GPT-6.2 Sol | 7/10 | 8/10 |
 ```
 
 With a single goal, drop the Goal column.
