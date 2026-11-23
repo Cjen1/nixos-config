@@ -16,7 +16,7 @@
     ./immich.nix
     ./audiomuse-ai.nix
     ./navidrome.nix
-    ./home-assistant.nix
+    ./home-assistant
     ./forgejo.nix
     ./dex.nix
     ./ps-todos.nix

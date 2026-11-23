@@ -1,0 +1,53 @@
+title: Health
+views:
+  - title: Health
+    path: health
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Cats
+          - type: custom:trend-card
+            title: Weight · 90d · ±% of mean
+            mode: centred
+            span: percent
+            unit: kg
+            entities:
+              - entity: sensor.parker_weight
+                name: Parker
+              - entity: sensor.rosie_weight
+                name: Rosie
+          - type: custom:trend-card
+            title: Parker · visits / day
+            mode: banded
+            entities: [sensor.parker_visits_today]
+          - type: custom:trend-card
+            title: Rosie · visits / day
+            mode: banded
+            entities: [sensor.rosie_visits_today]
+      - type: grid
+        cards:
+          - type: heading
+            heading: People
+          # The scale doesn't know who stood on it (profile_id is always 0),
+          # so the card splits weigh-ins by weight: 100 kg to start, then the
+          # midpoint of the heavier person's p25 and the lighter person's p75
+          # over the last 30 days.
+          - type: custom:trend-card
+            title: Weight · 90d · 7d avg · ±kg of mean
+            mode: centred
+            span: absolute
+            unit: kg
+            split_boundary: 100
+            split_learn_days: 30
+            entities:
+              - entity: sensor.smart_scale_s200_3c70_weight
+                name: Chris
+                split: above
+                smooth_days: 7
+              - entity: sensor.smart_scale_s200_3c70_weight
+                name: Alannah
+                split: below
+                smooth_days: 7
