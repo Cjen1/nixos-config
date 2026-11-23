@@ -1,6 +1,6 @@
 ---
 name: council
-description: Use when the user asks for a "council".
+description: Use when the user asks for a "council", optionally followed by a number or "all".
 ---
 
 # Council
@@ -12,11 +12,19 @@ implementation and explore new ideas, skip fixes to code being replaced.
 
 ## Councilors
 
-| Councilor | `model` | `reasoning_effort` |
-| --- | --- | --- |
-| GPT-6.2 Astra | `gpt-6.2-astra` | `xhigh` |
-| GPT-6.2 Sol | `gpt-6.2-sol` | `xhigh` |
-| Opus 5.5 | `claude-opus-5.5` | `xhigh` |
+Councilors are listed in priority order.
+
+| Priority | Councilor | `model` | `reasoning_effort` |
+| --- | --- | --- | --- |
+| 1 | GPT-6.2 Astra | `gpt-6.2-astra` | `xhigh` |
+| 2 | Opus 5.5 | `claude-opus-5.5` | `xhigh` |
+| 3 | Gemini 4 Carbon | `gemini-4-carbon` | `medium` |
+| 4 | MAI Code 2 | `mai-code-2` | `xhigh` |
+
+A number after "council" sets its size: use that many councilors, taken from
+the top of the list. "Council 1" is GPT-6.2 Astra alone; "council 3" is GPT-6.2
+Astra, Opus 5.5, and Gemini 4 Carbon. "Council all", a number of 4 or more, or
+no number uses every councilor.
 
 If the user names other councilors, use those. If a councilor is unavailable,
 report it instead of substituting.
@@ -27,9 +35,13 @@ Use one council for the request. If it has several goals, ask each councilor
 to review and score each goal separately, so one goal's findings do not hide
 another's.
 
+Split a large goal into smaller subgoals and score each one. A single score for
+a broad goal hides where the work falls short; subgoal scores give more
+specific feedback.
+
 ## Running a round
 
-Run the three councilors as parallel background subagents. Give each the request and the context
+Run the selected councilors as parallel background subagents. Give each the request and the context
 it needs: repo path, base, diff command, intent, what is out of scope, and
 check results. For review or feedback, keep them read-only. A timeout, error,
 or missing reply is not approval.
@@ -53,12 +65,12 @@ Rounds: 2
 
 | Goal | Councilor | Round 1 | Round 2 |
 | --- | --- | --- | --- |
-| Fix the crash | Opus 5.5 | 7/10 | 9/10 |
 | Fix the crash | GPT-6.2 Astra | 8/10 | 10/10 |
-| Fix the crash | GPT-6.2 Sol | 7/10 | 9/10 |
-| Keep the API stable | Opus 5.5 | 6/10 | 9/10 |
+| Fix the crash | Opus 5.5 | 7/10 | 9/10 |
+| Fix the crash | Gemini 4 Carbon | 7/10 | 9/10 |
 | Keep the API stable | GPT-6.2 Astra | 8/10 | 9/10 |
-| Keep the API stable | GPT-6.2 Sol | 7/10 | 8/10 |
+| Keep the API stable | Opus 5.5 | 6/10 | 9/10 |
+| Keep the API stable | Gemini 4 Carbon | 7/10 | 8/10 |
 ```
 
 With a single goal, drop the Goal column.
