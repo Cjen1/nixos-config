@@ -31,9 +31,10 @@ report it instead of substituting.
 
 ## Separate scores per goal
 
-Use one council for the request. If it has several goals, ask each councilor
-to review and score each goal separately, so one goal's findings do not hide
-another's.
+Use one council for the request. If the user does not state the goals, infer
+them from the prior discussion and list them in each councilor's brief. If the
+request has several goals, ask each councilor to review and score each goal
+separately, so one goal's findings do not hide another's.
 
 Split a large goal into smaller subgoals and score each one. A single score for
 a broad goal hides where the work falls short; subgoal scores give more
