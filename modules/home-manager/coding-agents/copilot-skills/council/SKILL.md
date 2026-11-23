@@ -57,24 +57,32 @@ pass as one round. A fresh review after fixes starts a new round: send the
 same councilors what you fixed, what you declined and why, and the change
 since the last round.
 
-Put the results in the final reply only.
+Put the results in the final reply only. Give each goal its own table, with a
+row per councilor and a column per round.
 
 ```markdown
 ## Council review
 
 Rounds: 2
 
-| Goal | Councilor | Round 1 | Round 2 |
-| --- | --- | --- | --- |
-| Fix the crash | GPT-6.2 Astra | 8/10 | 10/10 |
-| Fix the crash | Opus 5.5 | 7/10 | 9/10 |
-| Fix the crash | Gemini 4 Carbon | 7/10 | 9/10 |
-| Keep the API stable | GPT-6.2 Astra | 8/10 | 9/10 |
-| Keep the API stable | Opus 5.5 | 6/10 | 9/10 |
-| Keep the API stable | Gemini 4 Carbon | 7/10 | 8/10 |
+### Fix the crash
+
+| Councilor | Round 1 | Round 2 |
+| --- | --- | --- |
+| GPT-6.2 Astra | 8/10 | 10/10 |
+| Opus 5.5 | 7/10 | 9/10 |
+| Gemini 4 Carbon | 7/10 | 9/10 |
+
+### Keep the API stable
+
+| Councilor | Round 1 | Round 2 |
+| --- | --- | --- |
+| GPT-6.2 Astra | 8/10 | 9/10 |
+| Opus 5.5 | 6/10 | 9/10 |
+| Gemini 4 Carbon | 7/10 | 8/10 |
 ```
 
-With a single goal, drop the Goal column.
+With a single goal, give one table under that goal's heading.
 
 If a councilor gives no score, write `no score`. Do not invent one.
 
