@@ -299,23 +299,6 @@ It does not grant unrestricted access.
 Check settings preservation and repeat activation with
 `python3 tests/test-copilot-settings.py`.
 
-## Copilot notifications in wmux
-
-The MSFT configuration enables status hooks and the experimental `wmux-attention`
-extension. Apply Home Manager on the machine running Copilot, then restart
-Copilot. Over SSH, keep the tmux pane visible and attached.
-
-On first load, approve the extension's request for permission-event access.
-The handler always returns no decision, leaving approval to Copilot.
-
-Permission alerts wait 1.5 seconds and cancel if the request resolves first.
-Slow automatic approvals can still alert. The extension does not change
-permission decisions.
-
-If the extension fails or you want the original permission alerts, set
-`codingAgents.copilot.wmuxHooks.attentionExtension = "off"` in
-`hosts/msft/home.nix`, apply Home Manager, and restart Copilot.
-
 ## Update dependencies
 
 Update only one host's dependencies:
