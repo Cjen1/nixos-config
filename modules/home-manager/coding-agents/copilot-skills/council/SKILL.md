@@ -18,12 +18,12 @@ Councilors are listed in priority order.
 | --- | --- | --- | --- |
 | 1 | GPT-6.2 Astra | `gpt-6.2-astra` | `xhigh` |
 | 2 | Opus 5.5 | `claude-opus-5.5` | `xhigh` |
-| 3 | Gemini 4 Carbon | `gemini-4-carbon` | `medium` |
+| 3 | Gemini 4 Neon | `gemini-4-neon` | `xhigh` |
 | 4 | MAI Code 2 | `mai-code-2` | `xhigh` |
 
 A number after "council" sets its size: use that many councilors, taken from
 the top of the list. "Council 1" is GPT-6.2 Astra alone; "council 3" is GPT-6.2
-Astra, Opus 5.5, and Gemini 4 Carbon. "Council all", a number of 4 or more, or
+Astra, Opus 5.5, and Gemini 4 Neon. "Council all", a number of 4 or more, or
 no number uses every councilor.
 
 If the user names other councilors, use those. If a councilor is unavailable,
@@ -71,7 +71,7 @@ Rounds: 2
 | --- | --- | --- |
 | GPT-6.2 Astra | 8/10 | 10/10 |
 | Opus 5.5 | 7/10 | 9/10 |
-| Gemini 4 Carbon | 7/10 | 9/10 |
+| Gemini 4 Neon | 7/10 | 9/10 |
 
 ### Keep the API stable
 
@@ -79,7 +79,7 @@ Rounds: 2
 | --- | --- | --- |
 | GPT-6.2 Astra | 8/10 | 9/10 |
 | Opus 5.5 | 6/10 | 9/10 |
-| Gemini 4 Carbon | 7/10 | 8/10 |
+| Gemini 4 Neon | 7/10 | 8/10 |
 ```
 
 With a single goal, give one table under that goal's heading.
