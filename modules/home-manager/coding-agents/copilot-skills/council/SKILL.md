@@ -18,7 +18,7 @@ Councilors are listed in priority order.
 | --- | --- | --- | --- |
 | 1 | GPT-6.2 Astra | `gpt-6.2-astra` | `xhigh` |
 | 2 | Opus 5.5 | `claude-opus-5.5` | `xhigh` |
-| 3 | Gemini 4 Neon | `gemini-4-neon` | `xhigh` |
+| 3 | Gemini 4 Neon | `gemini-4-neon` | `high` |
 | 4 | MAI Code 2 | `mai-code-2` | `xhigh` |
 
 A number after "council" sets its size: use that many councilors, taken from
